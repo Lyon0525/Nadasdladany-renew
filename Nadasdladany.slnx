@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Nadasdladany.Api/Nadasdladany.Api.csproj" />
+  <Project Path="Nadasdladany.Application/Nadasdladany.Application.csproj" />
+  <Project Path="Nadasdladany.Domain/Nadasdladany.Domain.csproj" />
+  <Project Path="Nadasdladany.Infrastructure/Nadasdladany.Infrastructure.csproj" />
+</Solution>

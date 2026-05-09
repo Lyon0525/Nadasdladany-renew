@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+    /* Színek */
+    --color-primary: #0f172a; /* Éjfélkék (Kastély elegancia) */
+    --color-secondary: #f8f4ef; /* Krém / Papír szín (nem kopott szürke) */
+    --color-accent: #b8860b; /* Sötétarany (nem "citromsárga") */
+    --color-dark: #08060d;
+    /* Fontok */
+    --font-serif: "Playfair Display", serif;
+    --font-sans: "Montserrat", sans-serif;
+}
+
+@layer base {
+    :root {
+        background-color: #f9fafb;
+        color: #1f2937;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+}

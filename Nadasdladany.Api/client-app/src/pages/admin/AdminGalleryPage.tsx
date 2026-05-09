@@ -1,0 +1,74 @@
+import { useState, useEffect } from 'react';
+// JAVÍTÁS: ../../ használata, mert a fájl a src/pages/admin mappában van
+import { AdminLayout } from '../../layouts/AdminLayout'; 
+// JAVÍTÁS: ../../ használata és 'type' kulcsszó a GalleryAlbum-hoz
+import { galleryService, type GalleryAlbum } from '../../api/galleryService'; 
+import { Upload, Trash2, FolderPlus, Loader2 } from 'lucide-react';
+
+export const AdminGalleryPage = () => {
+    const [albums, setAlbums] = useState<GalleryAlbum[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        galleryService.getAlbums().then(setAlbums);
+    }, []);
+
+    const handleFileUpload = async (albumId: number, files: FileList | null) => {
+        if (!files) return;
+        setLoading(true);
+        try {
+            await galleryService.uploadImages(albumId, files);
+            alert('Sikeres feltöltés!');
+            // Frissítsük az albumot, hogy lássuk a változást (opcionális)
+            galleryService.getAlbums().then(setAlbums);
+        } catch (err) {
+            alert('Hiba történt!');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <AdminLayout>
+            <div className="flex justify-between items-center mb-12">
+                <h1 className="text-4xl font-serif font-bold text-primary">Galériák kezelése</h1>
+                <button className="flex items-center gap-2 bg-accent text-primary font-bold px-8 py-4 rounded-full hover:scale-105 transition-all">
+                    <FolderPlus size={20} /> Új album
+                </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
+                {albums.map(album => (
+                    <div key={album.id} className="bg-white p-8 rounded-[32px] border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm hover:shadow-md transition-shadow">
+                        <div>
+                            <h3 className="text-xl font-bold text-primary">{album.title}</h3>
+                            <p className="text-gray-400 text-sm">{album.imageCount} kép az albumban</p>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            <label className="flex items-center gap-2 px-6 py-3 bg-secondary rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
+                                {loading ? <Loader2 className="animate-spin" /> : <><Upload size={18} /> Képek hozzáadása</>}
+                                <input
+                                    type="file" 
+                                    multiple 
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => handleFileUpload(album.id, e.target.files)}
+                                />
+                            </label>
+                            <button className="p-3 text-red-400 hover:bg-red-50 rounded-full transition-colors" title="Album törlése">
+                                <Trash2 size={20} />
+                            </button>
+                        </div>
+                    </div>
+                ))}
+
+                {albums.length === 0 && (
+                    <div className="text-center py-20 bg-white rounded-[40px] border border-dashed border-gray-200 text-gray-400">
+                        Nincsenek még galériák. Hozzon létre egyet az "Új album" gombbal!
+                    </div>
+                )}
+            </div>
+        </AdminLayout>
+    );
+};

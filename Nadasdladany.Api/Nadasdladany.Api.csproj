@@ -1,0 +1,61 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- MODOSÍTVA: Most már az API-n belül van a mappa -->
+    <SpaRoot>client-app\</SpaRoot>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Nadasdladany.Application\Nadasdladany.Application.csproj" />
+    <ProjectReference Include="..\Nadasdladany.Infrastructure\Nadasdladany.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Biztosítjuk, hogy a VS ne próbálja meg a kliens fájljait C# tartalomként kezelni fejlesztés közben -->
+    <Content Remove="$(SpaRoot)**" />
+    <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="client-app\public\institutions\" />
+    <Folder Include="client-app\public\news\" />
+    <Folder Include="client-app\public\reps\" />
+  </ItemGroup>
+
+  <!-- PUBLISH FOLYAMAT ÖSSZEKÖTÉSE -->
+  <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
+    <!-- 1. Node.js csomagok telepítése -->
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+    <!-- 2. React projekt buildelése (Vite esetén 'dist', CRA esetén 'build') -->
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build" />
+
+    <!-- 3. A buildelt fájlok (dist) bemásolása a wwwroot-ba a publish mappán belül -->
+    <ItemGroup>
+      <DistFiles Include="$(SpaRoot)dist\**" />
+      <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+        <RelativePath>wwwroot\%(RecursiveDir)%(FileName)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
+
+</Project>
