@@ -71,3 +71,7 @@ Desktop.ini
 [Bb]uild[Ll]og.*
 *.coverage
 *.coveragexml
+/.repomixignore
+/jog.txt
+/old.txt
+/repomix-output.xml
