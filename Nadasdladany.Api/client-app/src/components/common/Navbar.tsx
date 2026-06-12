@@ -38,6 +38,10 @@ export const Navbar = () => {
         { name: 'Önkormányzat', path: '/onkormanyzat' },
         { name: 'Intézmények', path: '/intezmenyek' },
         { name: 'Kapcsolat', path: '/kapcsolat' },
+        { name: 'Pályázatok', path: '/palyazatok' },
+        { name: 'Közösségek', path: '/kozossegek' },
+        { name: 'Ügyintézés', path: '/ugyintezes' },
+        { name: 'Hivatal', path: '/hivatal' },
     ];
 
     return (

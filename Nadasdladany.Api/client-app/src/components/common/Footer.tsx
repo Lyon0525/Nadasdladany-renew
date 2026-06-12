@@ -25,6 +25,10 @@ export const Footer = () => {
               <li><Link to="/esemenyek" className="hover:text-white transition-colors">Eseménynaptár</Link></li>
               <li><Link to="/kastely" className="hover:text-white transition-colors">Nádasdy-kastély</Link></li>
               <li><Link to="/dokumentumok" className="hover:text-white transition-colors">Dokumentumtár</Link></li>
+              <li><Link to="/valasztasok" className="hover:text-white transition-colors">Választási információk</Link></li>
+              <li><Link to="/allasok" className="hover:text-white transition-colors">Álláshirdetések</Link></li>
+              <li><Link to="/kozerdeku-adatigenyles" className="hover:text-white transition-colors">Közérdekű adatigénylés</Link></li>
+              <li><Link to="/jogi-nyilatkozatok" className="hover:text-white transition-colors">Jogi Nyilatkozatok & GDPR</Link></li>
             </ul>
           </div>
 

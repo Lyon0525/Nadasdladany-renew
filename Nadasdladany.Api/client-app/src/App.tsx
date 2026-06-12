@@ -1,9 +1,6 @@
-// App.tsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { HelmetProvider } from 'react-helmet-async';
-
-// Publikus oldalak (ezek valószínűleg közvetlenül a /pages mappában vannak)
 import { HomePage } from './pages/HomePage';
 import { NewsDetailPage } from './pages/NewsDetailPage';
 import { CastlePage } from './pages/CastlePage';
@@ -13,44 +10,74 @@ import { ContactPage } from './pages/ContactPage';
 import { GalleryPage } from './pages/GalleryPage';
 import { AlbumDetailPage } from './pages/AlbumDetailPage';
 import { LoginPage } from './pages/LoginPage';
-
-// Admin oldalak - JAVÍTÁS: elérési út kiegészítve az 'admin' mappával
 import { DashboardPage } from './pages/admin/DashboardPage';
 import { AdminNewsPage } from './pages/admin/AdminNewsPage';
 import { AdminEventsPage } from './pages/admin/AdminEventsPage';
 import { AdminGalleryPage } from './pages/admin/AdminGalleryPage';
-
+import { AdminDocumentsPage } from './pages/admin/AdminDocumentsPage';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
+import { ProjectsPage } from './pages/ProjectsPage';
+import { AdminProjectsPage } from './pages/admin/AdminProjectsPage';
+import { ElectionsPage } from './pages/ElectionsPage';
+import { OrganizationsPage } from './pages/OrganizationsPage';
+import { AdminInstitutionsPage } from './pages/admin/AdminInstitutionsPage';
+import { AdminOrganizationsPage } from './pages/admin/AdminOrganizationsPage';
+import { CareersPage } from './pages/CareersPage';
+import { AdminCareersPage } from './pages/admin/AdminCareersPage';
+import { EAdministrationPage } from './pages/admin/EAdministrationPage';
+import { AdminNewsletterPage } from './pages/admin/AdminNewsletterPage';
+import { PublicDataRequestPage } from './pages/PublicDataRequestPage';
+import { AdminDataRequestsPage } from './pages/admin/AdminDataRequestsPage';
+import { OfficePage } from './pages/OfficePage';
+import { LegalPage } from './pages/LegalPage';
 
 function App() {
-  return (
-    <HelmetProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Publikus oldalak */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/hirek/:slug" element={<NewsDetailPage />} />
-          <Route path="/kastely" element={<CastlePage />} />
-          <Route path="/onkormanyzat" element={<MunicipalityPage />} />
-          <Route path="/intezmenyek" element={<InstitutionsPage />} />
-          <Route path="/kapcsolat" element={<ContactPage />} />
-          <Route path="/galeria" element={<GalleryPage />} />
-          <Route path="/galeria/:slug" element={<AlbumDetailPage />} />
-          <Route path="/admin/login" element={<LoginPage />} />
+    return (
+        <HelmetProvider>
+            <BrowserRouter>
+                <Routes>
+                    {/* Publikus oldalak */}
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/hirek/:slug" element={<NewsDetailPage />} />
+                    <Route path="/kastely" element={<CastlePage />} />
+                    <Route path="/onkormanyzat" element={<MunicipalityPage />} />
+                    <Route path="/intezmenyek" element={<InstitutionsPage />} />
+                    <Route path="/kapcsolat" element={<ContactPage />} />
+                    <Route path="/galeria" element={<GalleryPage />} />
+                    <Route path="/galeria/:slug" element={<AlbumDetailPage />} />
+                    <Route path="/admin/login" element={<LoginPage />} />
+                    <Route path="/palyazatok" element={<ProjectsPage />} />
+                    <Route path="/valasztasok" element={<ElectionsPage />} />
+                    <Route path="/kozossegek" element={<OrganizationsPage />} />
+                    <Route path="/intezmenyek/:slug" element={<InstitutionsPage />} />
 
-          {/* Védett admin oldalak */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/admin/dashboard" element={<DashboardPage />} />
-            <Route path="/admin/news" element={<AdminNewsPage />} />
-            <Route path="/admin/events" element={<AdminEventsPage />} />
-            <Route path="/admin/gallery" element={<AdminGalleryPage />} />
-          </Route>
-        </Routes>
+                    <Route path="/allasok" element={<CareersPage />} />
+                    <Route path="/ugyintezes" element={<EAdministrationPage />} />
+                    <Route path="/kozerdeku-adatigenyles" element={<PublicDataRequestPage />} />
+                    <Route path="/hivatal" element={<OfficePage />} />
+                    <Route path="/jogi-nyilatkozatok" element={<LegalPage />} />
 
-        <Toaster position="bottom-right" reverseOrder={false} />
-      </BrowserRouter>
-    </HelmetProvider>
-  );
+                    {/* Védett admin oldalak */}
+                    <Route element={<ProtectedRoute />}>
+                        <Route path="/admin/dashboard" element={<DashboardPage />} />
+                        <Route path="/admin/news" element={<AdminNewsPage />} />
+                        <Route path="/admin/events" element={<AdminEventsPage />} />
+                        <Route path="/admin/documents" element={<AdminDocumentsPage />} />
+                        <Route path="/admin/gallery" element={<AdminGalleryPage />} />
+                        <Route path="/admin/projects" element={<AdminProjectsPage />} />
+                        <Route path="/admin/careers" element={<AdminCareersPage />} />
+                        <Route path="/admin/institutions" element={<AdminInstitutionsPage />} />
+                        <Route path="/admin/organizations" element={<AdminOrganizationsPage />} />
+                        <Route path="/admin/newsletter" element={<AdminNewsletterPage />} />
+                        <Route path="/admin/data-requests" element={<AdminDataRequestsPage />} />
+                        <Route path="/admin/representatives" element={<AdminOrganizationsPage />} />
+                    </Route>
+                </Routes>
+
+                <Toaster position="bottom-right" reverseOrder={false} />
+            </BrowserRouter>
+        </HelmetProvider>
+    );
 }
 
 export default App;

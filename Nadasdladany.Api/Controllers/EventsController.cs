@@ -7,6 +7,12 @@ namespace Nadasdladany.Api.Controllers;
 
 public class EventsController : ApiControllerBase
 {
+    [HttpGet]
+    public async Task<ActionResult<List<EventDto>>> GetEvents()
+    {
+        return await Mediator.Send(new GetUpcomingEventsQuery());
+    }
+
     [HttpGet("upcoming")]
     public async Task<ActionResult<List<EventDto>>> GetUpcomingEvents()
     {

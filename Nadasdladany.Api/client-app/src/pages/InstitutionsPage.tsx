@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { MainLayout } from '../layouts/MainLayout';
-// JAVÍTÁS: A típus elé oda kell írni, hogy 'type'
 import { institutionService, type Institution } from '../api/institutionService';
 import { InstitutionCard } from '../features/institutions/components/InstitutionCard';
 import { Building2 } from 'lucide-react';
@@ -9,9 +8,8 @@ export const InstitutionsPage = () => {
     const [institutions, setInstitutions] = useState<Institution[]>([]);
 
     useEffect(() => {
-        institutionService.getInstitutions().then(setArticles => {
-            // Mivel a szerviz valószínűleg a raw tömböt adja vissza:
-            setInstitutions(setArticles);
+        institutionService.getInstitutions().then(data => {
+            setInstitutions(data);
         });
     }, []);
 

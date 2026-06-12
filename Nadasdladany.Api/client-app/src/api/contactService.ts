@@ -8,7 +8,6 @@ export interface ContactMessage {
 }
 
 export const contactService = {
-    // Üzenet küldése a backendnek
     submitMessage: async (message: ContactMessage) => {
         const response = await apiClient.post('/contact', message);
         return response.data;

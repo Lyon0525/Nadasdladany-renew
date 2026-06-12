@@ -27,4 +27,17 @@ public class ArticlesController : ApiControllerBase
         await Mediator.Send(new DeleteArticleCommand(id));
         return NoContent();
     }
+
+    [HttpPut("{id}")]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult> Update(int id, [FromForm] UpdateArticleCommand command)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest("Az URL-ben szereplő ID nem egyezik a küldött ID-val.");
+        }
+
+        await Mediator.Send(command);
+        return NoContent();
+    }
 }

@@ -1,6 +1,21 @@
-import { type ReactNode } from 'react'; // Fix: 'type' kulcsszó hozzáadva
+import { type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Newspaper, FileText, Image as ImageIcon, LogOut, ChevronLeft } from 'lucide-react';
+// JAVÍTÁS: Egy sorba vontuk a Lucide ikonok importját a duplikáció elkerülésére
+import {
+    LayoutDashboard,
+    Newspaper,
+    FileText,
+    Image as ImageIcon,
+    LogOut,
+    ChevronLeft,
+    Award,
+    Building2,
+    Users,
+    Briefcase,
+    Mail,
+    ShieldAlert,
+    UserCheck // 🌟 ÚJ IKON: A képviselőknek és hivatali apparátusnak
+} from 'lucide-react';
 import { authService } from '../api/authService';
 
 export const AdminLayout = ({ children }: { children: ReactNode }) => {
@@ -15,8 +30,18 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
     const menuItems = [
         { name: 'Irányítópult', path: '/admin/dashboard', icon: <LayoutDashboard size={20} /> },
         { name: 'Hírek kezelése', path: '/admin/news', icon: <Newspaper size={20} /> },
+        { name: 'Pályázatok', path: '/admin/projects', icon: <Award size={20} /> },
+        { name: 'Intézmények', path: '/admin/institutions', icon: <Building2 size={20} /> },
+
+        // 🌟 ÚJ MENÜPONT: Bekötve a Képviselő-testület, a bizottságok és a hivatali dolgozók kezelőfelülete
+        { name: 'Képviselők & Hivatal', path: '/admin/representatives', icon: <UserCheck size={20} /> },
+
+        { name: 'Civil & Egyházak', path: '/admin/organizations', icon: <Users size={20} /> },
+        { name: 'Álláshirdetések', path: '/admin/careers', icon: <Briefcase size={20} /> },
         { name: 'Dokumentumok', path: '/admin/documents', icon: <FileText size={20} /> },
         { name: 'Galéria', path: '/admin/gallery', icon: <ImageIcon size={20} /> },
+        { name: 'Hírlevél küldés', path: '/admin/newsletter', icon: <Mail size={20} /> },
+        { name: 'Adatigénylések', path: '/admin/data-requests', icon: <ShieldAlert size={20} /> },
     ];
 
     return (
@@ -46,7 +71,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
 
                 <button
                     onClick={handleLogout}
-                    className="mt-auto flex items-center gap-4 px-4 py-3 rounded-xl text-red-400 hover:bg-red-400/10 transition-colors"
+                    className="mt-auto flex items-center gap-4 px-4 py-3 rounded-xl text-red-400 hover:bg-red-400/10 transition-colors cursor-pointer"
                 >
                     <LogOut size={20} /> Kijelentkezés
                 </button>

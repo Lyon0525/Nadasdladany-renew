@@ -14,22 +14,18 @@ export interface VillageEvent {
 }
 
 export const eventService = {
-    // Összes publikus esemény lekérése
     getEvents: async () => {
         const response = await apiClient.get<VillageEvent[]>('/events');
         return response.data;
     },
-    // Egy esemény lekérése slug alapján
     getEventBySlug: async (slug: string) => {
         const response = await apiClient.get<VillageEvent>(`/events/${slug}`);
         return response.data;
     },
-    // ADMIN: Új esemény
     createEvent: async (event: any) => {
         const response = await apiClient.post<VillageEvent>('/events', event);
         return response.data;
     },
-    // ADMIN: Törlés
     deleteEvent: async (id: number) => {
         await apiClient.delete(`/events/${id}`);
     }

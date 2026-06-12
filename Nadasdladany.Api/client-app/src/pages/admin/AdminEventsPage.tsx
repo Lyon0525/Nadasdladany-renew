@@ -1,32 +1,63 @@
 import { useEffect, useState } from 'react';
 import { AdminLayout } from '../../layouts/AdminLayout';
 import { eventService, type VillageEvent } from '../../api/eventService';
-import { Trash2, CalendarPlus } from 'lucide-react';
+import { EventForm } from '../../features/admin/events/components/EventForm';
+import { Trash2, CalendarPlus, MapPin, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export const AdminEventsPage = () => {
     const [events, setEvents] = useState<VillageEvent[]>([]);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    const fetchEvents = async () => {
+        try {
+            const data = await eventService.getEvents();
+            setEvents(data || []);
+        } catch (err) {
+            toast.error("Hiba az események betöltésekor");
+        }
+    };
 
     useEffect(() => { fetchEvents(); }, []);
 
-    const fetchEvents = async () => {
-        const data = await eventService.getEvents();
-        setEvents(data);
+    const handleDelete = async (id: number) => {
+        if (!window.confirm('Biztosan törölni szeretné ezt az eseményt?')) return;
+        try {
+            await eventService.deleteEvent(id);
+            toast.success("Esemény sikeresen törölve");
+            fetchEvents();
+        } catch (err) {
+            toast.error("Hiba a törlés során");
+        }
     };
 
-    const handleDelete = async (id: number) => {
-        if (!window.confirm('Törli az eseményt?')) return;
-        await eventService.deleteEvent(id);
-        toast.success("Esemény törölve");
-        fetchEvents();
+    const handleSubmit = async (eventData: any) => {
+        setLoading(true);
+        try {
+            await eventService.createEvent(eventData);
+            toast.success("Esemény sikeresen közzétéve!");
+            setIsFormOpen(false);
+            fetchEvents();
+        } catch (err) {
+            toast.error("Mentési hiba. Ellenőrizze a kötelező mezőket!");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <AdminLayout>
             <div className="flex justify-between items-center mb-12">
-                <h1 className="text-4xl font-serif font-bold text-primary">Események kezelése</h1>
-                <button className="bg-accent text-primary font-bold px-8 py-4 rounded-full flex items-center gap-2">
-                    <CalendarPlus size={20} /> Új esemény
+                <div>
+                    <h1 className="text-4xl font-serif font-bold text-primary">Események kezelése</h1>
+                    <p className="text-gray-400 mt-1">A községi eseménynaptárban megjelenő aktív rendezvények.</p>
+                </div>
+                <button
+                    onClick={() => setIsFormOpen(true)}
+                    className="bg-accent text-primary font-bold px-8 py-4 rounded-full flex items-center gap-2 hover:scale-105 transition-all shadow-lg"
+                >
+                    <CalendarPlus size={20} /> Új esemény meghirdetése
                 </button>
             </div>
 
@@ -36,24 +67,47 @@ export const AdminEventsPage = () => {
                         <tr>
                             <th className="px-8 py-5">Esemény</th>
                             <th className="px-8 py-5">Helyszín</th>
+                            <th className="px-8 py-5">Időpont</th>
                             <th className="px-8 py-5 text-right">Műveletek</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
                         {events.map(event => (
-                            <tr key={event.id} className="hover:bg-gray-50/50 transition-colors">
+                            <tr key={event.id} className="hover:bg-gray-50/50 transition-colors group">
                                 <td className="px-8 py-5 font-bold text-primary">{event.title}</td>
-                                <td className="px-8 py-5 text-sm text-gray-500">{event.location}</td>
+                                <td className="px-8 py-5 text-sm text-gray-500">
+                                    <div className="flex items-center gap-1"><MapPin size={14} className="text-accent" /> {event.location || '-'}</div>
+                                </td>
+                                <td className="px-8 py-5 text-sm text-gray-400">
+                                    <div className="flex items-center gap-1">
+                                        <Clock size={14} className="text-accent" />
+                                        {new Date(event.startDate).toLocaleDateString('hu-HU')}
+                                        {!event.isAllDay && ` ${new Date(event.startDate).toLocaleTimeString('hu-HU', { hour: '2-digit', minute: '2-digit' })}`}
+                                    </div>
+                                </td>
                                 <td className="px-8 py-5 text-right">
-                                    <button onClick={() => handleDelete(event.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-full">
+                                    <button
+                                        onClick={() => handleDelete(event.id)}
+                                        className="text-gray-400 p-2 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                                        title="Esemény törlése"
+                                    >
                                         <Trash2 size={18} />
                                     </button>
                                 </td>
                             </tr>
                         ))}
+                        {events.length === 0 && (
+                            <tr>
+                                <td colSpan={4} className="text-center py-10 text-gray-400 italic">Nincsenek aktív közösségi események.</td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>
+
+            {isFormOpen && (
+                <EventForm onClose={() => setIsFormOpen(false)} onSubmit={handleSubmit} loading={loading} />
+            )}
         </AdminLayout>
     );
 };

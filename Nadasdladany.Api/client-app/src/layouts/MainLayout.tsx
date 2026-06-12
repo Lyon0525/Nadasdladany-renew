@@ -2,6 +2,7 @@ import { type ReactNode } from 'react'; // Fix: 'type' kulcsszó hozzáadva
 import { Navbar } from '../components/common/Navbar';
 import { Footer } from '../components/common/Footer';
 import { DynamicBackground } from '../components/common/DynamicBackground';
+import { CookieBanner } from '../components/common/CookieBanner';
 
 interface Props {
     children: ReactNode;
@@ -15,6 +16,7 @@ export const MainLayout = ({ children }: Props) => {
             <main className="flex-grow pt-24">
                 {children}
             </main>
+            <CookieBanner />
             <Footer />
         </div>
     );

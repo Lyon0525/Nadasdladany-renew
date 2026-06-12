@@ -8,18 +8,39 @@ import { NewsCard } from '../features/news/components/NewsCard';
 import { NewsCardSkeleton } from '../features/news/components/NewsCardSkeleton';
 import { VillageMap } from '../features/map/components/VillageMap';
 import { getImageUrl } from '../lib/imageUtils';
-import { ChevronDown, User } from 'lucide-react';
+import { ChevronDown, User, Bell } from 'lucide-react'; // Bell ikon hozzáadva
+import { newsletterService } from '../api/newsletterService';
+import toast from 'react-hot-toast'; // Toast értesítések importja
 
 export const HomePage = () => {
     const [articles, setArticles] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
 
+    // 🌟 Hírlevél állapotkezelők
+    const [email, setEmail] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+
     useEffect(() => {
-        articleService.getArticles()
-            .then(data => setArticles(Array.isArray(data) ? data : []))
+        articleService.getArticles(1, 3)
+            .then(data => setArticles(data && Array.isArray(data.items) ? data.items : []))
             .catch(() => setArticles([]))
             .finally(() => setLoading(false));
     }, []);
+
+    // 🌟 Hírlevél feliratkozás logikája
+    const handleSubscribe = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSubmitting(true);
+        try {
+            await newsletterService.subscribe(email);
+            toast.success("Sikeresen feliratkozott a községi hírlevélre!");
+            setEmail('');
+        } catch {
+            toast.error("Hiba történt a feliratkozás során.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     return (
         <MainLayout>
@@ -62,7 +83,6 @@ export const HomePage = () => {
                         <div className="w-64 h-64 md:w-80 md:h-80 flex-shrink-0 relative">
                             <div className="absolute inset-0 border-2 border-accent rounded-[40px] rotate-6 translate-x-4 translate-y-4" />
                             <div className="relative w-full h-full bg-gray-200 rounded-[40px] shadow-2xl z-10 overflow-hidden flex items-center justify-center">
-                                {/* Ha van mayor.jpg, azt használja, ha nincs, egy ikont */}
                                 <img
                                     src={getImageUrl('/img/reps/mayor.jpg')}
                                     className="w-full h-full object-cover"
@@ -121,13 +141,47 @@ export const HomePage = () => {
                 )}
             </section>
 
-            {/* TÉRKÉP */}
+            {/* TÉRKÉP SZEKCIÓ */}
             <section className="max-w-7xl mx-auto py-24 px-6">
                 <div className="text-center mb-16">
                     <h2 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-4">Fedezze fel községünket</h2>
                     <p className="text-gray-500 italic">Nádasdladány legfontosabb pontjai egy interaktív térképen</p>
                 </div>
                 <VillageMap />
+            </section>
+
+            {/* 🌟 ÚJ: HÍRLEVÉL FELIRATKOZÁSI SZEKCIÓ */}
+            <section className="max-w-7xl mx-auto pb-24 px-6">
+                <div className="bg-primary text-white py-16 px-8 md:px-16 rounded-[40px] text-center shadow-xl relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-accent/10 to-transparent pointer-events-none" />
+                    <div className="relative z-10">
+                        <div className="p-4 bg-white/10 text-accent rounded-2xl w-fit mx-auto mb-6">
+                            <Bell size={28} />
+                        </div>
+                        <h2 className="text-3xl md:text-4xl font-serif font-bold mb-3">Értesüljön elsőként a hírekről!</h2>
+                        <p className="text-gray-300 text-sm max-w-md mx-auto mb-8">
+                            Iratkozzon fel hírlevelünkre, hogy azonnal értesüljön a legfrissebb önkormányzati döntésekről, pályázatokról és rendezvényekről.
+                        </p>
+
+                        <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+                            <input
+                                type="email"
+                                required
+                                placeholder="Az Ön e-mail címe..."
+                                className="flex-grow bg-white/10 border border-white/10 px-6 py-4 rounded-full text-white placeholder:text-gray-400 outline-none focus:border-accent transition-all text-sm"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                            <button
+                                type="submit"
+                                disabled={submitting}
+                                className="bg-accent text-primary font-bold px-8 py-4 rounded-full text-sm hover:scale-105 transition-all flex-shrink-0 disabled:opacity-50 shadow-md cursor-pointer"
+                            >
+                                {submitting ? "Feliratkozás..." : "Feliratkozás"}
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </section>
         </MainLayout>
     );

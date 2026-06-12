@@ -15,7 +15,7 @@ export const AdminNewsPage = () => {
     const fetchNews = async () => {
         try {
             const data = await articleService.getArticles();
-            setArticles(data);
+            setArticles(data && Array.isArray(data.items) ? data.items : []);
         } catch (err) {
             toast.error("Hiba a hírek betöltésekor");
         }

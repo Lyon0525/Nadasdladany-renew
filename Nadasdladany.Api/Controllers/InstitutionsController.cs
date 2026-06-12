@@ -13,6 +13,12 @@ public class InstitutionsController : ApiControllerBase
         return await Mediator.Send(new GetInstitutionsQuery());
     }
 
+    [HttpGet("{slug}")]
+    public async Task<ActionResult<InstitutionDto>> GetBySlug(string slug)
+    {
+        return await Mediator.Send(new GetInstitutionBySlugQuery(slug));
+    }
+
     [HttpPost]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<int>> Create([FromForm] CreateInstitutionCommand command)

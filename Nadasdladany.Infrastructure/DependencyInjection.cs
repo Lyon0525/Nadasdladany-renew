@@ -45,7 +45,7 @@ public static class DependencyInjection
         services.AddTransient<IFileService, FileService>();
         services.AddHttpContextAccessor(); // Kell a CurrentUserService-hez!
         services.AddTransient<ICurrentUserService, CurrentUserService>();
-        services.AddTransient<IEmailService, EmailService>();
+        services.AddTransient<IEmailService, DummyEmailService>();
         services.AddTransient<ISlugService, SlugService>();
 
         // 5. Add Authorization (basic)

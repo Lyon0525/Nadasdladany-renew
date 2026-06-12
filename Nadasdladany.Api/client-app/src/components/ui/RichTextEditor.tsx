@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
@@ -5,8 +6,8 @@ import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Quote, Undo, Redo } 
 import { cn } from '../../lib/utils';
 
 interface Props {
-  content: string;
-  onChange: (html: string) => void; // Itt is legyen ott a string típus
+    content: string;
+    onChange: (html: string) => void;
 }
 
 const MenuBar = ({ editor }: { editor: any }) => {
@@ -57,7 +58,10 @@ export const RichTextEditor = ({ content, onChange }: Props) => {
         ],
         content: content,
         onUpdate: ({ editor }) => {
-            onChange(editor.getHTML());
+            const html = editor.getHTML();
+            if (html !== content) {
+                onChange(html);
+            }
         },
         editorProps: {
             attributes: {
@@ -65,6 +69,12 @@ export const RichTextEditor = ({ content, onChange }: Props) => {
             },
         },
     });
+
+    useEffect(() => {
+        if (editor && content !== editor.getHTML()) {
+            editor.commands.setContent(content, { emitUpdate: false });
+        }
+    }, [content, editor]);
 
     return (
         <div className="border border-gray-100 rounded-3xl overflow-hidden focus-within:border-accent transition-colors bg-white shadow-sm">

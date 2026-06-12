@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
-// JAVÍTÁS: ../../ használata, mert a fájl a src/pages/admin mappában van
-import { AdminLayout } from '../../layouts/AdminLayout'; 
-// JAVÍTÁS: ../../ használata és 'type' kulcsszó a GalleryAlbum-hoz
-import { galleryService, type GalleryAlbum } from '../../api/galleryService'; 
+import { AdminLayout } from '../../layouts/AdminLayout';
+import { galleryService, type GalleryAlbum } from '../../api/galleryService';
 import { Upload, Trash2, FolderPlus, Loader2 } from 'lucide-react';
+import { AlbumForm } from '../../features/admin/gallery/components/AlbumForm';
+import toast from 'react-hot-toast';
 
 export const AdminGalleryPage = () => {
     const [albums, setAlbums] = useState<GalleryAlbum[]>([]);
     const [loading, setLoading] = useState(false);
+    const [isAlbumFormOpen, setIsAlbumFormOpen] = useState(false);
+    const loadAlbums = () => {
+        galleryService.getAlbums().then(setAlbums);
+    };
 
     useEffect(() => {
-        galleryService.getAlbums().then(setAlbums);
+        loadAlbums();
     }, []);
 
     const handleFileUpload = async (albumId: number, files: FileList | null) => {
@@ -18,13 +22,23 @@ export const AdminGalleryPage = () => {
         setLoading(true);
         try {
             await galleryService.uploadImages(albumId, files);
-            alert('Sikeres feltöltés!');
-            // Frissítsük az albumot, hogy lássuk a változást (opcionális)
-            galleryService.getAlbums().then(setAlbums);
+            toast.success('Képek sikeresen hozzáadva az albumhoz!');
+            loadAlbums();
         } catch (err) {
-            alert('Hiba történt!');
+            toast.error('Hiba történt a képek feltöltése során.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleAlbumDelete = async (id: number) => {
+        if (!window.confirm("Biztosan törölni szeretné ezt az albumot a benne lévő összes képpel együtt?")) return;
+        try {
+            await galleryService.deleteAlbum(id);
+            toast.success("Album sikeresen törölve!");
+            loadAlbums();
+        } catch {
+            toast.error("Hiba történt a törlés során.");
         }
     };
 
@@ -32,7 +46,11 @@ export const AdminGalleryPage = () => {
         <AdminLayout>
             <div className="flex justify-between items-center mb-12">
                 <h1 className="text-4xl font-serif font-bold text-primary">Galériák kezelése</h1>
-                <button className="flex items-center gap-2 bg-accent text-primary font-bold px-8 py-4 rounded-full hover:scale-105 transition-all">
+
+                <button
+                    onClick={() => setIsAlbumFormOpen(true)}
+                    className="flex items-center gap-2 bg-accent text-primary font-bold px-8 py-4 rounded-full hover:scale-105 transition-all cursor-pointer shadow-md"
+                >
                     <FolderPlus size={20} /> Új album
                 </button>
             </div>
@@ -47,16 +65,21 @@ export const AdminGalleryPage = () => {
 
                         <div className="flex items-center gap-4">
                             <label className="flex items-center gap-2 px-6 py-3 bg-secondary rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
-                                {loading ? <Loader2 className="animate-spin" /> : <><Upload size={18} /> Képek hozzáadása</>}
+                                {loading ? <Loader2 className="animate-spin" size={18} /> : <><Upload size={18} /> Képek hozzáadása</>}
                                 <input
-                                    type="file" 
-                                    multiple 
+                                    type="file"
+                                    multiple
                                     accept="image/*"
                                     className="hidden"
+                                    disabled={loading}
                                     onChange={(e) => handleFileUpload(album.id, e.target.files)}
                                 />
                             </label>
-                            <button className="p-3 text-red-400 hover:bg-red-50 rounded-full transition-colors" title="Album törlése">
+                            <button
+                                onClick={() => handleAlbumDelete(album.id)}
+                                className="p-3 text-red-400 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
+                                title="Album törlése"
+                            >
                                 <Trash2 size={20} />
                             </button>
                         </div>
@@ -69,6 +92,13 @@ export const AdminGalleryPage = () => {
                     </div>
                 )}
             </div>
+
+            {isAlbumFormOpen && (
+                <AlbumForm
+                    onClose={() => setIsAlbumFormOpen(false)}
+                    onSuccess={loadAlbums}
+                />
+            )}
         </AdminLayout>
     );
 };

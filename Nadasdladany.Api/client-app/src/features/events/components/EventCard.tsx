@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { MapPin, Clock, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { type VillageEvent } from '../../../api/eventService';
 
 interface Props {
@@ -43,14 +42,26 @@ export const EventCard = ({ event, index }: Props) => {
                 </div>
             </div>
 
-            {/* Gomb */}
+            {/* Gomb - JAVÍTVA: Külső hivatkozás kezelése és 404-es belső routing elkerülése */}
             <div className="flex items-center">
-                <Link
-                    to={`/esemenyek/${event.slug}`}
-                    className="p-4 bg-gray-50 text-primary rounded-full group-hover:bg-primary group-hover:text-white transition-all"
-                >
-                    <ArrowRight size={20} />
-                </Link>
+                {event.eventUrl ? (
+                    <a
+                        href={event.eventUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Esemény részletei (külső hivatkozás)"
+                        className="p-4 bg-gray-50 text-primary rounded-full group-hover:bg-primary group-hover:text-white transition-all cursor-pointer shadow-sm"
+                    >
+                        <ArrowRight size={20} />
+                    </a>
+                ) : (
+                    <div
+                        title="Nincs további külső hivatkozás"
+                        className="p-4 bg-gray-50/50 text-gray-300 rounded-full"
+                    >
+                        <Clock size={20} />
+                    </div>
+                )}
             </div>
         </motion.div>
     );

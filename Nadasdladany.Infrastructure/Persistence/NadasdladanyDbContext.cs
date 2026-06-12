@@ -25,7 +25,12 @@ public class NadasdladanyDbContext : IdentityDbContext<ApplicationUser>, IApplic
     }
 
     public DbSet<Article> Articles => Set<Article>();
+    public DbSet<JobPosting> JobPostings => Set<JobPosting>();
+    public DbSet<NewsletterSubscriber> NewsletterSubscribers => Set<NewsletterSubscriber>();
+    public DbSet<Organization> Organizations => Set<Organization>();
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<PublicDataRequest> PublicDataRequests => Set<PublicDataRequest>();
+    public DbSet<Project> Projects => Set<Project>();
     public DbSet<Event> Events => Set<Event>();
     public DbSet<Document> Documents => Set<Document>();
     public DbSet<DocumentCategory> DocumentCategories => Set<DocumentCategory>();
@@ -38,6 +43,8 @@ public class NadasdladanyDbContext : IdentityDbContext<ApplicationUser>, IApplic
     public DbSet<UsefulLink> UsefulLinks => Set<UsefulLink>();
     public DbSet<ContactSubmission> ContactSubmissions => Set<ContactSubmission>();
     public DbSet<SiteSetting> SiteSettings => Set<SiteSetting>();
+    public DbSet<OfficeSetting> OfficeSettings => Set<OfficeSetting>();
+    public DbSet<OfficeStaff> OfficeStaff => Set<OfficeStaff>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -47,7 +54,6 @@ public class NadasdladanyDbContext : IdentityDbContext<ApplicationUser>, IApplic
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        // Automatikus audit mező kitöltés
         foreach (var entry in ChangeTracker.Entries<BaseAuditableEntity>())
         {
             switch (entry.State)

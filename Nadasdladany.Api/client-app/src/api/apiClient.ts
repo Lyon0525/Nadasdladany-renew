@@ -5,7 +5,6 @@ const apiClient = axios.create({
     withCredentials: true,
 });
 
-// Kérés interceptor: Hozzáadjuk a JWT tokent a fejlécbe
 apiClient.interceptors.request.use((config) => {
     const userStr = localStorage.getItem('user');
     if (userStr) {

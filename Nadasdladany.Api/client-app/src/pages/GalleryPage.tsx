@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MainLayout } from '../layouts/MainLayout';
-// JAVÍTÁS: A GalleryAlbum elé oda kell írni, hogy 'type'
 import { galleryService, type GalleryAlbum } from '../api/galleryService';
 import { Image, FolderOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
