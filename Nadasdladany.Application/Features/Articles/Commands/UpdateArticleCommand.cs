@@ -54,7 +54,6 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand>
 
         if (request.Image != null)
         {
-            // Régi kép törlése, ha volt
             if (!string.IsNullOrEmpty(entity.FeaturedImageUrl))
                 _fileService.DeleteFile(entity.FeaturedImageUrl);
 

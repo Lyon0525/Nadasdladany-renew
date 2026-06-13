@@ -44,7 +44,6 @@ export const AlbumDetailPage = () => {
                 </div>
             </div>
 
-            {/* LIGHTBOX */}
             <AnimatePresence>
                 {selectedImageIndex !== null && (
                     <motion.div

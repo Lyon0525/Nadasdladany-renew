@@ -32,7 +32,6 @@ public class UpdateOfficeInfoCommandHandler : IRequestHandler<UpdateOfficeInfoCo
 
         if (entity == null)
         {
-            // Ha nincs még rekord, létrehozunk egyet
             entity = new OfficeInfo { Address = request.Address, OfficeName = request.OfficeName };
             _context.OfficeInfos.Add(entity);
         }

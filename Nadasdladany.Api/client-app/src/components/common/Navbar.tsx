@@ -47,12 +47,14 @@ export const Navbar = () => {
     return (
         <>
             <nav className={cn(
-                "fixed top-0 w-full z-[100] transition-all duration-500 px-6",
-                isScrolled ? "py-3 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-sm" : "py-6 bg-transparent"
+                "fixed top-0 w-full z-[9999] transition-all duration-500 px-6",
+                isScrolled
+                    ? "py-3 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-sm"
+                    : "py-6 bg-primary/90 backdrop-blur-md shadow-lg"
             )}>
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    {/* Logo + Címer */}
-                    <Link to="/" className="flex items-center gap-3 group">
+                <div className="max-w-7xl mx-auto w-full flex items-center justify-between gap-x-12">
+
+                    <Link to="/" className="flex items-center gap-3 group flex-shrink-0">
                         <img
                             src="/nadasdladany-cimer.png"
                             alt="Címer"
@@ -64,14 +66,13 @@ export const Navbar = () => {
                         )}>Nádasdladány</span>
                     </Link>
 
-                    {/* Desktop Nav */}
-                    <div className="hidden lg:flex items-center gap-2">
+                    <div className="hidden lg:flex items-center justify-center flex-1 mx-8 xl:mx-16 gap-x-1 xl:gap-x-1.5 overflow-visible">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.name}
                                 to={link.path}
                                 className={cn(
-                                    "px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 relative",
+                                    "px-2 py-2 rounded-full text-xs xl:text-sm font-medium transition-all duration-300 relative flex-shrink-0",
                                     location.pathname === link.path
                                         ? "text-accent"
                                         : (isScrolled ? "text-primary/70 hover:text-primary" : "text-white/80 hover:text-white")
@@ -83,29 +84,28 @@ export const Navbar = () => {
                                 )}
                             </Link>
                         ))}
-
-                        <button
-                            onClick={() => setIsSearchOpen(true)}
-                            className={cn(
-                                "ml-4 p-2 transition-colors flex items-center gap-2 border rounded-full px-4",
-                                isScrolled ? "text-primary/50 border-gray-200 hover:text-accent" : "text-white/50 border-white/20 hover:text-white"
-                            )}
-                        >
-                            <Search size={18} />
-                            <span className="text-xs font-bold uppercase tracking-widest">Keresés</span>
-                        </button>
                     </div>
 
-                    {/* Mobile Toggle */}
-                    <div className="lg:hidden flex items-center gap-4">
+                    <button
+                        onClick={() => setIsSearchOpen(true)}
+                        className={cn(
+                            "hidden lg:flex p-2 transition-colors items-center gap-2 border rounded-full px-3 xl:px-4 cursor-pointer flex-shrink-0",
+                            isScrolled ? "text-primary/50 border-gray-200 hover:text-accent" : "text-white/50 border-white/20 hover:text-white"
+                        )}
+                    >
+                        <Search size={16} />
+                        <span className="text-xs font-bold uppercase tracking-widest hidden xl:inline">Keresés</span>
+                    </button>
+
+                    <div className="lg:hidden flex items-center gap-4 flex-shrink-0 ml-auto">
                         <button
                             onClick={() => setIsSearchOpen(true)}
-                            className={isScrolled ? "text-primary" : "text-white"}
+                            className={cn("cursor-pointer", isScrolled ? "text-primary" : "text-white")}
                         >
                             <Search size={24} />
                         </button>
                         <button
-                            className={isScrolled ? "text-primary" : "text-white"}
+                            className={cn("cursor-pointer", isScrolled ? "text-primary" : "text-white")}
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         >
                             {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}

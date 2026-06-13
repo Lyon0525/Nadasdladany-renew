@@ -2,9 +2,6 @@
 
 namespace Nadasdladany.Domain.Entities;
 
-/// <summary>
-/// General information about the Mayor's Office.
-/// </summary>
 public class OfficeInfo : BaseEntity
 {
     public required string OfficeName { get; set; } = "Polgármesteri Hivatal";

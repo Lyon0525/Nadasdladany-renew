@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 export const DynamicBackground = () => {
     return (
         <div className="fixed inset-0 -z-10 overflow-hidden bg-secondary/30">
-            {/* Arany selymes folt */}
             <motion.div
                 animate={{
                     x: [0, 100, 0],
@@ -13,7 +12,6 @@ export const DynamicBackground = () => {
                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                 className="absolute -top-[10%] -left-[10%] w-[500px] h-[500px] rounded-full bg-accent/10 blur-[120px]"
             />
-            {/* Mélyzöld elegáns folt */}
             <motion.div
                 animate={{
                     x: [0, -80, 0],

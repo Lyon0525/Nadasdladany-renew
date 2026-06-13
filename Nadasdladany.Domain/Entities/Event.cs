@@ -2,9 +2,6 @@
 
 namespace Nadasdladany.Domain.Entities;
 
-/// <summary>
-/// Represents a community or municipal event.
-/// </summary>
 public class Event : BaseAuditableEntity
 {
     public required string Title { get; set; }

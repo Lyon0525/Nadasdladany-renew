@@ -2,9 +2,6 @@
 
 namespace Nadasdladany.Domain.Entities;
 
-/// <summary>
-/// Represents an opening hour entry for the office.
-/// </summary>
 public class OfficeHourEntry : BaseEntity
 {
     public DayOfWeek DayOfWeek { get; set; }

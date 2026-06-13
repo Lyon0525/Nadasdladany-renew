@@ -126,7 +126,6 @@ export const NewsForm = ({ onClose, onSubmit, loading }: Props) => {
 
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 ml-1">Teljes tartalom</label>
-                        {/* JAVÍTÁS: Explicit típus (html: string) */}
                         <RichTextEditor
                             content={content}
                             onChange={(html: string) => setContent(html)}

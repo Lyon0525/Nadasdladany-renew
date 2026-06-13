@@ -29,7 +29,6 @@ public class SendNewsletterCommandHandler : IRequestHandler<SendNewsletterComman
 
         foreach (var sub in subscribers)
         {
-            // Meghívódik a dummy service, ami nem csinál semmit, de a logika struktúrája ép marad
             await _emailService.SendEmailAsync(sub.Email, request.Subject, request.Body);
         }
     }

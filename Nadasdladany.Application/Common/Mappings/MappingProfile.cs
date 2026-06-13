@@ -15,7 +15,6 @@ public class MappingProfile : Profile
     {
         var mapFromType = typeof(IMapFrom<>);
 
-        // Kikeressük az összes típust, ami implementálja az IMapFrom<> interfészt
         var types = assembly.GetExportedTypes()
             .Where(t => t.GetInterfaces().Any(i =>
                 i.IsGenericType && i.GetGenericTypeDefinition() == mapFromType))

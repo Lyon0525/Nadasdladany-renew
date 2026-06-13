@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'; // Fix: 'type' kulcsszó hozzáadva
+import { type ReactNode } from 'react';
 import { Navbar } from '../components/common/Navbar';
 import { Footer } from '../components/common/Footer';
 import { DynamicBackground } from '../components/common/DynamicBackground';

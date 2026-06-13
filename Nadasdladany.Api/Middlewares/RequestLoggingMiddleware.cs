@@ -2,9 +2,6 @@
 
 namespace Nadasdladany.Api.Middlewares;
 
-/// <summary>
-/// Middleware to log every incoming HTTP request and its duration.
-/// </summary>
 public class RequestLoggingMiddleware
 {
     private readonly RequestDelegate _next;
@@ -42,7 +39,7 @@ public class RequestLoggingMiddleware
             sw.Stop();
             _logger.LogError("HTTP {Method} {Path} failed in {Elapsed}ms",
                 context.Request.Method, context.Request.Path, sw.ElapsedMilliseconds);
-            throw; // Re-throw to be caught by ExceptionHandlingMiddleware
+            throw;
         }
     }
 }

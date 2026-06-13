@@ -3,7 +3,6 @@ export interface User {
     token: string;
     role: string;
 }
-
 export interface LoginResponse {
     email: string;
     token: string;

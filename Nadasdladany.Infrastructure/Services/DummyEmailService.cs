@@ -14,7 +14,6 @@ public class DummyEmailService : IEmailService
 
     public Task SendEmailAsync(string to, string subject, string body)
     {
-        // 🌟 JAVÍTÁS: SMTP hiányában szimplán csak naplózzuk a konzolra fejlesztési célból, de nem indítunk SMTP kapcsolatot.
         _logger.LogInformation("Hírlevél küldése szimulálva ide: {To}. Tárgy: {Subject}", to, subject);
         return Task.CompletedTask;
     }

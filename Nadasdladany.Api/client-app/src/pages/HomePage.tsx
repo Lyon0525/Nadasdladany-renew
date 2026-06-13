@@ -8,15 +8,14 @@ import { NewsCard } from '../features/news/components/NewsCard';
 import { NewsCardSkeleton } from '../features/news/components/NewsCardSkeleton';
 import { VillageMap } from '../features/map/components/VillageMap';
 import { getImageUrl } from '../lib/imageUtils';
-import { ChevronDown, User, Bell } from 'lucide-react'; // Bell ikon hozzáadva
+import { ChevronDown, User, Bell } from 'lucide-react';
 import { newsletterService } from '../api/newsletterService';
-import toast from 'react-hot-toast'; // Toast értesítések importja
+import toast from 'react-hot-toast';
 
 export const HomePage = () => {
     const [articles, setArticles] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // 🌟 Hírlevél állapotkezelők
     const [email, setEmail] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
@@ -27,7 +26,6 @@ export const HomePage = () => {
             .finally(() => setLoading(false));
     }, []);
 
-    // 🌟 Hírlevél feliratkozás logikája
     const handleSubscribe = async (e: React.FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
@@ -44,7 +42,6 @@ export const HomePage = () => {
 
     return (
         <MainLayout>
-            {/* HERO BANNER */}
             <section className="relative h-screen flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <img
@@ -59,10 +56,31 @@ export const HomePage = () => {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1 }}
-                    className="relative z-10 text-center px-6"
+                    className="relative z-10 text-center px-6 selection:bg-accent selection:text-primary"
                 >
-                    <h1 className="text-6xl md:text-9xl font-serif font-bold text-white mb-6">Nádasdladány</h1>
-                    <p className="text-accent text-xl md:text-2xl font-light tracking-[0.4em] uppercase">Ahol a múlt és jövő összeér</p>
+                    <h1
+                        className="text-6xl md:text-9xl font-serif font-black text-white mb-6 tracking-tight"
+                        style={{
+                            textShadow: '0 4px 20px rgba(0, 0, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4)'
+                        }}
+                    >
+                        Nádasdladány
+                    </h1>
+
+                    <p
+                        className="text-accent text-lg md:text-2xl font-bold tracking-[0.35em] uppercase selection:bg-white selection:text-primary"
+                        style={{
+                            textShadow: `
+                                -1px -1px 0 #000,  
+                                 1px -1px 0 #000,
+                                -1px  1px 0 #000,
+                                 1px  1px 0 #000,
+                                 0px  4px 10px rgba(0, 0, 0, 0.9)
+                            `
+                        }}
+                    >
+                        Ahol a múlt és jövő összeér
+                    </p>
                 </motion.div>
 
                 <motion.div
@@ -74,7 +92,6 @@ export const HomePage = () => {
                 </motion.div>
             </section>
 
-            {/* POLGÁRMESTERI KÖSZÖNTŐ */}
             <section className="bg-white py-24 px-6">
                 <div className="max-w-7xl mx-auto">
                     <div className="relative bg-secondary/30 rounded-[60px] p-8 md:p-20 flex flex-col md:flex-row items-center gap-16 shadow-inner border border-gray-100">
@@ -104,7 +121,7 @@ export const HomePage = () => {
                                 </p>
                             </div>
                             <div className="mt-10">
-                                <p className="font-bold text-primary text-xl">Pálfi Kristóf</p>
+                                <p className="font-bold text-primary text-xl">XY</p>
                                 <p className="text-accent font-medium uppercase tracking-widest text-xs">Polgármester</p>
                             </div>
                         </div>
@@ -112,7 +129,6 @@ export const HomePage = () => {
                 </div>
             </section>
 
-            {/* HÍREK SZEKCIÓ */}
             <section className="max-w-7xl mx-auto py-24 px-6">
                 <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
                     <div className="text-center md:text-left">
@@ -141,7 +157,6 @@ export const HomePage = () => {
                 )}
             </section>
 
-            {/* TÉRKÉP SZEKCIÓ */}
             <section className="max-w-7xl mx-auto py-24 px-6">
                 <div className="text-center mb-16">
                     <h2 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-4">Fedezze fel községünket</h2>
@@ -150,7 +165,6 @@ export const HomePage = () => {
                 <VillageMap />
             </section>
 
-            {/* 🌟 ÚJ: HÍRLEVÉL FELIRATKOZÁSI SZEKCIÓ */}
             <section className="max-w-7xl mx-auto pb-24 px-6">
                 <div className="bg-primary text-white py-16 px-8 md:px-16 rounded-[40px] text-center shadow-xl relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-r from-accent/10 to-transparent pointer-events-none" />

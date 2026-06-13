@@ -5,9 +5,6 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Nadasdladany.Application.Features.Articles.DTOs;
 
-/// <summary>
-/// Data transfer object for Article details.
-/// </summary>
 public class ArticleDto : IMapFrom<Article>
 {
     public int Id { get; set; }
@@ -18,8 +15,6 @@ public class ArticleDto : IMapFrom<Article>
     public string? FeaturedImageUrl { get; set; }
     public DateTime PublishedDate { get; set; }
     public string? Author { get; set; }
-
-    // Flattened properties from Category
     public int CategoryId { get; set; }
     public string CategoryName { get; set; } = string.Empty;
 

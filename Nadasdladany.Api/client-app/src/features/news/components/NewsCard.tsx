@@ -18,7 +18,6 @@ export const NewsCard = ({ article, index }: Props) => {
             className="group"
         >
             <Link to={`/hirek/${article.slug}`} className="block relative overflow-hidden rounded-3xl bg-white shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100">
-                {/* Kép szekció */}
                 <div className="relative h-72 overflow-hidden">
                     <img
                         src={article.featuredImageUrl || 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80'}
@@ -38,7 +37,6 @@ export const NewsCard = ({ article, index }: Props) => {
                     </div>
                 </div>
 
-                {/* Szöveg szekció */}
                 <div className="p-8">
                     <div className="flex items-center gap-2 text-gray-400 text-xs mb-4 uppercase tracking-widest">
                         <Calendar size={14} className="text-accent" />

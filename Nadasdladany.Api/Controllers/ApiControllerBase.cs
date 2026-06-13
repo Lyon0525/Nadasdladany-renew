@@ -9,6 +9,5 @@ public abstract class ApiControllerBase : ControllerBase
 {
     private ISender? _mediator;
 
-    // Ha még nincs inicializálva a mediator, lekéri a DI konténerből
     protected ISender Mediator => _mediator ??= HttpContext.RequestServices.GetRequiredService<ISender>();
 }

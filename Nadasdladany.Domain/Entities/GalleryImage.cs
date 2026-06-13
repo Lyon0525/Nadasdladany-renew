@@ -2,9 +2,6 @@
 
 namespace Nadasdladany.Domain.Entities;
 
-/// <summary>
-/// Represents a single image within a gallery album.
-/// </summary>
 public class GalleryImage : BaseAuditableEntity
 {
     public string? Title { get; set; }

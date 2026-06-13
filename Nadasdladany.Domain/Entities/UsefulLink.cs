@@ -2,9 +2,6 @@
 
 namespace Nadasdladany.Domain.Entities;
 
-/// <summary>
-/// Represents a useful external link.
-/// </summary>
 public class UsefulLink : BaseEntity
 {
     public required string Title { get; set; }

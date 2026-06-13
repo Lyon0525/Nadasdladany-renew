@@ -4,9 +4,6 @@ using Nadasdladany.Application.Interfaces.Common;
 
 namespace Nadasdladany.Infrastructure.Identity;
 
-/// <summary>
-/// Implementation of the identity service using ASP.NET Core Identity.
-/// </summary>
 public class IdentityService : IIdentityService
 {
     private readonly UserManager<ApplicationUser> _userManager;
@@ -30,7 +27,6 @@ public class IdentityService : IIdentityService
 
     public async Task<bool> AuthorizeAsync(string userId, string policyName)
     {
-        // This will be expanded later when we add authorization policies
         var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == userId);
         return user != null;
     }

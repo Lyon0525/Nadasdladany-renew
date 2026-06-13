@@ -28,7 +28,6 @@ export const CastlePage = () => {
     return (
         <div className="bg-[#080a0f] text-white min-h-screen">
             <MainLayout>
-                {/* HERO SECTION */}
                 <section className="relative h-[90vh] flex items-center justify-center overflow-hidden">
                     <CastleParticles />
                     <motion.div style={{ scale }} className="absolute inset-0 z-0">
@@ -63,7 +62,6 @@ export const CastlePage = () => {
                     </div>
                 </section>
 
-                {/* STORY SECTION */}
                 <section className="max-w-7xl mx-auto py-32 px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
                     <motion.div
                         initial={{ opacity: 0, x: -50 }}
@@ -96,7 +94,6 @@ export const CastlePage = () => {
                     </motion.div>
                 </section>
 
-                {/* FEATURES GRID */}
                 <section className="bg-white/5 py-32 px-6">
                     <div className="max-w-7xl mx-auto">
                         <div className="text-center mb-20">
@@ -124,7 +121,6 @@ export const CastlePage = () => {
                     </div>
                 </section>
 
-                {/* INFO SECTION */}
                 <section className="max-w-4xl mx-auto py-32 px-6 text-center">
                     <div className="p-12 rounded-[40px] bg-gradient-to-br from-accent/20 to-transparent border border-accent/30">
                         <Info className="mx-auto text-accent mb-6" size={48} />

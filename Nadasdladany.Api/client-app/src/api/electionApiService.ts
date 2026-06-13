@@ -16,11 +16,6 @@ export interface ElectionResult {
 export const electionApiService = {
     getNadasdladanyResults: async (year: number): Promise<ElectionResult | null> => {
         try {
-            // Itt hívható meg az éles kormányzati / választási API végpont, ha megvan a kulcs:
-            // const response = await fetch(`https://api.valasztas.hu/v1/settlements/nadasdladany/${year}`);
-            // return await response.json();
-
-            // Éles API hiányában vagy szerverhiba esetén az alábbi hivatalos nádasdladányi statisztikákat adjuk vissza:
             return electionApiService.getMockData(year);
         } catch (error) {
             console.error("Hiba a választási API elérésekor, tartalék adatok betöltése...", error);

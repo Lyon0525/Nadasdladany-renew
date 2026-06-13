@@ -3,9 +3,6 @@ using System.Reflection.Metadata;
 
 namespace Nadasdladany.Domain.Entities;
 
-/// <summary>
-/// Categories for municipal documents (e.g., Decrees, Minutes).
-/// </summary>
 public class DocumentCategory : BaseEntity
 {
     public required string Name { get; set; }

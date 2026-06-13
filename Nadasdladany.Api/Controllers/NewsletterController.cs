@@ -30,10 +30,7 @@ public class NewsletterController : ApiControllerBase
     [HttpPost("send")]
     public async Task<ActionResult> Send(SendNewsletterCommand command)
     {
-        // Elindítjuk a háttérben a logikát (Dummy lefutás)
         await Mediator.Send(command);
-
-        // 🌟 JAVÍTÁS: Küldünk egy egyedi fejlécet vagy választ, amiből a frontend látja, hogy ez csak szimuláció
         return Ok(new { message = "Nincs SMTP implementálva", isDummy = true });
     }
 }

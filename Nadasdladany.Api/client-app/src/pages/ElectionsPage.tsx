@@ -12,13 +12,10 @@ export const ElectionsPage = () => {
     const [loadingDocs, setLoadingDocs] = useState(true);
     const [selectedYear, setSelectedYear] = useState<number>(2024);
     const [searchTerm, setSearchTerm] = useState('');
-
-    // 🌟 API állapotok
     const [apiResult, setApiResult] = useState<ElectionResult | null>(null);
     const [loadingApi, setLoadingApi] = useState(false);
     const [activeSubTab, setActiveSubTab] = useState<'results' | 'documents'>('results');
 
-    // 1. Dokumentumok betöltése a backendről
     useEffect(() => {
         setLoadingDocs(true);
         apiClient.get<PaginatedResult<DocumentFile>>('/documents', {
@@ -31,7 +28,6 @@ export const ElectionsPage = () => {
             .finally(() => setLoadingDocs(false));
     }, []);
 
-    // 2. Éles választási API adatok betöltése
     useEffect(() => {
         setLoadingApi(true);
         electionApiService.getNadasdladanyResults(selectedYear)
@@ -39,7 +35,6 @@ export const ElectionsPage = () => {
             .finally(() => setLoadingApi(false));
     }, [selectedYear]);
 
-    // Dokumentum szűrés
     const filteredDocs = docs.filter(doc => {
         const matchesSearch = doc.title.toLowerCase().includes(searchTerm.toLowerCase());
         const docYear = new Date(doc.publishedDate).getFullYear().toString();
@@ -50,7 +45,6 @@ export const ElectionsPage = () => {
     return (
         <MainLayout>
             <div className="max-w-6xl mx-auto px-6 py-16">
-                {/* Fejléc */}
                 <div className="text-center mb-12">
                     <Vote size={48} className="mx-auto text-accent mb-6" />
                     <h1 className="text-5xl font-serif font-bold text-primary mb-4">Választási Információk</h1>
@@ -59,7 +53,6 @@ export const ElectionsPage = () => {
                     </p>
                 </div>
 
-                {/* Évszám választó sáv */}
                 <div className="flex justify-center mb-8">
                     <div className="inline-flex bg-secondary p-1.5 rounded-full border border-gray-100">
                         {[2026, 2024, 2019].map((year) => (
@@ -77,7 +70,6 @@ export const ElectionsPage = () => {
                     </div>
                 </div>
 
-                {/* Al-fülek: Eredmények vagy Dokumentumok */}
                 <div className="flex justify-center gap-4 mb-12 border-b border-gray-100 pb-4">
                     <button
                         onClick={() => setActiveSubTab('results')}
@@ -93,14 +85,12 @@ export const ElectionsPage = () => {
                     </button>
                 </div>
 
-                {/* 🌟 1. AL-FÜL: DINAMIKUS API EREDMÉNYEK */}
                 {activeSubTab === 'results' && (
                     <div className="space-y-8 animate-in fade-in duration-300">
                         {loadingApi ? (
                             <div className="text-center py-20 font-serif italic text-accent text-xl animate-pulse">API adatok lekérése...</div>
                         ) : apiResult ? (
                             <>
-                                {/* Statisztikai kártyák */}
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                                     <div className="bg-white p-6 rounded-[24px] border border-gray-100 shadow-sm flex items-center gap-4">
                                         <div className="p-3 bg-secondary rounded-xl text-accent"><Users size={20} /></div>
@@ -125,7 +115,6 @@ export const ElectionsPage = () => {
                                     </div>
                                 </div>
 
-                                {/* Jelöltek listája és szavazati arány grafikonok */}
                                 <div className="bg-white p-8 md:p-10 rounded-[40px] border border-gray-100 shadow-sm space-y-6">
                                     <h3 className="text-2xl font-serif font-bold text-primary mb-6">{apiResult.type} - Nádasdladány</h3>
 
@@ -145,7 +134,6 @@ export const ElectionsPage = () => {
                                                         <span className="text-xs text-accent font-bold">{candidate.percentage}%</span>
                                                     </div>
                                                 </div>
-                                                {/* Egyedi CSS alapú sávdiagram vizualizáció */}
                                                 <div className="w-full h-3 bg-secondary rounded-full overflow-hidden">
                                                     <div
                                                         className={`h-full rounded-full transition-all duration-1000 ${candidate.isWinner ? 'bg-accent' : 'bg-gray-300'}`}
@@ -169,7 +157,6 @@ export const ElectionsPage = () => {
                     </div>
                 )}
 
-                {/* 🌟 2. AL-FÜL: STATIKUS JOGI DOKUMENTUMOK */}
                 {activeSubTab === 'documents' && (
                     <div className="space-y-6 animate-in fade-in duration-300">
                         <div className="relative mb-8">

@@ -20,7 +20,6 @@ export interface OfficeDetails {
 }
 
 export const OfficePage = () => {
-    // JAVÍTÁS: any helyért megkapja a pontos OfficeDetails típust
     const [data, setData] = useState<OfficeDetails | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -39,13 +38,11 @@ export const OfficePage = () => {
         );
     }
 
-    // Ügyfélfogadási idő feldolgozása a JSON-ból
     const openingHours = data?.openingHoursJson ? JSON.parse(data.openingHoursJson) : {};
 
     return (
         <MainLayout>
             <div className="max-w-6xl mx-auto px-6 py-16">
-                {/* Címsor */}
                 <div className="text-center mb-16">
                     <Building2 size={48} className="mx-auto text-accent mb-6" />
                     <h1 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-4">Közös Önkormányzati Hivatal</h1>
@@ -53,7 +50,6 @@ export const OfficePage = () => {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-20 items-start">
-                    {/* Elérhetőségek kártya */}
                     <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm space-y-6">
                         <h3 className="font-serif font-bold text-xl text-primary border-b border-gray-50 pb-3">Kapcsolat</h3>
                         <div className="space-y-4 text-sm text-gray-600">
@@ -81,7 +77,6 @@ export const OfficePage = () => {
                         </div>
                     </div>
 
-                    {/* Ügyfélfogadási rend kártya */}
                     <div className="lg:col-span-2 bg-secondary/40 p-8 md:p-10 rounded-[40px] border border-gray-100">
                         <h3 className="font-serif font-bold text-2xl text-primary mb-6 flex items-center gap-2">
                             <Clock size={22} className="text-accent" /> Ügyfélfogadási Idő
@@ -107,7 +102,6 @@ export const OfficePage = () => {
                     </div>
                 </div>
 
-                {/* Hivatali Apparátus / Munkatársak szekció */}
                 <div className="space-y-8">
                     <div className="text-center md:text-left border-b border-gray-100 pb-4 flex items-center gap-3">
                         <UserCheck className="text-accent" size={28} />

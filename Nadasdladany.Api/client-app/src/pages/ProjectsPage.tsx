@@ -18,7 +18,6 @@ export const ProjectsPage = () => {
     return (
         <MainLayout>
             <div className="max-w-7xl mx-auto px-6 py-16">
-                {/* Fejléc */}
                 <div className="text-center mb-20">
                     <Award size={48} className="mx-auto text-accent mb-6" />
                     <h1 className="text-5xl font-serif font-bold text-primary mb-4">Pályázatok és Fejlesztések</h1>
@@ -55,7 +54,6 @@ export const ProjectsPage = () => {
                                         {proj.excerpt || "Kattintson a részletekért és a teljes tartalom megtekintéséhez."}
                                     </p>
 
-                                    {/* Pályázati Infó rács */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-gray-50 pt-6 text-sm text-gray-400">
                                         {proj.projectCode && (
                                             <div className="flex items-center gap-2 truncate">

@@ -30,34 +30,38 @@ import { PublicDataRequestPage } from './pages/PublicDataRequestPage';
 import { AdminDataRequestsPage } from './pages/admin/AdminDataRequestsPage';
 import { OfficePage } from './pages/OfficePage';
 import { LegalPage } from './pages/LegalPage';
+import { AdminWelcomePage } from './pages/admin/AdminWelcomePage';
+import { NewsPage } from './pages/NewsPage';
+import { EventsPage } from './pages/EventsPage';
+import { EventDetailPage } from './pages/EventDetailPage';
 
 function App() {
     return (
         <HelmetProvider>
             <BrowserRouter>
                 <Routes>
-                    {/* Publikus oldalak */}
                     <Route path="/" element={<HomePage />} />
                     <Route path="/hirek/:slug" element={<NewsDetailPage />} />
+                    <Route path="/hirek" element={<NewsPage />} />
                     <Route path="/kastely" element={<CastlePage />} />
                     <Route path="/onkormanyzat" element={<MunicipalityPage />} />
                     <Route path="/intezmenyek" element={<InstitutionsPage />} />
                     <Route path="/kapcsolat" element={<ContactPage />} />
                     <Route path="/galeria" element={<GalleryPage />} />
                     <Route path="/galeria/:slug" element={<AlbumDetailPage />} />
+                    <Route path="/esemenyek" element={<EventsPage />} />
+                    <Route path="/esemenyek/:slug" element={<EventDetailPage />} />
                     <Route path="/admin/login" element={<LoginPage />} />
                     <Route path="/palyazatok" element={<ProjectsPage />} />
                     <Route path="/valasztasok" element={<ElectionsPage />} />
                     <Route path="/kozossegek" element={<OrganizationsPage />} />
                     <Route path="/intezmenyek/:slug" element={<InstitutionsPage />} />
-
                     <Route path="/allasok" element={<CareersPage />} />
                     <Route path="/ugyintezes" element={<EAdministrationPage />} />
                     <Route path="/kozerdeku-adatigenyles" element={<PublicDataRequestPage />} />
                     <Route path="/hivatal" element={<OfficePage />} />
                     <Route path="/jogi-nyilatkozatok" element={<LegalPage />} />
 
-                    {/* Védett admin oldalak */}
                     <Route element={<ProtectedRoute />}>
                         <Route path="/admin/dashboard" element={<DashboardPage />} />
                         <Route path="/admin/news" element={<AdminNewsPage />} />
@@ -71,6 +75,7 @@ function App() {
                         <Route path="/admin/newsletter" element={<AdminNewsletterPage />} />
                         <Route path="/admin/data-requests" element={<AdminDataRequestsPage />} />
                         <Route path="/admin/representatives" element={<AdminOrganizationsPage />} />
+                        <Route path="/admin/welcome" element={<AdminWelcomePage />} />
                     </Route>
                 </Routes>
 

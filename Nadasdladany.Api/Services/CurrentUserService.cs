@@ -12,6 +12,5 @@ public class CurrentUserService : ICurrentUserService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    // A ClaimTypes.NameIdentifier tartalmazza a bejelentkezett User ID-ját
     public string? UserId => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
 }

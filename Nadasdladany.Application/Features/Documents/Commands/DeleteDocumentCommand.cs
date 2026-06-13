@@ -25,7 +25,6 @@ public class DeleteDocumentCommandHandler : IRequestHandler<DeleteDocumentComman
         if (entity == null)
             throw new NotFoundException(nameof(Document), request.Id);
 
-        // Delete physical file
         _fileService.DeleteFile(entity.FilePath);
 
         _context.Documents.Remove(entity);

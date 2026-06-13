@@ -17,7 +17,6 @@ public class FileService : IFileService
     {
         if (file == null || file.Length == 0) return null;
 
-        // Path: wwwroot/uploads/{folderName}
         string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", folderName);
 
         if (!Directory.Exists(uploadsFolder))
@@ -31,7 +30,6 @@ public class FileService : IFileService
             await file.CopyToAsync(fileStream);
         }
 
-        // Return relative path for database storage
         return $"/uploads/{folderName}/{uniqueFileName}";
     }
 
@@ -39,7 +37,6 @@ public class FileService : IFileService
     {
         if (string.IsNullOrEmpty(relativePath)) return;
 
-        // Trim starting slash for Path.Combine to work correctly
         string fullPath = Path.Combine(_webHostEnvironment.WebRootPath, relativePath.TrimStart('/'));
 
         if (File.Exists(fullPath))

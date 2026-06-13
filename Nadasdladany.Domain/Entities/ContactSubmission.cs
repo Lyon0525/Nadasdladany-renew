@@ -2,9 +2,6 @@
 
 namespace Nadasdladany.Domain.Entities;
 
-/// <summary>
-/// Represents a message sent through the contact form.
-/// </summary>
 public class ContactSubmission : BaseEntity
 {
     public required string Name { get; set; }

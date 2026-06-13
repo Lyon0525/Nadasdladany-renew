@@ -36,7 +36,6 @@ public class UploadImageCommandHandler : IRequestHandler<UploadImageCommand, int
 
     public async Task<int> Handle(UploadImageCommand request, CancellationToken cancellationToken)
     {
-        // Upload to "gallery" folder
         string? imageUrl = await _fileService.UploadFileAsync(request.File, "gallery");
 
         if (string.IsNullOrEmpty(imageUrl))
@@ -45,7 +44,7 @@ public class UploadImageCommandHandler : IRequestHandler<UploadImageCommand, int
         var entity = new GalleryImage
         {
             ImageUrl = imageUrl,
-            ThumbnailUrl = imageUrl, // Simple version: same as image
+            ThumbnailUrl = imageUrl,
             Title = request.Title,
             AltText = request.AltText,
             GalleryAlbumId = request.AlbumId,

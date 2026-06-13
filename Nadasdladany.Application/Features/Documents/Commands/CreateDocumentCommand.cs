@@ -37,7 +37,6 @@ public class CreateDocumentCommandHandler : IRequestHandler<CreateDocumentComman
 
     public async Task<int> Handle(CreateDocumentCommand request, CancellationToken cancellationToken)
     {
-        // Upload to "documents" subfolder
         string? filePath = await _fileService.UploadFileAsync(request.File, "documents");
 
         if (string.IsNullOrEmpty(filePath))

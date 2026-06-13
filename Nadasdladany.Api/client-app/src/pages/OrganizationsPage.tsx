@@ -26,7 +26,6 @@ export const OrganizationsPage = () => {
                     <p className="text-gray-500 max-w-2xl mx-auto">Ismerje meg Nádasdladány aktív civil szervezeteit, alapítványait és történelmi egyházait.</p>
                 </div>
 
-                {/* Fülek */}
                 <div className="flex justify-center mb-12">
                     <div className="inline-flex bg-secondary p-1.5 rounded-full border border-gray-100 flex-wrap justify-center gap-1 sm:gap-0">
                         <button onClick={() => setActiveTab('all')} className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all ${activeTab === 'all' ? 'bg-white text-primary shadow-sm' : 'text-gray-400'}`}>Összes</button>
@@ -36,7 +35,6 @@ export const OrganizationsPage = () => {
                     </div>
                 </div>
 
-                {/* Lista */}
                 <div className="space-y-6">
                     {loading ? (
                         <div className="text-center py-20 font-serif italic text-accent text-xl animate-pulse">Közösségek betöltése...</div>

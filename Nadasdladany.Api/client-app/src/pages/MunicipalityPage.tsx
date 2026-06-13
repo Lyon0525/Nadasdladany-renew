@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { MainLayout } from '../layouts/MainLayout';
 import { municipalityService } from '../api/municipalityService';
-// JAVÍTÁS: A felesleges és nem használt DocumentFile importot töröltük
 import { type Representative } from '../types/Municipality';
 import { getImageUrl } from '../lib/imageUtils';
 import { Users, User, Shield, Landmark, ClipboardList } from 'lucide-react';

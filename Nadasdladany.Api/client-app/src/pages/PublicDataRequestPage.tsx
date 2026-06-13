@@ -43,7 +43,6 @@ export const PublicDataRequestPage = () => {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
-                    {/* Tájékoztató szöveg blokk */}
                     <div className="lg:col-span-1 bg-secondary/40 p-8 rounded-[32px] border border-gray-100 space-y-6 text-sm text-primary leading-relaxed">
                         <h3 className="font-serif font-bold text-lg flex items-center gap-2"><Info size={18} className="text-accent" /> Tájékoztató</h3>
                         <p>
@@ -57,7 +56,6 @@ export const PublicDataRequestPage = () => {
                         </p>
                     </div>
 
-                    {/* Online Űrlap */}
                     <div className="lg:col-span-2 bg-white p-8 md:p-10 rounded-[40px] border border-gray-100 shadow-sm">
                         {success ? (
                             <div className="text-center py-12 space-y-4 animate-in zoom-in-95 duration-300">

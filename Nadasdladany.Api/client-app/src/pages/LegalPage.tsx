@@ -14,7 +14,6 @@ export const LegalPage = () => {
                     <p className="text-gray-500 text-sm">Hivatalos impresszum, adatvédelmi előírások és akadálymentesítési tájékoztató.</p>
                 </div>
 
-                {/* Navigációs fülek */}
                 <div className="flex flex-wrap justify-center gap-2 mb-12 border-b border-gray-100 pb-4">
                     <button
                         onClick={() => setActiveTab('impresszum')}
@@ -36,10 +35,8 @@ export const LegalPage = () => {
                     </button>
                 </div>
 
-                {/* TARTALMAK */}
                 <div className="bg-white p-8 md:p-12 rounded-[40px] border border-gray-100 shadow-sm prose prose-sm max-w-none text-primary leading-relaxed">
 
-                    {/* 1. IMPRESSZUM */}
                     {activeTab === 'impresszum' && (
                         <div className="animate-in fade-in duration-300 space-y-6">
                             <h2 className="font-serif text-2xl font-bold text-primary border-b border-gray-50 pb-3">Hivatalos Impresszum</h2>
@@ -63,7 +60,6 @@ export const LegalPage = () => {
                         </div>
                     )}
 
-                    {/* 2. GDPR ADATVÉDELEM */}
                     {activeTab === 'gdpr' && (
                         <div className="animate-in fade-in duration-300 space-y-6">
                             <h2 className="font-serif text-2xl font-bold text-primary border-b border-gray-50 pb-3">Adatkezelési Tájékoztató (Kivonat)</h2>
@@ -79,7 +75,6 @@ export const LegalPage = () => {
                         </div>
                     )}
 
-                    {/* 3. AKADÁLYMENTESÍTÉS */}
                     {activeTab === 'accessibility' && (
                         <div className="animate-in fade-in duration-300 space-y-6">
                             <h2 className="font-serif text-2xl font-bold text-primary border-b border-gray-50 pb-3">Akadálymentesítési Nyilatkozat</h2>

@@ -172,7 +172,6 @@ export const InstitutionForm = ({ onClose, onSubmit, loading }: Props) => {
 
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Részletes bemutatkozás és információk (Aloldal tartalom)</label>
-                        {/* JAVÍTÁS: A nem létező RichTextEditor helyett egy robusztus textarea-t használunk */}
                         <textarea
                             rows={8}
                             className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm leading-relaxed"

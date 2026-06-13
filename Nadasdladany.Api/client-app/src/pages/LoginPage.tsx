@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LogIn, Lock, Mail, Loader2 } from 'lucide-react';
+import { LogIn, Lock, Mail, Loader2, Eye, EyeOff } from 'lucide-react';
 import { authService } from '../api/authService';
 
 export const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+
+    const handleShowPassword = () => setShowPassword(true);
+    const handleHidePassword = () => setShowPassword(false);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -56,14 +60,27 @@ export const LoginPage = () => {
 
                     <div className="relative">
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-accent" size={18} />
+
                         <input
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             required
                             placeholder="Jelszó"
-                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-white outline-none focus:border-accent transition-all"
+                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-white outline-none focus:border-accent transition-all"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
+
+                        <button
+                            type="button"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors cursor-pointer select-none"
+                            onMouseDown={handleShowPassword}
+                            onMouseUp={handleHidePassword}
+                            onMouseLeave={handleHidePassword}
+                            onTouchStart={handleShowPassword}
+                            onTouchEnd={handleHidePassword}
+                        >
+                            {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                        </button>
                     </div>
 
                     {error && <p className="text-red-400 text-sm text-center font-medium">{error}</p>}

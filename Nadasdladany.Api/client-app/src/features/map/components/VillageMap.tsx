@@ -1,11 +1,10 @@
-import { type ReactNode } from 'react'; // Fix: 'type' import
+import { type ReactNode } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { Landmark, Cross, Building } from 'lucide-react'; // Fix: Building felmozgatva
+import { Landmark, Cross, Building } from 'lucide-react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-// Egyedi ikon készítése Lucide ikonokból
 const createCustomIcon = (iconNode: ReactNode) => {
     const html = renderToStaticMarkup(
         <div className="p-2 bg-white rounded-full shadow-lg border-2 border-[#c5a35a] text-[#1a2e1a]">
@@ -36,7 +35,6 @@ export const VillageMap = () => {
                 style={{ height: '100%', width: '100%' }}
                 scrollWheelZoom={false}
             >
-                {/* Modern, világos "Muted" térkép stílus (CartoDB Positron) */}
                 <TileLayer
                     url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

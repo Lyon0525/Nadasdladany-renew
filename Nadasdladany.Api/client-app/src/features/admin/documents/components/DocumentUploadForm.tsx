@@ -39,7 +39,6 @@ export const DocumentUploadForm = ({ onClose, onSuccess }: Props) => {
             const response = await fetch('/api/documents', {
                 method: 'POST',
                 body: formData
-                // Megjegyzés: Ha az apiClient-et használod, akkor: await documentService.uploadDocument(formData);
             });
 
             if (response.ok) {
@@ -60,7 +59,6 @@ export const DocumentUploadForm = ({ onClose, onSuccess }: Props) => {
         <div className="fixed inset-0 bg-primary/20 backdrop-blur-sm z-50 flex justify-end animate-in fade-in duration-200">
             <div className="w-full max-w-lg bg-white h-full p-8 shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300">
 
-                {/* Fejléc */}
                 <div className="flex justify-between items-center border-b border-gray-100 pb-4">
                     <div>
                         <h3 className="text-xl font-serif font-bold text-primary">Új dokumentum feltöltése</h3>
@@ -71,7 +69,6 @@ export const DocumentUploadForm = ({ onClose, onSuccess }: Props) => {
                     </button>
                 </div>
 
-                {/* Űrlap törzs */}
                 <form onSubmit={handleSubmit} className="flex-1 py-6 space-y-6 overflow-y-auto">
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Dokumentum címe *</label>
@@ -105,7 +102,6 @@ export const DocumentUploadForm = ({ onClose, onSuccess }: Props) => {
                         />
                     </div>
 
-                    {/* Fájlválasztó zóna */}
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Fájl kiválasztása *</label>
                         <div className="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center hover:border-accent transition-colors bg-secondary/20 relative">
@@ -123,7 +119,6 @@ export const DocumentUploadForm = ({ onClose, onSuccess }: Props) => {
                     </div>
                 </form>
 
-                {/* Akció gombok */}
                 <div className="border-t border-gray-100 pt-4 flex gap-4">
                     <button
                         type="button" onClick={onClose}

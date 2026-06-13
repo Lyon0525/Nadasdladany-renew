@@ -2,9 +2,6 @@
 
 namespace Nadasdladany.Domain.Entities;
 
-/// <summary>
-/// Represents a photo album in the gallery.
-/// </summary>
 public class GalleryAlbum : BaseAuditableEntity
 {
     public required string Title { get; set; }

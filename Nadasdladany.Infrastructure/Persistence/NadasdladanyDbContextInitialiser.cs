@@ -54,14 +54,12 @@ public class NadasdladanyDbContextInitialiser
 
     private async Task TrySeedAsync()
     {
-        // 1. Szerepkörök
         var adminRole = new IdentityRole("Administrator");
         if (_roleManager.Roles.All(r => r.Name != adminRole.Name))
         {
             await _roleManager.CreateAsync(adminRole);
         }
 
-        // 2. Admin felhasználó
         var adminUser = new ApplicationUser { UserName = "admin@nadasdladany.hu", Email = "admin@nadasdladany.hu", EmailConfirmed = true };
         if (_userManager.Users.All(u => u.UserName != adminUser.UserName))
         {
@@ -69,7 +67,6 @@ public class NadasdladanyDbContextInitialiser
             await _userManager.AddToRoleAsync(adminUser, adminRole.Name!);
         }
 
-        // 3. Kategóriák
         if (!_context.Categories.Any())
         {
             _context.Categories.AddRange(
@@ -87,15 +84,31 @@ public class NadasdladanyDbContextInitialiser
                 new DocumentCategory { Name = "Hivatali nyomtatványok / Űrlapok", Slug = "hivatali-nyomtatvanyok" },
                 new DocumentCategory { Name = "Pályázati dokumentációk", Slug = "palyazati-dokumentaciok" },
                 new DocumentCategory { Name = "Közérdekű adatok / Jegyzőkönyvek", Slug = "kozerdeku-adatok" },
-                new DocumentCategory { Name = "Választási közlemények és határozatok", Slug = "valasztasok" } // 🌟 ÚJ KATEGÓRIA A VÁLASZTÁSOKNAK
+                new DocumentCategory { Name = "Választási közlemények és határozatok", Slug = "valasztasok" }
             );
+            await _context.SaveChangesAsync();
+        }
+
+        if (!_context.Events.Any())
+        {
+            _context.Events.Add(new Event
+            {
+                Title = "Nádasdladányi Falunap és Kulturális Fesztivál",
+                Slug = "nadasdladanyi-falunap-2026",
+                Description = "Szeretettel várunk minden kedves helyi lakost és idelátogató vendéget az év legnagyobb közösségi rendezvényére a Kastélypark melletti rendezvénytéren!",
+                Location = "8145 Nádasdladány, Rendezvénytér (Kastélypark mellett)",
+                StartDate = DateTime.UtcNow.AddDays(30),
+                IsAllDay = true,
+                Organizer = "Önkormányzat",
+                IsPublished = true
+            });
+
             await _context.SaveChangesAsync();
         }
 
         if (!_context.Organizations.Any())
         {
             _context.Organizations.AddRange(
-                // --- CIVIL SZERVEZETEK & KLUBOK (Type = 0: CivilSzervezet) ---
                 new Organization
                 {
                     Name = "Nádasdladányi Polgárőr Egyesület",
@@ -139,7 +152,6 @@ public class NadasdladanyDbContextInitialiser
                     IsPublished = true
                 },
 
-                // --- EGYHÁZAK (Type = 1: Egyhaz) ---
                 new Organization
                 {
                     Name = "Római Katolikus Plébánia - Nádasdladány",
@@ -256,7 +268,6 @@ public class NadasdladanyDbContextInitialiser
             await _context.SaveChangesAsync();
         }
 
-        // 4. Mintahír a kastély képével
         if (!_context.Articles.Any())
         {
             var cat = await _context.Categories.FirstAsync();
@@ -269,12 +280,11 @@ public class NadasdladanyDbContextInitialiser
                 PublishedDate = DateTime.Now,
                 IsPublished = true,
                 CategoryId = cat.Id,
-                FeaturedImageUrl = "/img/castle/DJI_0143_retus2.jpg" // Meglévő kép használata
+                FeaturedImageUrl = "/img/castle/DJI_0143_retus2.jpg"
             });
             await _context.SaveChangesAsync();
         }
 
-        // 5. Polgármester (Kép nélkül indítjuk, a React kezeli a fallback-et)
         if (!_context.Representatives.Any())
         {
             _context.Representatives.Add(new Representative
@@ -289,7 +299,6 @@ public class NadasdladanyDbContextInitialiser
             await _context.SaveChangesAsync();
         }
 
-        // 6. Alapbeállítások
         if (!_context.SiteSettings.Any())
         {
             _context.SiteSettings.AddRange(

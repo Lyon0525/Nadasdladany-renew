@@ -1,6 +1,5 @@
 import { type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// JAVÍTÁS: Egy sorba vontuk a Lucide ikonok importját a duplikáció elkerülésére
 import {
     LayoutDashboard,
     Newspaper,
@@ -14,7 +13,7 @@ import {
     Briefcase,
     Mail,
     ShieldAlert,
-    UserCheck // 🌟 ÚJ IKON: A képviselőknek és hivatali apparátusnak
+    UserCheck
 } from 'lucide-react';
 import { authService } from '../api/authService';
 
@@ -32,10 +31,8 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
         { name: 'Hírek kezelése', path: '/admin/news', icon: <Newspaper size={20} /> },
         { name: 'Pályázatok', path: '/admin/projects', icon: <Award size={20} /> },
         { name: 'Intézmények', path: '/admin/institutions', icon: <Building2 size={20} /> },
-
-        // 🌟 ÚJ MENÜPONT: Bekötve a Képviselő-testület, a bizottságok és a hivatali dolgozók kezelőfelülete
+        { name: 'Polgármesteri köszöntő', path: '/admin/welcome', icon: <UserCheck size={20} /> },
         { name: 'Képviselők & Hivatal', path: '/admin/representatives', icon: <UserCheck size={20} /> },
-
         { name: 'Civil & Egyházak', path: '/admin/organizations', icon: <Users size={20} /> },
         { name: 'Álláshirdetések', path: '/admin/careers', icon: <Briefcase size={20} /> },
         { name: 'Dokumentumok', path: '/admin/documents', icon: <FileText size={20} /> },

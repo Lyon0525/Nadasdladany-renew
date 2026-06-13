@@ -3,9 +3,6 @@ using Nadasdladany.Domain.Enums;
 
 namespace Nadasdladany.Domain.Entities;
 
-/// <summary>
-/// Represents a member of the representative body or municipal staff.
-/// </summary>
 public class Representative : BaseAuditableEntity
 {
     public required string Name { get; set; }

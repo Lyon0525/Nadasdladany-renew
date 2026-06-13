@@ -3,9 +3,6 @@ using Nadasdladany.Application.Common.Exceptions;
 
 namespace Nadasdladany.Api.Middlewares;
 
-/// <summary>
-/// Global exception handler middleware to catch application-specific and unhandled exceptions.
-/// </summary>
 public class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
@@ -39,7 +36,7 @@ public class ExceptionHandlingMiddleware
             title = GetTitle(exception),
             status = statusCode,
             detail = exception.Message,
-            errors = GetErrors(exception) // Csak validációs hibáknál töltődik ki
+            errors = GetErrors(exception)
         };
 
         context.Response.ContentType = "application/json";

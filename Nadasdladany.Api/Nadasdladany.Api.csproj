@@ -4,7 +4,6 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- MODOSÍTVA: Most már az API-n belül van a mappa -->
     <SpaRoot>client-app\</SpaRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
   </PropertyGroup>
@@ -29,7 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Biztosítjuk, hogy a VS ne próbálja meg a kliens fájljait C# tartalomként kezelni fejlesztés közben -->
     <Content Remove="$(SpaRoot)**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
   </ItemGroup>
@@ -40,14 +38,10 @@
     <Folder Include="client-app\public\reps\" />
   </ItemGroup>
 
-  <!-- PUBLISH FOLYAMAT ÖSSZEKÖTÉSE -->
   <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
-    <!-- 1. Node.js csomagok telepítése -->
     <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
-    <!-- 2. React projekt buildelése (Vite esetén 'dist', CRA esetén 'build') -->
     <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build" />
 
-    <!-- 3. A buildelt fájlok (dist) bemásolása a wwwroot-ba a publish mappán belül -->
     <ItemGroup>
       <DistFiles Include="$(SpaRoot)dist\**" />
       <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">

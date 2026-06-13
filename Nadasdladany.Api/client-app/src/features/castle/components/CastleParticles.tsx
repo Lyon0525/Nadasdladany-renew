@@ -26,7 +26,6 @@ const ParticleField = () => {
     return (
         <points ref={mesh}>
             <bufferGeometry>
-                {/* JAVÍTÁS: Az args prop-ban adjuk át a tömböt és a méretet (3 = x,y,z) */}
                 <bufferAttribute
                     attach="attributes-position"
                     args={[particles, 3]}

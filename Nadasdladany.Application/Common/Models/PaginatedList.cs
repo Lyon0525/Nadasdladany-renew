@@ -2,10 +2,6 @@
 
 namespace Nadasdladany.Application.Common.Models;
 
-/// <summary>
-/// A generic wrapper for lists that includes pagination metadata.
-/// </summary>
-/// <typeparam name="T">The type of the items in the list.</typeparam>
 public class PaginatedList<T>
 {
     public IReadOnlyCollection<T> Items { get; }
@@ -25,9 +21,6 @@ public class PaginatedList<T>
 
     public bool HasNextPage => PageNumber < TotalPages;
 
-    /// <summary>
-    /// Creates a paginated list from an IQueryable source.
-    /// </summary>
     public static async Task<PaginatedList<T>> CreateAsync(IQueryable<T> source, int pageNumber, int pageSize)
     {
         var count = await source.CountAsync();

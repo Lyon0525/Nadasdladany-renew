@@ -67,7 +67,7 @@ export const DocumentForm = ({ onClose, onSubmit, loading }: Props) => {
                             <option value="2">Hivatali nyomtatványok / Űrlapok</option>
                             <option value="3">Pályázati dokumentációk</option>
                             <option value="4">Közérdekű adatok / Jegyzőkönyvek</option>
-                            <option value="5">Választási közlemények és határozatok</option> {/* 🌟 ÚJ OPTION */}
+                            <option value="5">Választási közlemények és határozatok</option>
                         </select>
                     </div>
 

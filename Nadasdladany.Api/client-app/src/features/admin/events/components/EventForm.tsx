@@ -18,7 +18,6 @@ export const EventForm = ({ onClose, onSubmit, loading }: Props) => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // A backend ISO DateTime formátumot vár a StartDate mezőre
         onSubmit({
             title,
             location,

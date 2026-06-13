@@ -35,7 +35,6 @@ export const ContactPage = () => {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-20">
-                    {/* INFO KÁRTYÁK */}
                     <div className="lg:col-span-1 space-y-6">
                         {contactInfo.map((info, i) => (
                             <motion.a
@@ -57,7 +56,6 @@ export const ContactPage = () => {
                         ))}
                     </div>
 
-                    {/* ÜZENETKÜLDŐ ŰRLAP */}
                     <div className="lg:col-span-2">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -140,7 +138,6 @@ export const ContactPage = () => {
                     </div>
                 </div>
 
-                {/* GOOGLE MAPS TÉRKÉP */}
                 <div className="w-full h-[500px] rounded-[40px] overflow-hidden shadow-sm border border-gray-100">
                     <iframe
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4613.1938729305475!2d18.241105251684356!3d47.13787963541213!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4769f30601e12161%3A0xdbb0ef0f26d26421!2sPolg%C3%A1rmesteri%20Hivatal%20N%C3%A1dasdlad%C3%A1ny!5e1!3m2!1shu!2shu!4v1715110000000!5m2!1shu!2shu"

@@ -42,7 +42,6 @@ export const InstitutionForm = ({ onClose, onSubmit, loading }: Props) => {
         <div className="fixed inset-0 bg-primary/20 backdrop-blur-sm z-50 flex justify-end animate-in fade-in duration-200">
             <div className="w-full max-w-xl bg-white h-full p-8 shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300">
 
-                {/* Fejléc */}
                 <div className="flex justify-between items-center border-b border-gray-100 pb-4">
                     <div>
                         <h3 className="text-xl font-serif font-bold text-primary">Új intézmény rögzítése</h3>
@@ -53,7 +52,6 @@ export const InstitutionForm = ({ onClose, onSubmit, loading }: Props) => {
                     </button>
                 </div>
 
-                {/* Űrlap törzs */}
                 <form onSubmit={handleFormSubmit} className="flex-1 py-6 space-y-5 overflow-y-auto pr-1">
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Intézmény Hivatalos Neve *</label>
@@ -118,7 +116,6 @@ export const InstitutionForm = ({ onClose, onSubmit, loading }: Props) => {
                     </div>
                 </form>
 
-                {/* Akció gombok */}
                 <div className="border-t border-gray-100 pt-4 flex gap-4">
                     <button
                         type="button" onClick={onClose} disabled={loading}

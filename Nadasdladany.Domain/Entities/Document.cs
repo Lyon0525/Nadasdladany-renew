@@ -2,9 +2,6 @@
 
 namespace Nadasdladany.Domain.Entities;
 
-/// <summary>
-/// Represents a downloadable municipal document.
-/// </summary>
 public class Document : BaseAuditableEntity
 {
     public required string Title { get; set; }

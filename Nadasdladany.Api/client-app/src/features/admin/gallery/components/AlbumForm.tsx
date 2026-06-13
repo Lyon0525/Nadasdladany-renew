@@ -32,11 +32,10 @@ export const AlbumForm = ({ onClose, onSuccess }: Props) => {
         formData.append('Name', name);
         formData.append('Description', description);
         if (coverImage) {
-            formData.append('CoverImage', coverImage); // A backend parancs így várja
+            formData.append('CoverImage', coverImage);
         }
 
         try {
-            // Közvetlen hívás a backend galéria kontrollerére
             const response = await fetch('/api/gallery/albums', {
                 method: 'POST',
                 body: formData
@@ -60,7 +59,6 @@ export const AlbumForm = ({ onClose, onSuccess }: Props) => {
         <div className="fixed inset-0 bg-primary/20 backdrop-blur-sm z-50 flex justify-end animate-in fade-in duration-200">
             <div className="w-full max-w-md bg-white h-full p-8 shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300">
 
-                {/* Fejléc */}
                 <div className="flex justify-between items-center border-b border-gray-100 pb-4">
                     <div>
                         <h3 className="text-xl font-serif font-bold text-primary">Új fotóalbum létrehozása</h3>
@@ -71,7 +69,6 @@ export const AlbumForm = ({ onClose, onSuccess }: Props) => {
                     </button>
                 </div>
 
-                {/* Űrlap mezők */}
                 <form onSubmit={handleSubmit} className="flex-1 py-6 space-y-6 overflow-y-auto">
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Album megnevezése *</label>
@@ -91,7 +88,6 @@ export const AlbumForm = ({ onClose, onSuccess }: Props) => {
                         />
                     </div>
 
-                    {/* Album borítókép választó */}
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Album borítóképe</label>
                         <div className="relative h-28 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center group hover:border-accent transition-all overflow-hidden bg-white">
@@ -112,7 +108,6 @@ export const AlbumForm = ({ onClose, onSuccess }: Props) => {
                     </div>
                 </form>
 
-                {/* Akció gombok */}
                 <div className="border-t border-gray-100 pt-4 flex gap-4">
                     <button
                         type="button" onClick={onClose}

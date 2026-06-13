@@ -40,14 +40,12 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean, onClose:
         <AnimatePresence>
             {isOpen && (
                 <div className="fixed inset-0 z-[200] flex items-start justify-center pt-[15vh] px-4">
-                    {/* Háttér homályosítás */}
                     <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         onClick={onClose}
                         className="absolute inset-0 bg-primary/40 backdrop-blur-sm"
                     />
 
-                    {/* Kereső doboz */}
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: -20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}

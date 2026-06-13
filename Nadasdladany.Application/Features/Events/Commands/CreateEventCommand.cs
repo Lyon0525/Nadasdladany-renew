@@ -25,7 +25,6 @@ public class CreateEventCommandValidator : AbstractValidator<CreateEventCommand>
         RuleFor(v => v.Title).MaximumLength(150).NotEmpty();
         RuleFor(v => v.StartDate).NotEmpty();
 
-        // Üzleti szabály: A befejezés nem lehet a kezdés előtt
         RuleFor(v => v.EndDate)
             .GreaterThanOrEqualTo(v => v.StartDate)
                 .When(v => v.EndDate.HasValue)
