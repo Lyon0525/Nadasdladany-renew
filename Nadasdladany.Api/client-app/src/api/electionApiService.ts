@@ -1,53 +1,19 @@
-export interface ElectionResult {
-    year: number;
-    type: string;
-    registeredVoters: number;
-    votedCount: number;
-    turnoutPercentage: number;
-    results: {
-        candidateName: string;
-        organization: string;
-        votesCount: number;
-        percentage: number;
-        isWinner: boolean;
-    }[];
-}
+import apiClient from './apiClient';
+import { type ElectionResult } from '../pages/ElectionsPage';
 
 export const electionApiService = {
     getNadasdladanyResults: async (year: number): Promise<ElectionResult | null> => {
         try {
-            return electionApiService.getMockData(year);
+            const response = await apiClient.get<ElectionResult>(`/elections/${year}`);
+            return response.data;
         } catch (error) {
-            console.error("Hiba a választási API elérésekor, tartalék adatok betöltése...", error);
-            return electionApiService.getMockData(year);
+            console.error("Hiba a választási adatok letöltésekor:", error);
+            return null;
         }
     },
 
-    getMockData: (year: number): ElectionResult | null => {
-        const data: Record<number, ElectionResult> = {
-            2024: {
-                year: 2024,
-                type: "Helyi Önkormányzati Választások",
-                registeredVoters: 1420,
-                votedCount: 895,
-                turnoutPercentage: 63.03,
-                results: [
-                    { candidateName: "Pálfi Kristóf", organization: "Független", votesCount: 520, percentage: 58.1, isWinner: true },
-                    { candidateName: "Kovács István", organization: "Független", votesCount: 375, percentage: 41.9, isWinner: false }
-                ]
-            },
-            2019: {
-                year: 2019,
-                type: "Helyi Önkormányzati Választások",
-                registeredVoters: 1445,
-                votedCount: 785,
-                turnoutPercentage: 54.33,
-                results: [
-                    { candidateName: "Tőke László", organization: "Független", votesCount: 455, percentage: 57.9, isWinner: true },
-                    { candidateName: "Nagy Sándor", organization: "Független", votesCount: 330, percentage: 42.1, isWinner: false }
-                ]
-            }
-        };
-        return data[year] || null;
+    saveElectionResults: async (data: any): Promise<number> => {
+        const response = await apiClient.post<number>('/elections', data);
+        return response.data;
     }
 };

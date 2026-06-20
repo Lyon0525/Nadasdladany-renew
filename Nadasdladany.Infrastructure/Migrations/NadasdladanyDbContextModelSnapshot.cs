@@ -368,6 +368,39 @@ namespace Nadasdladany.Infrastructure.Migrations
                     b.ToTable("DocumentCategories");
                 });
 
+            modelBuilder.Entity("Nadasdladany.Domain.Entities.ElectionResultEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CandidatesJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RegisteredVoters")
+                        .HasColumnType("int");
+
+                    b.Property<double>("TurnoutPercentage")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("VotedCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Elections");
+                });
+
             modelBuilder.Entity("Nadasdladany.Domain.Entities.Event", b =>
                 {
                     b.Property<int>("Id")
@@ -1112,20 +1145,35 @@ namespace Nadasdladany.Infrastructure.Migrations
 
             modelBuilder.Entity("Nadasdladany.Domain.Entities.SiteSetting", b =>
                 {
-                    b.Property<string>("SettingKey")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CoatOfArmsImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CoatOfArmsText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HistoryText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LandmarksText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MayorImageUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MayorName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SettingValue")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<string>("WelcomeText")
                         .IsRequired()
@@ -1133,9 +1181,10 @@ namespace Nadasdladany.Infrastructure.Migrations
 
                     b.Property<string>("WelcomeTitle")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
-                    b.HasKey("SettingKey");
+                    b.HasKey("Id");
 
                     b.ToTable("SiteSettings");
                 });
@@ -1174,6 +1223,41 @@ namespace Nadasdladany.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UsefulLinks");
+                });
+
+            modelBuilder.Entity("Nadasdladany.Domain.Entities.VillageLocation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IconType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VillageLocations");
                 });
 
             modelBuilder.Entity("Nadasdladany.Infrastructure.Identity.ApplicationUser", b =>

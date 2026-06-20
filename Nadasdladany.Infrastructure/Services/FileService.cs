@@ -1,43 +1,45 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Nadasdladany.Application.Interfaces.Common;
 
 namespace Nadasdladany.Infrastructure.Services;
 
 public class FileService : IFileService
 {
-    private readonly IWebHostEnvironment _webHostEnvironment;
+    private readonly string _baseStoragePath;
 
-    public FileService(IWebHostEnvironment webHostEnvironment)
+    public FileService()
     {
-        _webHostEnvironment = webHostEnvironment;
+        _baseStoragePath = Path.Combine(Directory.GetCurrentDirectory(), "app_data_uploads");
     }
 
-    public async Task<string?> UploadFileAsync(IFormFile? file, string folderName)
+    public async Task<string> UploadFileAsync(IFormFile file, string subFolder)
     {
-        if (file == null || file.Length == 0) return null;
+        if (file == null || file.Length == 0) return string.Empty;
 
-        string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", folderName);
+        var targetFolder = Path.Combine(_baseStoragePath, subFolder);
 
-        if (!Directory.Exists(uploadsFolder))
-            Directory.CreateDirectory(uploadsFolder);
+        if (!Directory.Exists(targetFolder))
+        {
+            Directory.CreateDirectory(targetFolder);
+        }
 
-        string uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
-        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+        var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+        var filePath = Path.Combine(targetFolder, fileName);
 
         using (var fileStream = new FileStream(filePath, FileMode.Create))
         {
             await file.CopyToAsync(fileStream);
         }
 
-        return $"/uploads/{folderName}/{uniqueFileName}";
+        return $"/uploads/{subFolder}/{fileName}";
     }
 
-    public void DeleteFile(string? relativePath)
+    public void DeleteFile(string relativePath)
     {
         if (string.IsNullOrEmpty(relativePath)) return;
 
-        string fullPath = Path.Combine(_webHostEnvironment.WebRootPath, relativePath.TrimStart('/'));
+        var cleanPath = relativePath.Replace("/uploads/", "").Replace("uploads/", "").Replace("/", Path.DirectorySeparatorChar.ToString());
+        var fullPath = Path.Combine(_baseStoragePath, cleanPath);
 
         if (File.Exists(fullPath))
         {

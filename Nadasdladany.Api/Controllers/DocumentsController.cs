@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Nadasdladany.Application.Common.Models;
 using Nadasdladany.Application.Features.Documents.Commands;
 using Nadasdladany.Application.Features.Documents.DTOs;
@@ -16,12 +17,14 @@ public class DocumentsController : ApiControllerBase
 
     [HttpPost]
     [Consumes("multipart/form-data")]
+    [Authorize]
     public async Task<ActionResult<int>> Create([FromForm] CreateDocumentCommand command)
     {
         return await Mediator.Send(command);
     }
 
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<ActionResult> Delete(int id)
     {
         await Mediator.Send(new DeleteDocumentCommand(id));

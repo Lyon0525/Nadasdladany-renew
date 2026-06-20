@@ -6,6 +6,7 @@ import { NewsDetailPage } from './pages/NewsDetailPage';
 import { CastlePage } from './pages/CastlePage';
 import { MunicipalityPage } from './pages/MunicipalityPage';
 import { InstitutionsPage } from './pages/InstitutionsPage';
+import { InstitutionDetailPage } from './pages/InstitutionDetailPage';
 import { ContactPage } from './pages/ContactPage';
 import { GalleryPage } from './pages/GalleryPage';
 import { AlbumDetailPage } from './pages/AlbumDetailPage';
@@ -34,6 +35,12 @@ import { AdminWelcomePage } from './pages/admin/AdminWelcomePage';
 import { NewsPage } from './pages/NewsPage';
 import { EventsPage } from './pages/EventsPage';
 import { EventDetailPage } from './pages/EventDetailPage';
+import { RepresentativeDetailPage } from './pages/RepresentativeDetailPage';
+import { DocumentsPage } from './pages/DocumentsPage';
+import { AdminElectionsPage } from './pages/admin/AdminElectionsPage';
+import { AdminUsersPage } from './pages/admin/AdminUsersPage';
+import { AboutTownPage } from './pages/AboutTownPage';
+import { AdminMapPage } from './pages/admin/AdminMapPage';
 
 function App() {
     return (
@@ -46,7 +53,10 @@ function App() {
                     <Route path="/kastely" element={<CastlePage />} />
                     <Route path="/onkormanyzat" element={<MunicipalityPage />} />
                     <Route path="/intezmenyek" element={<InstitutionsPage />} />
+                    <Route path="/intezmenyek/:slug" element={<InstitutionDetailPage />} />
                     <Route path="/kapcsolat" element={<ContactPage />} />
+                    <Route path="/onkormanyzat" element={<MunicipalityPage />} />
+                    <Route path="/onkormanyzat/:id" element={<RepresentativeDetailPage />} />
                     <Route path="/galeria" element={<GalleryPage />} />
                     <Route path="/galeria/:slug" element={<AlbumDetailPage />} />
                     <Route path="/esemenyek" element={<EventsPage />} />
@@ -55,12 +65,13 @@ function App() {
                     <Route path="/palyazatok" element={<ProjectsPage />} />
                     <Route path="/valasztasok" element={<ElectionsPage />} />
                     <Route path="/kozossegek" element={<OrganizationsPage />} />
-                    <Route path="/intezmenyek/:slug" element={<InstitutionsPage />} />
                     <Route path="/allasok" element={<CareersPage />} />
                     <Route path="/ugyintezes" element={<EAdministrationPage />} />
                     <Route path="/kozerdeku-adatigenyles" element={<PublicDataRequestPage />} />
                     <Route path="/hivatal" element={<OfficePage />} />
                     <Route path="/jogi-nyilatkozatok" element={<LegalPage />} />
+                    <Route path="/dokumentumok" element={<DocumentsPage />} />
+                    <Route path="/a-kozsegrol" element={<AboutTownPage />} />
 
                     <Route element={<ProtectedRoute />}>
                         <Route path="/admin/dashboard" element={<DashboardPage />} />
@@ -76,6 +87,9 @@ function App() {
                         <Route path="/admin/data-requests" element={<AdminDataRequestsPage />} />
                         <Route path="/admin/representatives" element={<AdminOrganizationsPage />} />
                         <Route path="/admin/welcome" element={<AdminWelcomePage />} />
+                        <Route path="/admin/elections" element={<AdminElectionsPage />} />
+                        <Route path="/admin/users" element={<AdminUsersPage />} />
+                        <Route path="/admin/map" element={<AdminMapPage />} />
                     </Route>
                 </Routes>
 

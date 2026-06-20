@@ -45,6 +45,8 @@ public class NadasdladanyDbContext : IdentityDbContext<ApplicationUser>, IApplic
     public DbSet<SiteSetting> SiteSettings => Set<SiteSetting>();
     public DbSet<OfficeSetting> OfficeSettings => Set<OfficeSetting>();
     public DbSet<OfficeStaff> OfficeStaff => Set<OfficeStaff>();
+    public DbSet<ElectionResultEntity> Elections => Set<ElectionResultEntity>();
+    public DbSet<VillageLocation> VillageLocations => Set<VillageLocation>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

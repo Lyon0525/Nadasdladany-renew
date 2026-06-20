@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Nadasdladany.Application.Features.PublicDataRequests.Commands;
 using Nadasdladany.Application.Features.PublicDataRequests.DTOs;
 using Nadasdladany.Application.Features.PublicDataRequests.Queries;
@@ -14,6 +15,7 @@ public class PublicDataRequestsController : ApiControllerBase
     }
 
     [HttpGet]
+    [Authorize]
     public async Task<ActionResult<List<PublicDataRequestDto>>> GetAll()
     {
         return await Mediator.Send(new GetPublicDataRequestsQuery());

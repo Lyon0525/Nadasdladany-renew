@@ -26,6 +26,7 @@ public interface IApplicationDbContext
     DbSet<SiteSetting> SiteSettings { get; }
     DbSet<OfficeSetting> OfficeSettings { get; }
     DbSet<OfficeStaff> OfficeStaff { get; }
-
+    DbSet<ElectionResultEntity> Elections { get; }
+    DbSet<VillageLocation> VillageLocations { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom'; // 🌟 ÚJ IMPORT
 import { MainLayout } from '../layouts/MainLayout';
 import { municipalityService } from '../api/municipalityService';
 import { type Representative } from '../types/Municipality';
 import { getImageUrl } from '../lib/imageUtils';
-import { Users, User, Shield, Landmark, ClipboardList } from 'lucide-react';
+import { Users, User, Shield, Landmark, ClipboardList, ArrowRight } from 'lucide-react';
 
 export const MunicipalityPage = () => {
     const [representatives, setRepresentatives] = useState<Representative[]>([]);
@@ -53,14 +54,14 @@ export const MunicipalityPage = () => {
                     <div className="inline-flex bg-secondary p-1.5 rounded-full border border-gray-100">
                         <button
                             onClick={() => setActiveSection('board')}
-                            className={`flex items-center gap-2 px-8 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${activeSection === 'board' ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:text-primary'
+                            className={`flex items-center gap-2 px-8 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${activeSection === 'board' ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:text-primary'
                                 }`}
                         >
                             <Users size={16} /> Képviselő-testület
                         </button>
                         <button
                             onClick={() => setActiveSection('committees')}
-                            className={`flex items-center gap-2 px-8 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${activeSection === 'committees' ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:text-primary'
+                            className={`flex items-center gap-2 px-8 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${activeSection === 'committees' ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:text-primary'
                                 }`}
                         >
                             <ClipboardList size={16} /> Bizottságok Működése
@@ -73,50 +74,74 @@ export const MunicipalityPage = () => {
                 ) : activeSection === 'board' ? (
                     <div className="space-y-20 animate-in fade-in duration-300">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+                            {/* 🌟 POLGÁRMESTER KÁRTYA ÁTALAKÍTÁSA LINKKÉ */}
                             {mayor && (
-                                <div className="bg-white rounded-[40px] border border-gray-100 p-8 shadow-sm text-center space-y-4 group hover:shadow-md transition-shadow">
-                                    <div className="w-40 h-40 mx-auto rounded-full overflow-hidden bg-secondary border-2 border-accent relative">
-                                        {mayor.imageUrl ? (
-                                            <img src={getImageUrl(mayor.imageUrl)} alt={mayor.name} className="w-full h-full object-cover" />
-                                        ) : <User size={64} className="text-primary/10 absolute inset-0 m-auto" />}
+                                <Link to={`/onkormanyzat/${mayor.id}`} className="block group">
+                                    <div className="bg-white rounded-[40px] border border-gray-100 p-8 shadow-sm text-center space-y-4 hover:shadow-xl hover:border-accent/30 transition-all duration-300 h-full flex flex-col justify-between">
+                                        <div className="space-y-4">
+                                            <div className="w-40 h-40 mx-auto rounded-full overflow-hidden bg-secondary border-2 border-accent relative group-hover:scale-105 transition-transform duration-500">
+                                                {mayor.imageUrl ? (
+                                                    <img src={getImageUrl(mayor.imageUrl)} alt={mayor.name} className="w-full h-full object-cover" />
+                                                ) : <User size={64} className="text-primary/10 absolute inset-0 m-auto" />}
+                                            </div>
+                                            <div>
+                                                <span className="text-[10px] uppercase font-bold tracking-widest text-accent">Polgármester</span>
+                                                <h3 className="text-2xl font-serif font-bold text-primary mt-1 group-hover:text-accent transition-colors">{mayor.name}</h3>
+                                            </div>
+                                        </div>
+                                        <span className="text-xs font-bold uppercase tracking-wider text-gray-400 group-hover:text-accent inline-flex items-center justify-center gap-1 pt-2">
+                                            Adatlap megtekintése <ArrowRight size={14} />
+                                        </span>
                                     </div>
-                                    <div>
-                                        <span className="text-[10px] uppercase font-bold tracking-widest text-accent">Polgármester</span>
-                                        <h3 className="text-2xl font-serif font-bold text-primary mt-1">{mayor.name}</h3>
-                                    </div>
-                                </div>
+                                </Link>
                             )}
 
+                            {/* 🌟 ALPOLGÁRMESTER KÁRTYA ÁTALAKÍTÁSA LINKKÉ */}
                             {viceMayor && (
-                                <div className="bg-white rounded-[40px] border border-gray-100 p-8 shadow-sm text-center space-y-4 group hover:shadow-md transition-shadow">
-                                    <div className="w-40 h-40 mx-auto rounded-full overflow-hidden bg-secondary border-2 border-gray-200 relative">
-                                        {viceMayor.imageUrl ? (
-                                            <img src={getImageUrl(viceMayor.imageUrl)} alt={viceMayor.name} className="w-full h-full object-cover" />
-                                        ) : <User size={64} className="text-primary/10 absolute inset-0 m-auto" />}
+                                <Link to={`/onkormanyzat/${viceMayor.id}`} className="block group">
+                                    <div className="bg-white rounded-[40px] border border-gray-100 p-8 shadow-sm text-center space-y-4 hover:shadow-xl hover:border-accent/30 transition-all duration-300 h-full flex flex-col justify-between">
+                                        <div className="space-y-4">
+                                            <div className="w-40 h-40 mx-auto rounded-full overflow-hidden bg-secondary border-2 border-gray-200 relative group-hover:scale-105 transition-transform duration-500">
+                                                {viceMayor.imageUrl ? (
+                                                    <img src={getImageUrl(viceMayor.imageUrl)} alt={viceMayor.name} className="w-full h-full object-cover" />
+                                                ) : <User size={64} className="text-primary/10 absolute inset-0 m-auto" />}
+                                            </div>
+                                            <div>
+                                                <span className="text-[10px] uppercase font-bold tracking-widest text-gray-400 font-bold">Alpolgármester</span>
+                                                <h3 className="text-2xl font-serif font-bold text-primary mt-1 group-hover:text-accent transition-colors">{viceMayor.name}</h3>
+                                            </div>
+                                        </div>
+                                        <span className="text-xs font-bold uppercase tracking-wider text-gray-400 group-hover:text-accent inline-flex items-center justify-center gap-1 pt-2">
+                                            Adatlap megtekintése <ArrowRight size={14} />
+                                        </span>
                                     </div>
-                                    <div>
-                                        <span className="text-[10px] uppercase font-bold tracking-widest text-gray-400 font-bold">Alpolgármester</span>
-                                        <h3 className="text-2xl font-serif font-bold text-primary mt-1">{viceMayor.name}</h3>
-                                    </div>
-                                </div>
+                                </Link>
                             )}
                         </div>
 
                         <div className="space-y-8">
                             <h3 className="text-3xl font-serif font-bold text-primary text-center md:text-left border-b border-gray-50 pb-4">Települési Képviselők</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                                {/* 🌟 KÉPVISELŐK KÁRTYÁINAK ÁTALAKÍTÁSA LINKKÉ */}
                                 {boardMembers.map((member) => (
-                                    <div key={member.id} className="bg-white rounded-[32px] border border-gray-100 p-6 text-center space-y-4">
-                                        <div className="w-28 h-28 mx-auto rounded-full overflow-hidden bg-secondary relative">
-                                            {member.imageUrl ? (
-                                                <img src={getImageUrl(member.imageUrl)} alt={member.name} className="w-full h-full object-cover" />
-                                            ) : <User size={48} className="text-primary/10 absolute inset-0 m-auto" />}
+                                    <Link to={`/onkormanyzat/${member.id}`} key={member.id} className="block group">
+                                        <div className="bg-white rounded-[32px] border border-gray-100 p-6 text-center space-y-4 hover:shadow-xl hover:border-accent/20 transition-all duration-300 h-full flex flex-col justify-between">
+                                            <div className="space-y-4">
+                                                <div className="w-28 h-28 mx-auto rounded-full overflow-hidden bg-secondary relative group-hover:scale-105 transition-transform duration-500">
+                                                    {member.imageUrl ? (
+                                                        <img src={getImageUrl(member.imageUrl)} alt={member.name} className="w-full h-full object-cover" />
+                                                    ) : <User size={48} className="text-primary/10 absolute inset-0 m-auto" />}
+                                                </div>
+                                                <div>
+                                                    <span className="text-[9px] uppercase font-bold tracking-wider text-gray-400">Képviselő-testületi tag</span>
+                                                    <h4 className="font-bold text-primary text-lg mt-0.5 group-hover:text-accent transition-colors">{member.name}</h4>
+                                                </div>
+                                            </div>
+                                            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 group-hover:text-accent inline-flex items-center justify-center gap-1 pt-2">
+                                                Profil <ArrowRight size={12} />
+                                            </span>
                                         </div>
-                                        <div>
-                                            <span className="text-[9px] uppercase font-bold tracking-wider text-gray-400">Képviselő-testületi tag</span>
-                                            <h4 className="font-bold text-primary text-lg mt-0.5">{member.name}</h4>
-                                        </div>
-                                    </div>
+                                    </Link>
                                 ))}
                             </div>
                         </div>

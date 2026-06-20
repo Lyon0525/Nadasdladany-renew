@@ -19,3 +19,28 @@
         scroll-behavior: smooth;
     }
 }
+
+/* Globális Leaflet finomítások a Nádasdladány dizájnhoz */
+.leaflet-popup-content-wrapper {
+    background: white !important;
+    color: #1a2e1a !important;
+    border-radius: 20px !important;
+    padding: 6px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.03) !important;
+}
+
+.leaflet-popup-tip {
+    background: white !important;
+    box-shadow: none !important;
+}
+
+.leaflet-container {
+    font-family: inherit !important;
+}
+
+/* Eltünteti a gombok körüli Leaflet-specifikus fura fehér háttereket */
+.custom-leaflet-icon {
+    background: transparent !important;
+    border: none !important;
+}

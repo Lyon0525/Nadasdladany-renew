@@ -12,6 +12,8 @@ export const AdminNewsPage = () => {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+
     const fetchNews = async () => {
         try {
             const data = await articleService.getArticles();
@@ -29,18 +31,40 @@ export const AdminNewsPage = () => {
             await articleService.deleteArticle(id);
             toast.success("Hír törölve");
             fetchNews();
-        } catch (err) { toast.error("Hiba a törlés során"); }
+        } catch (err) {
+            toast.error("Hiba a törlés során");
+        }
+    };
+
+    const handleOpenNew = () => {
+        setEditingArticle(null);
+        setIsFormOpen(true);
+    };
+
+    const handleEdit = (article: Article) => {
+        setEditingArticle(article);
+        setIsFormOpen(true);
     };
 
     const handleSubmit = async (formData: FormData) => {
         setLoading(true);
         try {
-            await articleService.createArticle(formData);
-            toast.success("Hír sikeresen közzétéve!");
+            if (editingArticle) {
+                await articleService.updateArticle(editingArticle.id, formData);
+                toast.success("Hír sikeresen frissítve!");
+            } else {
+                await articleService.createArticle(formData);
+                toast.success("Hír sikeresen közzétéve!");
+            }
+
             setIsFormOpen(false);
+            setEditingArticle(null);
             fetchNews();
-        } catch (err) { toast.error("Hiba a feltöltés során"); }
-        finally { setLoading(false); }
+        } catch (err) {
+            toast.error("Hiba a mentés során!");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -50,17 +74,22 @@ export const AdminNewsPage = () => {
                     <h1 className="text-4xl font-serif font-bold text-primary">Hírek kezelése</h1>
                 </div>
                 <button
-                    onClick={() => setIsFormOpen(true)}
-                    className="flex items-center gap-2 bg-accent text-primary font-bold px-8 py-4 rounded-full hover:scale-105 transition-all shadow-lg"
+                    onClick={handleOpenNew}
+                    className="flex items-center gap-2 bg-accent text-primary font-bold px-8 py-4 rounded-full hover:scale-105 transition-all shadow-lg cursor-pointer"
                 >
                     <Plus size={20} /> Új hír
                 </button>
             </div>
 
-            <AdminNewsList articles={articles} onDelete={handleDelete} />
+            <AdminNewsList articles={articles} onDelete={handleDelete} onEdit={handleEdit} />
 
             {isFormOpen && (
-                <NewsForm onClose={() => setIsFormOpen(false)} onSubmit={handleSubmit} loading={loading} />
+                <NewsForm
+                    article={editingArticle}
+                    onClose={() => { setIsFormOpen(false); setEditingArticle(null); }}
+                    onSubmit={handleSubmit}
+                    loading={loading}
+                />
             )}
         </AdminLayout>
     );

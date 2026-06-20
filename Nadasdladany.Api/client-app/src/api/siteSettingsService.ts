@@ -5,7 +5,11 @@ export interface SiteSetting {
     mayorName: string;
     welcomeTitle: string;
     welcomeText: string;
-    mayorImageUrl?: string;
+    mayorImageUrl: string | null;
+    historyText: string;
+    coatOfArmsText: string;
+    coatOfArmsImageUrl: string | null;
+    landmarksText: string;
 }
 
 export const siteSettingsService = {
@@ -13,10 +17,9 @@ export const siteSettingsService = {
         const response = await apiClient.get<SiteSetting>('/sitesettings');
         return response.data;
     },
+
     updateSettings: async (formData: FormData) => {
-        const response = await apiClient.put<number>('/sitesettings', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        const response = await apiClient.put<number>('/sitesettings', formData);
         return response.data;
-    }
+    },
 };

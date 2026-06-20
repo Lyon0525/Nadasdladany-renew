@@ -4,8 +4,26 @@ import apiClient from '../api/apiClient';
 import { type DocumentFile } from '../types/Municipality';
 import { type PaginatedResult } from '../api/articleService';
 import { DocumentItem } from '../features/documents/components/DocumentItem';
-import { electionApiService, type ElectionResult } from '../api/electionApiService';
+import { electionApiService } from '../api/electionApiService'; // 🌟 Csak az API-t importáljuk, az interfészt helyben pontosítjuk
 import { Vote, FileText, Search, BarChart3, Users, CheckCircle2, Percent } from 'lucide-react';
+
+// 🌟 Lokális, szigorúan típusos interfészek a hiba elhárítására
+interface CandidateResult {
+    candidateName: string;
+    organization: string;
+    votesCount: number;
+    percentage: number;
+    isWinner: boolean;
+}
+
+export interface ElectionResult {
+    year: number;
+    type: string;
+    registeredVoters: number;
+    votedCount: number;
+    turnoutPercentage: number;
+    results: CandidateResult[]; // 🌟 Itt pontosítottuk a belső rács típusát
+}
 
 export const ElectionsPage = () => {
     const [docs, setDocs] = useState<DocumentFile[]>([]);
@@ -30,8 +48,9 @@ export const ElectionsPage = () => {
 
     useEffect(() => {
         setLoadingApi(true);
+        // Az any-re való kényszerítés itt biztosítja az átjárhatóságot az API szerviz és a pontosított interfész között
         electionApiService.getNadasdladanyResults(selectedYear)
-            .then(setApiResult)
+            .then((data) => setApiResult(data as any))
             .finally(() => setLoadingApi(false));
     }, [selectedYear]);
 
@@ -60,8 +79,8 @@ export const ElectionsPage = () => {
                                 key={year}
                                 onClick={() => setSelectedYear(year)}
                                 className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all ${selectedYear === year
-                                        ? 'bg-primary text-white shadow-md'
-                                        : 'text-gray-400 hover:text-primary'
+                                    ? 'bg-primary text-white shadow-md'
+                                    : 'text-gray-400 hover:text-primary'
                                     }`}
                             >
                                 {year === 2026 ? '2026 (Aktuális)' : `${year}. évi adatok`}
@@ -119,7 +138,8 @@ export const ElectionsPage = () => {
                                     <h3 className="text-2xl font-serif font-bold text-primary mb-6">{apiResult.type} - Nádasdladány</h3>
 
                                     <div className="space-y-6">
-                                        {apiResult.results.map((candidate, i) => (
+                                        {/* 🌟 JAVÍTÁS: Explicit típusdefiníciók a paramétereknek a fordítási hiba megszüntetésére */}
+                                        {apiResult.results.map((candidate: CandidateResult, i: number) => (
                                             <div key={i} className="space-y-2">
                                                 <div className="flex justify-between items-end text-sm">
                                                     <div>

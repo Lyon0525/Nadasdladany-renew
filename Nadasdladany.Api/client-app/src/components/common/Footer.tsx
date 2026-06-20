@@ -22,6 +22,7 @@ export const Footer = () => {
               <li><Link to="/hirek" className="hover:text-white transition-colors">Friss híreink</Link></li>
               <li><Link to="/esemenyek" className="hover:text-white transition-colors">Eseménynaptár</Link></li>
               <li><Link to="/kastely" className="hover:text-white transition-colors">Nádasdy-kastély</Link></li>
+              <li><Link to="/a-kozsegrol" className="hover:text-white transition-colors">A községről</Link></li>
               <li><Link to="/dokumentumok" className="hover:text-white transition-colors">Dokumentumtár</Link></li>
               <li><Link to="/valasztasok" className="hover:text-white transition-colors">Választási információk</Link></li>
               <li><Link to="/allasok" className="hover:text-white transition-colors">Álláshirdetések</Link></li>
@@ -61,8 +62,7 @@ export const Footer = () => {
         <div className="border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
           <p>© 2026 Nádasdladány Község Önkormányzata. Minden jog fenntartva.</p>
           <div className="flex gap-6">
-            <Link to="/privacy" className="hover:text-gray-300 transition-colors">Adatvédelem</Link>
-            <Link to="/admin/login" className="hover:text-gray-300 transition-colors">Adminisztráció</Link>
+            <Link to="/joginyilatkozat" className="hover:text-gray-300 transition-colors">Jogi nyilatkozatok</Link>
           </div>
         </div>
       </div>

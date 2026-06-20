@@ -1,14 +1,35 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ChevronRight, Search } from 'lucide-react';
+import { Menu, X, ChevronRight, ChevronDown, Search } from 'lucide-react';
 import { SpotlightSearch } from './SpotlightSearch';
 import { cn } from '../../lib/utils';
+
+const primaryLinks = [
+    { name: 'Főoldal', path: '/' },
+    { name: 'A községről', path: '/a-kozsegrol' },
+    { name: 'Hírek', path: '/hirek' },
+    { name: 'Események', path: '/esemenyek' },
+    { name: 'Kastély', path: '/kastely' },
+    { name: 'Önkormányzat', path: '/onkormanyzat' },
+    { name: 'Kapcsolat', path: '/kapcsolat' },
+];
+
+const secondaryLinks = [
+    { name: 'Intézmények', path: '/intezmenyek' },
+    { name: 'Dokumentumtár', path: '/dokumentumok' },
+    { name: 'Pályázatok', path: '/palyazatok' },
+    { name: 'Közösségek', path: '/kozossegek' },
+    { name: 'Ügyintézés', path: '/ugyintezes' },
+    { name: 'Hivatal', path: '/hivatal' },
+];
 
 export const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [moreOpen, setMoreOpen] = useState(false);
+    const moreRef = useRef<HTMLDivElement>(null);
     const location = useLocation();
 
     useEffect(() => {
@@ -17,7 +38,7 @@ export const Navbar = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    useEffect(() => setMobileMenuOpen(false), [location]);
+    useEffect(() => { setMobileMenuOpen(false); setMoreOpen(false); }, [location]);
 
     useEffect(() => {
         const down = (e: KeyboardEvent) => {
@@ -30,19 +51,19 @@ export const Navbar = () => {
         return () => document.removeEventListener('keydown', down);
     }, []);
 
-    const navLinks = [
-        { name: 'Főoldal', path: '/' },
-        { name: 'Hírek', path: '/hirek' },
-        { name: 'Események', path: '/esemenyek' },
-        { name: 'Nádasdy-kastély', path: '/kastely' },
-        { name: 'Önkormányzat', path: '/onkormanyzat' },
-        { name: 'Intézmények', path: '/intezmenyek' },
-        { name: 'Kapcsolat', path: '/kapcsolat' },
-        { name: 'Pályázatok', path: '/palyazatok' },
-        { name: 'Közösségek', path: '/kozossegek' },
-        { name: 'Ügyintézés', path: '/ugyintezes' },
-        { name: 'Hivatal', path: '/hivatal' },
-    ];
+    // Close "Több" dropdown on outside click
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
+                setMoreOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    const allLinks = [...primaryLinks, ...secondaryLinks];
+    const isSecondaryActive = secondaryLinks.some(l => l.path === location.pathname);
 
     return (
         <>
@@ -52,8 +73,9 @@ export const Navbar = () => {
                     ? "py-3 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-sm"
                     : "py-6 bg-primary/90 backdrop-blur-md shadow-lg"
             )}>
-                <div className="max-w-7xl mx-auto w-full flex items-center justify-between gap-x-12">
+                <div className="max-w-7xl mx-auto w-full flex items-center gap-x-4">
 
+                    {/* Logo */}
                     <Link to="/" className="flex items-center gap-3 group flex-shrink-0">
                         <img
                             src="/nadasdladany-cimer.png"
@@ -61,18 +83,19 @@ export const Navbar = () => {
                             className="w-10 h-10 md:w-12 md:h-12 object-contain group-hover:rotate-12 transition-transform duration-300"
                         />
                         <span className={cn(
-                            "font-serif font-bold text-xl md:text-2xl tracking-tight transition-colors duration-300",
+                            "font-serif font-bold text-xl tracking-tight transition-colors duration-300",
                             isScrolled ? "text-primary" : "text-white"
                         )}>Nádasdladány</span>
                     </Link>
 
-                    <div className="hidden lg:flex items-center justify-center flex-1 mx-8 xl:mx-16 gap-x-1 xl:gap-x-1.5 overflow-visible">
-                        {navLinks.map((link) => (
+                    {/* Primary links */}
+                    <div className="hidden lg:flex items-center gap-x-0.5 flex-1 justify-center">
+                        {primaryLinks.map((link) => (
                             <Link
                                 key={link.name}
                                 to={link.path}
                                 className={cn(
-                                    "px-2 py-2 rounded-full text-xs xl:text-sm font-medium transition-all duration-300 relative flex-shrink-0",
+                                    "px-3 py-2 rounded-full text-xs xl:text-sm font-medium transition-all duration-300 relative whitespace-nowrap",
                                     location.pathname === link.path
                                         ? "text-accent"
                                         : (isScrolled ? "text-primary/70 hover:text-primary" : "text-white/80 hover:text-white")
@@ -84,8 +107,53 @@ export const Navbar = () => {
                                 )}
                             </Link>
                         ))}
+
+                        {/* Több dropdown */}
+                        <div className="relative" ref={moreRef}>
+                            <button
+                                onClick={() => setMoreOpen(o => !o)}
+                                className={cn(
+                                    "flex items-center gap-1 px-3 py-2 rounded-full text-xs xl:text-sm font-medium transition-all duration-300 cursor-pointer",
+                                    isSecondaryActive
+                                        ? "text-accent"
+                                        : (isScrolled ? "text-primary/70 hover:text-primary" : "text-white/80 hover:text-white")
+                                )}
+                            >
+                                Több
+                                <ChevronDown size={14} className={cn("transition-transform", moreOpen && "rotate-180")} />
+                            </button>
+
+                            <AnimatePresence>
+                                {moreOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 6 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 6 }}
+                                        transition={{ duration: 0.15 }}
+                                        className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white rounded-2xl shadow-xl border border-gray-100 p-2 grid grid-cols-2 gap-1 w-64 z-50"
+                                    >
+                                        {secondaryLinks.map((link) => (
+                                            <Link
+                                                key={link.name}
+                                                to={link.path}
+                                                className={cn(
+                                                    "flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-colors",
+                                                    location.pathname === link.path
+                                                        ? "text-accent bg-accent/5 font-medium"
+                                                        : "text-primary/70 hover:text-primary hover:bg-gray-50"
+                                                )}
+                                            >
+                                                {link.name}
+                                                <ChevronRight size={14} className="text-gray-300" />
+                                            </Link>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </div>
 
+                    {/* Search button */}
                     <button
                         onClick={() => setIsSearchOpen(true)}
                         className={cn(
@@ -97,32 +165,28 @@ export const Navbar = () => {
                         <span className="text-xs font-bold uppercase tracking-widest hidden xl:inline">Keresés</span>
                     </button>
 
+                    {/* Mobile controls */}
                     <div className="lg:hidden flex items-center gap-4 flex-shrink-0 ml-auto">
-                        <button
-                            onClick={() => setIsSearchOpen(true)}
-                            className={cn("cursor-pointer", isScrolled ? "text-primary" : "text-white")}
-                        >
+                        <button onClick={() => setIsSearchOpen(true)} className={cn("cursor-pointer", isScrolled ? "text-primary" : "text-white")}>
                             <Search size={24} />
                         </button>
-                        <button
-                            className={cn("cursor-pointer", isScrolled ? "text-primary" : "text-white")}
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        >
+                        <button className={cn("cursor-pointer", isScrolled ? "text-primary" : "text-white")} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                             {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
                         </button>
                     </div>
                 </div>
             </nav>
 
+            {/* Mobile menu — all links */}
             <AnimatePresence>
                 {mobileMenuOpen && (
                     <motion.div
                         initial={{ opacity: 0, x: '100%' }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: '100%' }}
-                        className="fixed inset-0 z-[90] bg-white flex flex-col p-8 pt-32 gap-6 lg:hidden"
+                        className="fixed inset-0 z-[90] bg-white flex flex-col p-8 pt-32 gap-6 lg:hidden overflow-y-auto"
                     >
-                        {navLinks.map((link) => (
+                        {allLinks.map((link) => (
                             <Link
                                 key={link.name}
                                 to={link.path}

@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Nadasdladany.Application.Features.SiteSettings.DTOs;
 using Nadasdladany.Application.Interfaces.Common;
-using Nadasdladany.Domain.Entities;
 
 namespace Nadasdladany.Application.Features.SiteSettings.Queries;
 
@@ -19,29 +18,33 @@ public class GetSiteSettingQueryHandler : IRequestHandler<GetSiteSettingQuery, S
 
     public async Task<SiteSettingDto> Handle(GetSiteSettingQuery request, CancellationToken cancellationToken)
     {
-        var settings = await _context.SiteSettings.ToListAsync(cancellationToken);
+        var settings = await _context.SiteSettings.FirstOrDefaultAsync(cancellationToken);
 
-        if (!settings.Any())
+        if (settings == null)
         {
-            var defaults = new List<SiteSetting>
+            return new SiteSettingDto
             {
-                new() { SettingKey = "MayorName", SettingValue = "Pálfi Kristóf" },
-                new() { SettingKey = "WelcomeTitle", SettingValue = "Polgármesteri Köszöntő" },
-                new() { SettingKey = "WelcomeText", SettingValue = "Tisztelt Látogató! Szeretettel köszöntöm Önt Nádasdladány község hivatalos weboldalán..." },
-                new() { SettingKey = "MayorImageUrl", SettingValue = "" }
+                Id = 0,
+                MayorName = string.Empty,
+                WelcomeTitle = string.Empty,
+                WelcomeText = string.Empty,
+                HistoryText = string.Empty,
+                CoatOfArmsText = string.Empty,
+                LandmarksText = string.Empty
             };
-
-            _context.SiteSettings.AddRange(defaults);
-            await _context.SaveChangesAsync(cancellationToken);
-            settings = defaults;
         }
 
         return new SiteSettingDto
         {
-            MayorName = settings.FirstOrDefault(s => s.SettingKey == "MayorName")?.SettingValue ?? "Pálfi Kristóf",
-            WelcomeTitle = settings.FirstOrDefault(s => s.SettingKey == "WelcomeTitle")?.SettingValue ?? "Polgármesteri Köszöntő",
-            WelcomeText = settings.FirstOrDefault(s => s.SettingKey == "WelcomeText")?.SettingValue ?? "",
-            MayorImageUrl = settings.FirstOrDefault(s => s.SettingKey == "MayorImageUrl")?.SettingValue
+            Id = settings.Id,
+            MayorName = settings.MayorName,
+            WelcomeTitle = settings.WelcomeTitle,
+            WelcomeText = settings.WelcomeText,
+            MayorImageUrl = settings.MayorImageUrl,
+            HistoryText = settings.HistoryText,
+            CoatOfArmsText = settings.CoatOfArmsText,
+            CoatOfArmsImageUrl = settings.CoatOfArmsImageUrl,
+            LandmarksText = settings.LandmarksText
         };
     }
 }

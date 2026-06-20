@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Nadasdladany.Application.Features.Municipality.Commands;
 using Nadasdladany.Application.Features.Municipality.DTOs;
 using Nadasdladany.Application.Features.Municipality.Queries;
@@ -14,6 +15,7 @@ public class MunicipalityController : ApiControllerBase
     }
 
     [HttpPut("office-info")]
+    [Authorize]
     public async Task<ActionResult> UpdateOfficeInfo(UpdateOfficeInfoCommand command)
     {
         await Mediator.Send(command);
@@ -22,6 +24,7 @@ public class MunicipalityController : ApiControllerBase
 
     [HttpPost("representatives")]
     [Consumes("multipart/form-data")]
+    [Authorize]
     public async Task<ActionResult<int>> CreateRepresentative([FromForm] CreateRepresentativeCommand command)
     {
         return await Mediator.Send(command);

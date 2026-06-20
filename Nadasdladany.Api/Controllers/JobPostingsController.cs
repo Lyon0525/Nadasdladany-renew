@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Nadasdladany.Application.Features.JobPostings.Commands;
 using Nadasdladany.Application.Features.JobPostings.DTOs;
 using Nadasdladany.Application.Features.JobPostings.Queries;
@@ -14,6 +15,7 @@ public class JobPostingsController : ApiControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult<int>> Create(CreateJobPostingCommand command)
     {
         return await Mediator.Send(command);

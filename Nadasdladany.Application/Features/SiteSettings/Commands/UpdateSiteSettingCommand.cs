@@ -8,10 +8,15 @@ namespace Nadasdladany.Application.Features.SiteSettings.Commands;
 
 public record UpdateSiteSettingCommand : IRequest<int>
 {
+    public int Id { get; init; }
     public required string MayorName { get; init; }
     public required string WelcomeTitle { get; init; }
     public required string WelcomeText { get; init; }
     public IFormFile? MayorImage { get; init; }
+    public required string HistoryText { get; init; }
+    public required string CoatOfArmsText { get; init; }
+    public IFormFile? CoatOfArmsImage { get; init; }
+    public required string LandmarksText { get; init; }
 }
 
 public class UpdateSiteSettingCommandHandler : IRequestHandler<UpdateSiteSettingCommand, int>
@@ -27,39 +32,49 @@ public class UpdateSiteSettingCommandHandler : IRequestHandler<UpdateSiteSetting
 
     public async Task<int> Handle(UpdateSiteSettingCommand request, CancellationToken cancellationToken)
     {
-        var settings = await _context.SiteSettings.ToListAsync(cancellationToken);
+        var settings = await _context.SiteSettings.FirstOrDefaultAsync(cancellationToken);
 
-        await SaveSettingAsync(settings, "MayorName", request.MayorName, cancellationToken);
-        await SaveSettingAsync(settings, "WelcomeTitle", request.WelcomeTitle, cancellationToken);
-        await SaveSettingAsync(settings, "WelcomeText", request.WelcomeText, cancellationToken);
+        bool isNew = false;
+        if (settings == null)
+        {
+            settings = new SiteSetting();
+            isNew = true;
+        }
+
+        settings.MayorName = request.MayorName;
+        settings.WelcomeTitle = request.WelcomeTitle;
+        settings.WelcomeText = request.WelcomeText;
+        settings.HistoryText = request.HistoryText;
+        settings.CoatOfArmsText = request.CoatOfArmsText;
+        settings.LandmarksText = request.LandmarksText;
 
         if (request.MayorImage != null)
         {
-            var imgSetting = settings.FirstOrDefault(s => s.SettingKey == "MayorImageUrl");
-            if (imgSetting != null && !string.IsNullOrEmpty(imgSetting.SettingValue))
+            if (!string.IsNullOrEmpty(settings.MayorImageUrl))
             {
-                _fileService.DeleteFile(imgSetting.SettingValue);
+                _fileService.DeleteFile(settings.MayorImageUrl);
             }
 
-            string newImageUrl = await _fileService.UploadFileAsync(request.MayorImage, "mayor");
-            await SaveSettingAsync(settings, "MayorImageUrl", newImageUrl, cancellationToken);
+            settings.MayorImageUrl = await _fileService.UploadFileAsync(request.MayorImage, "mayor");
+        }
+
+        if (request.CoatOfArmsImage != null)
+        {
+            if (!string.IsNullOrEmpty(settings.CoatOfArmsImageUrl))
+            {
+                _fileService.DeleteFile(settings.CoatOfArmsImageUrl);
+            }
+
+            settings.CoatOfArmsImageUrl = await _fileService.UploadFileAsync(request.CoatOfArmsImage, "branding");
+        }
+
+        if (isNew)
+        {
+            _context.SiteSettings.Add(settings);
         }
 
         await _context.SaveChangesAsync(cancellationToken);
-        return 1;
-    }
 
-    private async Task SaveSettingAsync(List<SiteSetting> existingSettings, string key, string value, CancellationToken cancellationToken)
-    {
-        var setting = existingSettings.FirstOrDefault(s => s.SettingKey == key);
-        if (setting != null)
-        {
-            setting.SettingValue = value;
-        }
-        else
-        {
-            var newSetting = new SiteSetting { SettingKey = key, SettingValue = value };
-            _context.SiteSettings.Add(newSetting);
-        }
+        return settings.Id;
     }
 }

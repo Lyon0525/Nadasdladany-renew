@@ -25,6 +25,13 @@ export const CastlePage = () => {
         }
     ];
 
+    const galleryImages = [
+        { src: "/castle/castle_gallery_1.jpg", alt: "Nádasdy-kastély homlokzat" },
+        { src: "/castle/castle_gallery_2.jpg", alt: "Kastélypark és tó" },
+        { src: "/castle/castle_gallery_3.jpg", alt: "Kastély belső részlet" },
+        { src: "/castle/castle_gallery_4.jpg", alt: "Tudor-stílusú torony" },
+    ];
+
     return (
         <div className="bg-[#080a0f] text-white min-h-screen">
             <MainLayout>
@@ -32,7 +39,7 @@ export const CastlePage = () => {
                     <CastleParticles />
                     <motion.div style={{ scale }} className="absolute inset-0 z-0">
                         <img
-                            src="https://nadasdladanyikastely.hu/wp-content/uploads/2021/05/kastely-hero.jpg"
+                            src="/castle/castle_hero_banner.jpg"
                             className="w-full h-full object-cover opacity-40"
                             alt="Nádasdy-kastély"
                         />
@@ -52,8 +59,9 @@ export const CastlePage = () => {
                                 A szerelem és innováció öröksége
                             </p>
                             <a
-                                href="https://nadasdladanyikastely.hu/jegyvasarlas/"
+                                href="https://nadasdladanyikastely.hu/"
                                 target="_blank"
+                                rel="noopener noreferrer"
                                 className="inline-flex items-center gap-3 px-12 py-5 bg-accent text-primary font-bold rounded-full hover:scale-105 transition-transform duration-300 shadow-[0_0_30px_rgba(197,163,90,0.3)]"
                             >
                                 Jegyvásárlás <Ticket size={20} />
@@ -87,7 +95,7 @@ export const CastlePage = () => {
                     >
                         <div className="absolute -inset-4 border border-accent/20 rounded-[40px] rotate-3" />
                         <img
-                            src="https://nadasdladany.hu/wp-content/uploads/2021/05/kastely-belso.jpg"
+                            src="/castle/castle_inside.jpg"
                             className="relative rounded-[40px] shadow-2xl z-10"
                             alt="Kastély belső"
                         />
@@ -121,6 +129,40 @@ export const CastlePage = () => {
                     </div>
                 </section>
 
+                <section className="max-w-7xl mx-auto py-32 px-6">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-5xl font-serif mb-4">Pillanatképek a Kastélyból</h2>
+                        <div className="w-20 h-1 bg-accent mx-auto mb-4" />
+                        <p className="text-gray-400 text-sm max-w-md mx-auto">Villantson bepillantást a Nádasdy-kastély lélegzetelállító külső és belső tereibe.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {galleryImages.map((img, index) => (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 40 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.6, delay: index * 0.1 }}
+                                className="relative h-80 rounded-[24px] overflow-hidden group border border-white/10 hover:border-accent/40 transition-colors shadow-lg bg-gray-900"
+                            >
+                                <img
+                                    src={img.src}
+                                    alt={img.alt}
+                                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-[#080a0f]/40 group-hover:bg-transparent transition-colors duration-500" />
+
+                                <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-[#080a0f] via-[#080a0f]/80 to-transparent translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                                    <p className="text-xs font-serif font-bold tracking-wider text-accent uppercase text-center">
+                                        {img.alt}
+                                    </p>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </section>
+
                 <section className="max-w-4xl mx-auto py-32 px-6 text-center">
                     <div className="p-12 rounded-[40px] bg-gradient-to-br from-accent/20 to-transparent border border-accent/30">
                         <Info className="mx-auto text-accent mb-6" size={48} />
@@ -128,9 +170,14 @@ export const CastlePage = () => {
                         <p className="text-gray-300 mb-8">
                             A kastély minden nap várja a látogatókat. Érdemes előre jegyet foglalni a vezetett túrákra, ahol szakértőink kalauzolnak el a Nádasdyak titokzatos világába.
                         </p>
-                        <button className="px-10 py-4 border border-accent text-accent rounded-full hover:bg-accent hover:text-primary transition-all font-bold">
+                        <a
+                            href="https://nadasdladanyikastely.hu/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center px-12 py-5 bg-accent text-primary font-bold rounded-full hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(197,163,90,0.3)] cursor-pointer"
+                        >
                             Nyitvatartás és árak
-                        </button>
+                        </a>
                     </div>
                 </section>
             </MainLayout>

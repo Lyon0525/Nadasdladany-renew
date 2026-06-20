@@ -44,7 +44,7 @@ export const EventDetailPage = () => {
 
     return (
         <MainLayout>
-            <Seo title={event.title} description={event.description} image="/img/castle/DJI_0143_retus2.jpg" />
+            <Seo title={event.title} description={event.description} image="/Nadasdladany-hero-banner.jpg" />
 
             <div className="max-w-4xl mx-auto px-6 py-12">
                 <button
@@ -94,7 +94,7 @@ export const EventDetailPage = () => {
                 </header>
 
                 <div className="relative h-[450px] rounded-[40px] overflow-hidden mb-16 shadow-2xl">
-                    <img src="/img/castle/DJI_0143_retus2.jpg" alt={event.title} className="w-full h-full object-cover" />
+                    <img src="/Nadasdladany-hero-banner.jpg" alt={event.title} className="w-full h-full object-cover" />
                 </div>
 
                 <div className="prose prose-lg prose-slate max-w-none shadow-sm bg-white p-8 md:p-16 rounded-[40px] border border-gray-50">

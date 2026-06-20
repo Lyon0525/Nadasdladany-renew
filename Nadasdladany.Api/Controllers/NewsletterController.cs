@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Nadasdladany.Application.Features.Newsletter.Commands;
 using Nadasdladany.Application.Interfaces.Common;
@@ -21,6 +22,7 @@ public class NewsletterController : ApiControllerBase
     }
 
     [HttpGet("subscribers")]
+    [Authorize]
     public async Task<ActionResult<int>> GetSubscriberCount()
     {
         var count = await _context.NewsletterSubscribers.CountAsync(x => x.IsActive);
@@ -28,6 +30,7 @@ public class NewsletterController : ApiControllerBase
     }
 
     [HttpPost("send")]
+    [Authorize]
     public async Task<ActionResult> Send(SendNewsletterCommand command)
     {
         await Mediator.Send(command);

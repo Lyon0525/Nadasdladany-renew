@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Nadasdladany.Application.Common.Models;
 using Nadasdladany.Application.Features.Articles.Commands;
 using Nadasdladany.Application.Features.Articles.DTOs;
@@ -16,12 +17,14 @@ public class ArticlesController : ApiControllerBase
 
     [HttpPost]
     [Consumes("multipart/form-data")]
+    [Authorize]
     public async Task<ActionResult<int>> Create([FromForm] CreateArticleCommand command)
     {
         return await Mediator.Send(command);
     }
 
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<ActionResult> Delete(int id)
     {
         await Mediator.Send(new DeleteArticleCommand(id));
@@ -30,6 +33,7 @@ public class ArticlesController : ApiControllerBase
 
     [HttpPut("{id}")]
     [Consumes("multipart/form-data")]
+    [Authorize]
     public async Task<ActionResult> Update(int id, [FromForm] UpdateArticleCommand command)
     {
         if (id != command.Id)

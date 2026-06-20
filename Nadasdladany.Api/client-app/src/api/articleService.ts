@@ -11,30 +11,20 @@ export interface PaginatedResult<T> {
 }
 
 export const articleService = {
-    getArticles: async (pageNumber = 1, pageSize = 10) => {
+    getArticles: async (pageNumber = 1, pageSize = 10, categoryId?: number) => {
         const response = await apiClient.get<PaginatedResult<Article>>('/articles', {
-            params: { pageNumber, pageSize }
+            params: { pageNumber, pageSize, categoryId }
         });
-        return response.data;
-    },
-
-    getArticleBySlug: async (slug: string) => {
-        const response = await apiClient.get<Article>(`/articles/${slug}`);
         return response.data;
     },
 
     createArticle: async (formData: FormData) => {
-        const response = await apiClient.post<Article>('/articles', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        const response = await apiClient.post<number>('/articles', formData);
         return response.data;
     },
 
     updateArticle: async (id: number, formData: FormData) => {
-        const response = await apiClient.put<Article>(`/articles/${id}`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        return response.data;
+        await apiClient.put(`/articles/${id}`, formData);
     },
 
     deleteArticle: async (id: number) => {

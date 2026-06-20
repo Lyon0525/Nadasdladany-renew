@@ -106,6 +106,20 @@ public class NadasdladanyDbContextInitialiser
             await _context.SaveChangesAsync();
         }
 
+        if (!_context.SiteSettings.Any())
+        {
+            _context.SiteSettings.Add(new SiteSetting
+            {
+                HistoryText = "Nádasdladány nevét az egykor itt elterülő hatalmas nádasokról és lápvidékről kapta. A település története szorosan összefonódott a gróf Nádasdy családdal, akik a 19. század második felében a község központjává tették birtokaikat, lendületet adva a térség ipari és kulturális fejlődésének. A lakosság évszázadokon át mezőgazdasággal és tőzegkitermeléssel foglalkozott.",
+
+                CoatOfArmsText = "Községünk címere csücskös talpú, álló katonai pajzs. A kék mezőben zöld halmon egy jobbra lépő, arany csőrű és lábú, ezüst tollazatú kócsag látható, amely felemelt jobb lábával egy arany követ tart. A kócsag a települést egykor körülölelő mocsárvilág és természetvédelem jelképe, míg a kő az éberséget és az összetartozást szimbolizálja.",
+                CoatOfArmsImageUrl = "/img/branding/coat-of-arms.png",
+
+                LandmarksText = "A település büszkesége a historizáló, Tudor-stílusú Nádasdy-kastély, melyet gyönyörű tájképi kert övez. Ugyancsak kiemelkedő építészeti emlékünk a neogótikus Szent Ilona római katolikus templom, melyet Hauszmann Alajos tervezett, és a Nádasdy család mauzóleumaként is szolgál, de a falu utcáit járva számos hangulatos, régi hivatali épületet és emlékhelyet is felfedezhetünk."
+            });
+            await _context.SaveChangesAsync();
+        }
+
         if (!_context.Organizations.Any())
         {
             _context.Organizations.AddRange(
@@ -151,7 +165,6 @@ public class NadasdladanyDbContextInitialiser
                     DisplayOrder = 3,
                     IsPublished = true
                 },
-
                 new Organization
                 {
                     Name = "Római Katolikus Plébánia - Nádasdladány",
@@ -182,6 +195,40 @@ public class NadasdladanyDbContextInitialiser
                 }
             );
 
+            await _context.SaveChangesAsync();
+        }
+
+        if (!_context.Elections.Any())
+        {
+            _context.Elections.AddRange(
+                new ElectionResultEntity
+                {
+                    Year = 2026,
+                    Type = "Országgyűlési Képviselő Választás (Fejér megye 5. sz. OEVK)",
+                    RegisteredVoters = 1395,
+                    VotedCount = 988,
+                    TurnoutPercentage = 70.82,
+                    CandidatesJson = "[{\"candidateName\":\"Törő Gábor\",\"organization\":\"FIDESZ - KDNP\",\"votesCount\":548,\"percentage\":55.46,\"isWinner\":true},{\"candidateName\":\"Horváth Ágnes\",\"organization\":\"DK - MSZP - Párbeszéd - LMP\",\"votesCount\":262,\"percentage\":26.51,\"isWinner\":false},{\"candidateName\":\"Végh Balázs\",\"organization\":\"Mi Hazánk Mozgalom\",\"votesCount\":112,\"percentage\":11.33,\"isWinner\":false},{\"candidateName\":\"Kovács Péter\",\"organization\":\"Magyar Kétfarkú Kutya Párt\",\"votesCount\":66,\"percentage\":6.70,\"isWinner\":false}]"
+                },
+                new ElectionResultEntity
+                {
+                    Year = 2024,
+                    Type = "Helyi Önkormányzati Választások - Polgármester Választás",
+                    RegisteredVoters = 1420,
+                    VotedCount = 895,
+                    TurnoutPercentage = 63.03,
+                    CandidatesJson = "[{\"candidateName\":\"Pálfi Kristóf\",\"organization\":\"Független\",\"votesCount\":520,\"percentage\":58.10,\"isWinner\":true},{\"candidateName\":\"Kovács István\",\"organization\":\"Független\",\"votesCount\":375,\"percentage\":41.90,\"isWinner\":false}]"
+                },
+                new ElectionResultEntity
+                {
+                    Year = 2019,
+                    Type = "Helyi Önkormányzati Választások - Polgármester Választás",
+                    RegisteredVoters = 1445,
+                    VotedCount = 785,
+                    TurnoutPercentage = 54.33,
+                    CandidatesJson = "[{\"candidateName\":\"Tőke László\",\"organization\":\"Független\",\"votesCount\":455,\"percentage\":57.96,\"isWinner\":true},{\"candidateName\":\"Nagy Sándor\",\"organization\":\"Független\",\"votesCount\":330,\"percentage\":42.04,\"isWinner\":false}]"
+                }
+            );
             await _context.SaveChangesAsync();
         }
 
@@ -229,7 +276,7 @@ public class NadasdladanyDbContextInitialiser
                     Email = "rendelo@nadasdladany.hu",
                     WebsiteUrl = null,
                     OpeningHours = "Háziorvosi rendelés:\nHétfő, Szerda, Péntek: 08:00 - 12:00\nKedd, Csütörtök: 13:00 - 16:00\n\nVédőnői tanácsadás:\nKedd: 09:00 - 11:00",
-                    Content = "<p>Az Egészségház modern orvosi eszközökkel és felújított rendelőkkel várja a lakosságot. Sürgős esetekben, vagy rendelési időn kívül a központi ügyelet hívható.</p><h4>Központi Orvosi Ügyelet (Polgárdi):</h4><p>Telefonszám: +36 (22) 311-104 (Hétköznap 16:00-tól másnap 08:00-ig, hétvégén 24 órában).</p>",
+                    Content = "<p>Az Egészségház modern orvosi eszközökkel and felújított rendelőkkel várja a lakosságot. Sürgős esetekben, vagy rendelési időn kívül a központi ügyelet hívható.</p><h4>Központi Orvosi Ügyelet (Polgárdi):</h4><p>Telefonszám: +36 (22) 311-104 (Hétköznap 16:00-tól másnap 08:00-ig, hétvégén 24 órában).</p>",
                     DisplayOrder = 3,
                     IsPublished = true
                 },
@@ -254,7 +301,7 @@ public class NadasdladanyDbContextInitialiser
                     Slug = "koznevelesi-intezmenyi-tarsulas",
                     Description = "A környező települések összefogásával működő társulás, amely az oktatási és nevelési intézmények hatékony, jogszerű és stabil gazdasági fenntartásáért felel.",
                     LeaderName = "Pálfi Kristóf - Társulási Elnök",
-                    Address = "8145 Nádasdladány, Fő utca 1.",
+                    Address = "8145 Nadasdladány, Fő utca 1.",
                     PhoneNumber = "+36 (22) 590-010",
                     Email = "tarsulas@nadasdladany.hu",
                     WebsiteUrl = null,
@@ -268,42 +315,104 @@ public class NadasdladanyDbContextInitialiser
             await _context.SaveChangesAsync();
         }
 
-        if (!_context.Articles.Any())
-        {
-            var cat = await _context.Categories.FirstAsync();
-            _context.Articles.Add(new Article
-            {
-                Title = "Megújult Nádasdladány digitális arca",
-                Slug = "megujult-honlap",
-                Excerpt = "Elindult a község modern, minden eszközön tökéletesen megjelenő weboldala.",
-                Content = "<p>Nádasdladány Község Önkormányzata büszkén mutatja be új honlapját, mely a legmodernebb technológiával készült.</p>",
-                PublishedDate = DateTime.Now,
-                IsPublished = true,
-                CategoryId = cat.Id,
-                FeaturedImageUrl = "/img/castle/DJI_0143_retus2.jpg"
-            });
-            await _context.SaveChangesAsync();
-        }
-
         if (!_context.Representatives.Any())
         {
-            _context.Representatives.Add(new Representative
-            {
-                Name = "Pálfi Kristóf",
-                Role = RepresentativeRole.Polgarmester,
-                CustomTitleOverride = "Polgármester",
-                Biography = "Üdvözlöm a község lakóit és az ide látogatókat!",
-                IsPublished = true,
-                DisplayOrder = 1
-            });
+            _context.Representatives.AddRange(
+                new Representative
+                {
+                    Name = "Pálfi Kristóf",
+                    Role = RepresentativeRole.Polgarmester,
+                    CustomTitleOverride = "Polgármester",
+                    Email = "polgarmester@nadasdladany.hu",
+                    PhoneNumber = "+36 (22) 590-010",
+                    Biography = "Tisztelt Nádasdladányiak! Polgármesterként elsődleges célom községünk folyamatos, fenntartható fejlődésének biztosítása, a történelmi örökségünk megőrzése és a lakossági jólét növelése. Fontosnak tartom az átlátható, modern közigazgatást és a civil közösségek támogatását. Forduljanak hozzám bizalommal a megadott hivatali elérhetőségeimen vagy személyesen a havi rendszerességű fogadóórákon.",
+                    IsPublished = true,
+                    DisplayOrder = 1
+                },
+                new Representative
+                {
+                    Name = "Kovács Árpád",
+                    Role = RepresentativeRole.Alpolgarmester,
+                    CustomTitleOverride = "Alpolgármester",
+                    Email = "alpolgarmester@nadasdladany.hu",
+                    PhoneNumber = "+36 (22) 590-012",
+                    Biography = "Alpolgármesterként szorosan együttműködöm a polgármester úrral és a képviselő-testülettel a faluszépítési, infrastrukturális és kulturális projektek koordinációjában. Kiemelt feladatom a helyi pályázatok gyakorlati megvalósításának és kivitelezésének felügyelete.",
+                    IsPublished = true,
+                    DisplayOrder = 2
+                },
+                new Representative
+                {
+                    Name = "Kovács János",
+                    Role = RepresentativeRole.Kepviselo,
+                    CustomTitleOverride = "Pénzügyi Bizottság Elnöke",
+                    Email = "kovacs.janos@nadasdladany.hu",
+                    PhoneNumber = "+36 (30) 123-4567",
+                    Biography = "Képviselőként és a Pénzügyi, Településfejlesztési és Szociális Bizottság elnökeként felelek az önkormányzat költségvetésének racionális tervezéséért és a szociális források igazságos elosztásáért. Emellett a helyi Polgárőr Egyesület elnökeként a falu közbiztonságának megőrzésén is dolgozom.",
+                    IsPublished = true,
+                    DisplayOrder = 3
+                },
+                new Representative
+                {
+                    Name = "Szabó Péter",
+                    Role = RepresentativeRole.Kepviselo,
+                    CustomTitleOverride = "Ügyrendi Bizottság Elnöke",
+                    Email = "szabo.peter@nadasdladany.hu",
+                    PhoneNumber = "+36 (22) 434-555",
+                    Biography = "Az Ügyrendi és Kulturális Bizottság elnökeként a helyi rendeletek jogszabályi megfelelőségéért, valamint a falu kulturális programjainak szervezéséért felelek. Célom, hogy Nádasdladány egy pezsgő, összetartó és rendezett otthon legyen mindannyiunk számára.",
+                    IsPublished = true,
+                    DisplayOrder = 4
+                },
+                new Representative
+                {
+                    Name = "Nagy László",
+                    Role = RepresentativeRole.Kepviselo,
+                    CustomTitleOverride = "Települési Képviselő",
+                    Email = "nagy.laszlo@nadasdladany.hu",
+                    Biography = "Képviselő-testületi tagként aktívan támogatom a helyi civil kezdeményezéseket és a sportélet fellendítését. Fontosnak tartom, hogy a lakosság hangja és ötletei közvetlenül eljussanak a döntéshozók asztalára.",
+                    IsPublished = true,
+                    DisplayOrder = 5
+                },
+                new Representative
+                {
+                    Name = "Kiss Barna",
+                    Role = RepresentativeRole.Kepviselo,
+                    CustomTitleOverride = "Települési Képviselő",
+                    Email = "reformatus@nadasdladany.hu",
+                    Biography = "Helyi lelkészként és önkormányzati képviselőként a közösség lelki és kulturális megerősítéséért dolgozom. A testületi munkában a hagyományőrzés, a rászorulók támogatása és az oktatási-nevelési kérdések kapják nálam a legnagyobb hangsúlyt.",
+                    IsPublished = true,
+                    DisplayOrder = 6
+                }
+            );
             await _context.SaveChangesAsync();
         }
 
-        if (!_context.SiteSettings.Any())
+        if (!_context.Projects.Any())
         {
-            _context.SiteSettings.AddRange(
-                new SiteSetting { SettingKey = "WelcomeTitle", SettingValue = "Tisztelt Látogatók!" },
-                new SiteSetting { SettingKey = "MayorName", SettingValue = "Pálfi Kristóf" }
+            _context.Projects.AddRange(
+                new Project
+                {
+                    Title = "Belterületi utak burkolat-felújítása Nádasdladány községben",
+                    Slug = "belteruleti-utak-felujitasa-2026",
+                    Excerpt = "A Magyar Falu Program keretében megvalósuló beruházás során a falu több kritikus belterületi útszakasza kap teljesen új aszfaltburkolatot és modern csapadékvíz-elvezető rendszert.",
+                    Content = "<h3>A projekt részletes bemutatása:</h3><p>Önkormányzatunk sikeresen pályázott az Iskola utca és a Petőfi Sándor utca egy részének teljes infrastrukturális megújítására. A munkálatok kiterjednek a meglévő elöregedett rétegek felmarására, az útalap megerősítésére, valamint két réteg új hengerelt aszfalt leterítésére.</p><h4>Várható lakossági hatások:</h4><p>A beruházás jelentősen növeli a közlekedésbiztonságot, csökkenti a gépjárművek zajterhelését és javítja az intézmények (Iskola, Óvoda) megközelíthetőségét. A munkálatok ideje alatt időszakos forgalomkorlátozásokra kell számítani, melyről folyamatosan tájékoztatjuk a tisztelt lakosságot.</p>",
+                    ProjectCode = "MFP-UHK/2026-01",
+                    TotalFunding = "45 000 000 Ft",
+                    SupportRate = "100%",
+                    FeaturedImageUrl = "/Nadasdladany-hero-banner.jpg",
+                    IsPublished = true
+                },
+                new Project
+                {
+                    Title = "Energetikai korszerűsítés a Nádasdladányi Sün Balázs Óvodában",
+                    Slug = "ovoda-energetikai-korszerusitese",
+                    Excerpt = "Európai Uniós (TOP Plusz) forrásból megvalósuló projekt, melynek célja az óvoda épületének teljes hőszigetelése, nyílászáróinak cseréje és napelemes rendszer telepítése.",
+                    Content = "<h3>Energetikai Hatékonyság Növelése:</h3><p>A projekt keretében az intézmény 15 cm-es homlokzati hőszigetelést kap, a régi ablakokat modern 3 rétegű hőszigetelt nyílászárókra cseréljük, valamint a tetőre een 12 kWp teljesítményű napelemrendszert szerelünk fel.</p><h4>Fenntarthatósági és pénzügyi előnyök:</h4><p>A felújítás befejeztével az óvoda fűtési és villamosenergia-költségei várhatóan több mint 65%-kal fognak csökkenni, miközben az épület szén-dioxid kibocsátása minimálisra csökken, példát mutatva a jövő nemzedékének.</p>",
+                    ProjectCode = "TOP_PLUSZ-1.2.1-26-0045",
+                    TotalFunding = "78 200 000 Ft",
+                    SupportRate = "100%",
+                    FeaturedImageUrl = "/Nadasdladany-hero-banner.jpg",
+                    IsPublished = true
+                }
             );
             await _context.SaveChangesAsync();
         }

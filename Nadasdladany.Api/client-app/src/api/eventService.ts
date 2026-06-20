@@ -22,6 +22,9 @@ export const eventService = {
         const response = await apiClient.get<VillageEvent>(`/events/${slug}`);
         return response.data;
     },
+    updateEvent: async (id: number, eventData: any) => {
+        await apiClient.put(`/events/${id}`, eventData);
+    },
     createEvent: async (event: any) => {
         const response = await apiClient.post<VillageEvent>('/events', event);
         return response.data;

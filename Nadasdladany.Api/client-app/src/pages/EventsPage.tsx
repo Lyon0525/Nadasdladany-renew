@@ -6,6 +6,7 @@ import { MainLayout } from '../layouts/MainLayout';
 import { Seo } from '../components/common/Seo';
 import apiClient from '../api/apiClient';
 import { cn } from '../lib/utils';
+import { MiniCalendar } from '../components/common/MiniCalendar';
 
 interface Event {
     id: number;
@@ -67,6 +68,10 @@ export const EventsPage = () => {
                     <p className="text-gray-500 max-w-2xl">Böngésszen Nádasdladány kulturális, sport és önkormányzati rendezvényei között.</p>
                 </div>
 
+                <div className="mb-20">
+                    <MiniCalendar />
+                </div>
+
                 <div className="flex gap-2 mb-12 justify-center md:justify-start">
                     <button
                         onClick={() => setFilter('upcoming')}
@@ -112,7 +117,7 @@ export const EventsPage = () => {
                                     {/* Kép konténer gyári kastélyos háttérképpel */}
                                     <div className="h-52 overflow-hidden relative bg-gray-100">
                                         <img
-                                            src="/img/castle/DJI_0143_retus2.jpg"
+                                            src="/Nadasdladany-hero-banner.jpg"
                                             alt={event.title}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                         />

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Nadasdladany.Application.Features.Gallery.Commands;
 using Nadasdladany.Application.Features.Gallery.DTOs;
 using Nadasdladany.Application.Features.Gallery.Queries;
@@ -15,12 +16,14 @@ public class GalleryController : ApiControllerBase
 
     [HttpPost("upload")]
     [Consumes("multipart/form-data")]
+    [Authorize]
     public async Task<ActionResult<int>> UploadImage([FromForm] UploadImageCommand command)
     {
         return await Mediator.Send(command);
     }
 
     [HttpDelete("image/{id}")]
+    [Authorize]
     public async Task<ActionResult> DeleteImage(int id)
     {
         await Mediator.Send(new DeleteImageCommand(id));

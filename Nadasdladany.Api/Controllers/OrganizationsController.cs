@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Nadasdladany.Application.Features.Organizations.DTOs;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Nadasdladany.Application.Features.Organizations.Commands;
+using Nadasdladany.Application.Features.Organizations.DTOs;
 using Nadasdladany.Application.Features.Organizations.Queries;
 using Nadasdladany.Domain.Enums;
 
@@ -16,6 +17,7 @@ public class OrganizationsController : ApiControllerBase
 
     [HttpPost]
     [Consumes("multipart/form-data")]
+    [Authorize]
     public async Task<ActionResult<int>> Create([FromForm] CreateOrganizationCommand command)
     {
         return await Mediator.Send(command);

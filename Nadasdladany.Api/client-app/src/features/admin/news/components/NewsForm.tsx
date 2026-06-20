@@ -1,42 +1,80 @@
 import { useState } from 'react';
 import { X, Upload, Loader2, Check } from 'lucide-react';
 import { RichTextEditor } from '../../../../components/ui/RichTextEditor';
+import { type Article } from '../../../../types/Article';
+import { getImageUrl } from '../../../../lib/imageUtils';
+import toast from 'react-hot-toast';
 
 interface Props {
+    article?: Article | null;
     onClose: () => void;
     onSubmit: (formData: FormData) => void;
     loading: boolean;
 }
 
-export const NewsForm = ({ onClose, onSubmit, loading }: Props) => {
-    const [title, setTitle] = useState('');
-    const [categoryId, setCategoryId] = useState('1');
-    const [excerpt, setExcerpt] = useState('');
-    const [content, setContent] = useState('<p>Írja ide a hír tartalmát...</p>');
+export const NewsForm = ({ article, onClose, onSubmit, loading }: Props) => {
+    const [title, setTitle] = useState(article?.title || '');
+    const [categoryId, setCategoryId] = useState(article ? (article as any).categoryId?.toString() || '1' : '1');
+    const [excerpt, setExcerpt] = useState(article?.excerpt || '');
+
+    const [content, setContent] = useState(article?.content || '');
+
     const [image, setImage] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(
+        article?.featuredImageUrl ? getImageUrl(article.featuredImageUrl) : null
+    );
+
+    const [isDragging, setIsDragging] = useState(false);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files ? e.target.files[0] : null;
         if (file) {
-            setImage(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+            processFile(file);
         }
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); };
+    const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragging(true); };
+    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDragging(false);
+    };
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setIsDragging(false);
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            const file = e.dataTransfer.files[0];
+            if (file.type.startsWith('image/')) {
+                processFile(file);
+            } else {
+                toast.error("Kérjük, csak képfájlt (jpg, png, webp) húzzon ide!");
+            }
+        }
+    };
+
+    const processFile = (file: File) => {
+        setImage(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setImagePreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const formData = new FormData();
+
+        if (article) {
+            formData.append('Id', article.id.toString());
+        }
+
         formData.append('Title', title);
         formData.append('CategoryId', categoryId);
         formData.append('Excerpt', excerpt);
         formData.append('Content', content);
+
         if (image) {
-            formData.append('FeaturedImageFile', image);
+            formData.append('Image', image);
         }
 
         onSubmit(formData);
@@ -48,13 +86,17 @@ export const NewsForm = ({ onClose, onSubmit, loading }: Props) => {
 
                 <div className="flex justify-between items-center mb-10">
                     <div>
-                        <h2 className="text-3xl font-serif font-bold text-primary">Új hír közzététele</h2>
-                        <p className="text-gray-400 text-sm mt-1">Töltse ki az alábbi mezőket a hír publikálásához.</p>
+                        <h2 className="text-3xl font-serif font-bold text-primary">
+                            {article ? 'Hír szerkesztése' : 'Új hír közzététele'}
+                        </h2>
+                        <p className="text-gray-400 text-sm mt-1">
+                            {article ? 'Módosítsa a meglévő hír adatait.' : 'Töltse ki az alábbi mezőket a hír publikálásához.'}
+                        </p>
                     </div>
                     <button
                         type="button"
                         onClick={onClose}
-                        className="p-3 hover:bg-secondary rounded-full transition-colors text-primary/50 hover:text-primary"
+                        className="p-3 hover:bg-secondary rounded-full transition-colors text-primary/50 hover:text-primary cursor-pointer"
                     >
                         <X size={24} />
                     </button>
@@ -77,7 +119,7 @@ export const NewsForm = ({ onClose, onSubmit, loading }: Props) => {
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 ml-1">Kategória</label>
                             <select
-                                className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent transition-all appearance-none"
+                                className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent transition-all appearance-none cursor-pointer"
                                 value={categoryId}
                                 onChange={(e) => setCategoryId(e.target.value)}
                             >
@@ -90,23 +132,34 @@ export const NewsForm = ({ onClose, onSubmit, loading }: Props) => {
 
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 ml-1">Borítókép</label>
-                            <div className="relative h-16 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center group hover:border-accent transition-all overflow-hidden">
+
+                            <div
+                                onDragOver={handleDragOver}
+                                onDragEnter={handleDragEnter}
+                                onDragLeave={handleDragLeave}
+                                onDrop={handleDrop}
+                                className={`relative border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center transition-all cursor-pointer group overflow-hidden ${isDragging ? 'border-accent bg-accent/5 scale-[1.01]' : 'border-gray-200 hover:border-accent'}`}
+                            >
                                 {imagePreview ? (
-                                    <div className="flex items-center gap-3 w-full px-4">
-                                        <img src={imagePreview} className="w-10 h-10 object-cover rounded-lg" alt="" />
-                                        <span className="text-sm font-bold text-accent truncate">{image?.name}</span>
-                                        <Check className="ml-auto text-green-500" size={18} />
+                                    <div className="flex flex-col items-center gap-3 w-full">
+                                        <img src={imagePreview} className="w-20 h-20 object-cover rounded-xl shadow-sm border border-gray-100" alt="" />
+                                        <span className="text-xs font-bold text-accent truncate max-w-full px-4 text-center">
+                                            {image ? image.name : 'Jelenlegi borítókép'}
+                                        </span>
+                                        <Check className="text-green-500" size={20} />
                                     </div>
                                 ) : (
-                                    <>
-                                        <Upload className="text-gray-300 mr-2 group-hover:text-accent transition-colors" size={18} />
-                                        <p className="text-xs text-gray-400 font-bold uppercase">Kép kiválasztása</p>
-                                    </>
+                                    <div className="flex flex-col items-center gap-2 pointer-events-none py-2">
+                                        <Upload className={`transition-colors ${isDragging ? 'text-accent' : 'text-gray-300 group-hover:text-accent'}`} size={28} />
+                                        <p className={`text-[10px] font-bold uppercase transition-colors text-center mt-2 ${isDragging ? 'text-accent' : 'text-gray-400 group-hover:text-accent'}`}>
+                                            Kattintson vagy húzza ide a képet
+                                        </p>
+                                    </div>
                                 )}
                                 <input
                                     type="file"
                                     accept="image/*"
-                                    className="absolute inset-0 opacity-0 cursor-pointer"
+                                    className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                     onChange={handleImageChange}
                                 />
                             </div>
@@ -136,19 +189,19 @@ export const NewsForm = ({ onClose, onSubmit, loading }: Props) => {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-colors"
+                            className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-colors cursor-pointer"
                         >
                             Mégse
                         </button>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-[2] bg-primary text-white font-bold py-4 rounded-2xl hover:bg-accent transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 disabled:opacity-50"
+                            className="flex-[2] bg-primary text-white font-bold py-4 rounded-2xl hover:bg-accent transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 disabled:opacity-50 cursor-pointer"
                         >
                             {loading ? (
                                 <Loader2 className="animate-spin" />
                             ) : (
-                                <>Hír közzététele</>
+                                <>{article ? 'Változtatások mentése' : 'Hír közzététele'}</>
                             )}
                         </button>
                     </div>

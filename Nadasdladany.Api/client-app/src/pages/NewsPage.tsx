@@ -83,7 +83,7 @@ export const NewsPage = () => {
                             >
                                 <div className="h-60 overflow-hidden relative bg-gray-100">
                                     <img
-                                        src={article.featuredImageUrl || '/img/castle/DJI_0143_retus2.jpg'}
+                                        src={article.featuredImageUrl || '/Nadasdladany-hero-banner.jpg'}
                                         alt={article.title}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     />

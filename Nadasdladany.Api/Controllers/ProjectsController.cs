@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Nadasdladany.Application.Common.Models;
 using Nadasdladany.Application.Features.Projects.Commands;
 using Nadasdladany.Application.Features.Projects.DTOs;
@@ -15,6 +16,7 @@ public class ProjectsController : ApiControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<int>> Create([FromForm] CreateProjectCommand command)
     {
