@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Nadasdladany.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Nadasdladany.Infrastructure.Persistence;
 namespace Nadasdladany.Infrastructure.Migrations
 {
     [DbContext(typeof(NadasdladanyDbContext))]
-    partial class NadasdladanyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260622154549_AddEventImageUrl")]
+    partial class AddEventImageUrl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

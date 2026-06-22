@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, Upload, Check } from 'lucide-react';
 import { type VillageEvent } from '../../../../api/eventService';
+import { getImageUrl } from '../../../../lib/imageUtils';
+import toast from 'react-hot-toast';
 
 interface Props {
     event?: VillageEvent | null;
     onClose: () => void;
-    onSubmit: (eventData: any) => void;
+    onSubmit: (formData: FormData) => void;
     loading: boolean;
 }
 
@@ -28,16 +30,45 @@ export const EventForm = ({ event, onClose, onSubmit, loading }: Props) => {
     const [isAllDay, setIsAllDay] = useState(event?.isAllDay || false);
     const [description, setDescription] = useState(event?.description || '');
 
+    const [image, setImage] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(event?.imageUrl ? getImageUrl(event.imageUrl) : null);
+    const [isDragging, setIsDragging] = useState(false);
+
+    const processFile = (file: File) => {
+        setImage(file);
+        const reader = new FileReader();
+        reader.onloadend = () => setImagePreview(reader.result as string);
+        reader.readAsDataURL(file);
+    };
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) processFile(e.target.files[0]);
+    };
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault(); setIsDragging(false);
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            const file = e.dataTransfer.files[0];
+            if (file.type.startsWith('image/')) processFile(file);
+            else toast.error("Kérjük, csak képfájlt húzzon ide!");
+        }
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit({
-            title,
-            location,
-            startDate: startDate ? new Date(startDate).toISOString() : new Date().toISOString(),
-            eventUrl: eventUrl || null,
-            isAllDay,
-            description
-        });
+
+        const formData = new FormData();
+        if (event) formData.append('Id', event.id.toString());
+        formData.append('Title', title);
+        formData.append('Location', location);
+        formData.append('StartDate', startDate ? new Date(startDate).toISOString() : new Date().toISOString());
+        formData.append('IsAllDay', isAllDay.toString());
+
+        if (eventUrl) formData.append('EventUrl', eventUrl);
+        if (description) formData.append('Description', description);
+        if (image) formData.append('Image', image);
+
+        onSubmit(formData);
     };
 
     return (
@@ -55,75 +86,71 @@ export const EventForm = ({ event, onClose, onSubmit, loading }: Props) => {
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5 pb-20">
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Esemény megnevezése</label>
-                        <input
-                            type="text" required
-                            className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm font-medium"
-                            placeholder="Pl. Falunap és Elszármazottak Találkozója"
-                            value={title} onChange={(e) => setTitle(e.target.value)}
-                        />
+                        <input type="text" required className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm font-medium" value={title} onChange={(e) => setTitle(e.target.value)} />
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Esemény plakátja / Borítóképe</label>
+                        <div
+                            onDragOver={(e) => e.preventDefault()}
+                            onDragEnter={(e) => { e.preventDefault(); setIsDragging(true); }}
+                            onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDragging(false); }}
+                            onDrop={handleDrop}
+                            className={`relative border-2 border-dashed rounded-2xl p-4 flex flex-col items-center justify-center transition-all cursor-pointer group overflow-hidden ${isDragging ? 'border-accent bg-accent/5 scale-[1.01]' : 'border-gray-200 hover:border-accent'}`}
+                        >
+                            {imagePreview ? (
+                                <div className="flex items-center gap-3 w-full">
+                                    <img src={imagePreview} className="w-12 h-12 object-cover rounded-lg shadow-sm" alt="" />
+                                    <span className="text-xs font-bold text-accent truncate max-w-full">{image ? image.name : 'Jelenlegi borítókép'}</span>
+                                    <Check className="text-green-500 ml-auto" size={16} />
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center gap-1 pointer-events-none py-2">
+                                    <Upload className={`transition-colors ${isDragging ? 'text-accent' : 'text-gray-300 group-hover:text-accent'}`} size={20} />
+                                    <p className={`text-[10px] font-bold uppercase transition-colors text-center mt-1 ${isDragging ? 'text-accent' : 'text-gray-400 group-hover:text-accent'}`}>Plakát feltöltése</p>
+                                </div>
+                            )}
+                            <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={handleImageChange} />
+                        </div>
                     </div>
 
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Helyszín</label>
-                        <input
-                            type="text" required
-                            className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm"
-                            placeholder="Pl. Kastélypark vagy Művelődési Ház"
-                            value={location} onChange={(e) => setLocation(e.target.value)}
-                        />
+                        <input type="text" required className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" value={location} onChange={(e) => setLocation(e.target.value)} />
                     </div>
 
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Időpont (Kezdet)</label>
-                        <input
-                            type="datetime-local" required
-                            className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm text-primary cursor-pointer"
-                            value={startDate} onChange={(e) => setStartDate(e.target.value)}
-                        />
+                        <input type="datetime-local" required className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm text-primary cursor-pointer" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Külső hivatkozás / Facebook URL (Opcionális)</label>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Külső hivatkozás / Facebook (Opcionális)</label>
                         <input
                             type="url"
                             className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm"
                             placeholder="https://facebook.com/events/..."
-                            value={eventUrl} onChange={(e) => setEventUrl(e.target.value)}
+                            value={eventUrl}
+                            onChange={(e) => setEventUrl(e.target.value)}
                         />
                     </div>
 
                     <div className="flex items-center gap-3 py-2 pl-1">
-                        <input
-                            type="checkbox" id="isAllDay"
-                            className="w-4 h-4 rounded text-accent focus:ring-accent border-gray-300 cursor-pointer"
-                            checked={isAllDay} onChange={(e) => setIsAllDay(e.target.checked)}
-                        />
-                        <label htmlFor="isAllDay" className="text-sm font-medium text-primary cursor-pointer select-none">
-                            Egész napos esemény
-                        </label>
+                        <input type="checkbox" id="isAllDay" className="w-4 h-4 rounded text-accent focus:ring-accent border-gray-300 cursor-pointer" checked={isAllDay} onChange={(e) => setIsAllDay(e.target.checked)} />
+                        <label htmlFor="isAllDay" className="text-sm font-medium text-primary cursor-pointer select-none">Egész napos esemény</label>
                     </div>
 
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Rövid tájékoztató szöveg</label>
-                        <textarea
-                            rows={3}
-                            className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm leading-relaxed"
-                            placeholder="Részletes leírás a lakosság számára..."
-                            value={description} onChange={(e) => setDescription(e.target.value)}
-                        />
+                        <textarea rows={3} className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm leading-relaxed" value={description} onChange={(e) => setDescription(e.target.value)} />
                     </div>
 
-                    <div className="pt-6 border-t border-gray-100 flex gap-4">
-                        <button type="button" onClick={onClose} className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-colors cursor-pointer">
-                            Mégse
-                        </button>
-                        <button
-                            type="submit" disabled={loading}
-                            className="flex-[2] bg-primary text-white font-bold py-4 rounded-2xl hover:bg-accent transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-md"
-                        >
+                    <div className="fixed bottom-0 right-0 w-full max-w-md p-6 bg-white/80 backdrop-blur-md border-t border-gray-100 flex gap-4">
+                        <button type="button" onClick={onClose} className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-colors cursor-pointer">Mégse</button>
+                        <button type="submit" disabled={loading} className="flex-[2] bg-primary text-white font-bold py-4 rounded-2xl hover:bg-accent transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-md">
                             {loading ? <Loader2 className="animate-spin" /> : <>{event ? 'Változtatások mentése' : 'Esemény mentése'}</>}
                         </button>
                     </div>

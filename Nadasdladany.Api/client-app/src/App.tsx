@@ -41,6 +41,7 @@ import { AdminElectionsPage } from './pages/admin/AdminElectionsPage';
 import { AdminUsersPage } from './pages/admin/AdminUsersPage';
 import { AboutTownPage } from './pages/AboutTownPage';
 import { AdminMapPage } from './pages/admin/AdminMapPage';
+import { AdminRepresentativesPage } from './pages/admin/AdminRepresentativesPage';
 
 function App() {
     return (
@@ -85,11 +86,11 @@ function App() {
                         <Route path="/admin/organizations" element={<AdminOrganizationsPage />} />
                         <Route path="/admin/newsletter" element={<AdminNewsletterPage />} />
                         <Route path="/admin/data-requests" element={<AdminDataRequestsPage />} />
-                        <Route path="/admin/representatives" element={<AdminOrganizationsPage />} />
                         <Route path="/admin/welcome" element={<AdminWelcomePage />} />
                         <Route path="/admin/elections" element={<AdminElectionsPage />} />
                         <Route path="/admin/users" element={<AdminUsersPage />} />
                         <Route path="/admin/map" element={<AdminMapPage />} />
+                        <Route path="/admin/representatives" element={<AdminRepresentativesPage />} />
                     </Route>
                 </Routes>
 

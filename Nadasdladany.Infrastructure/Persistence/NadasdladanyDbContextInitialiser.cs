@@ -89,37 +89,6 @@ public class NadasdladanyDbContextInitialiser
             await _context.SaveChangesAsync();
         }
 
-        if (!_context.Events.Any())
-        {
-            _context.Events.Add(new Event
-            {
-                Title = "Nádasdladányi Falunap és Kulturális Fesztivál",
-                Slug = "nadasdladanyi-falunap-2026",
-                Description = "Szeretettel várunk minden kedves helyi lakost és idelátogató vendéget az év legnagyobb közösségi rendezvényére a Kastélypark melletti rendezvénytéren!",
-                Location = "8145 Nádasdladány, Rendezvénytér (Kastélypark mellett)",
-                StartDate = DateTime.UtcNow.AddDays(30),
-                IsAllDay = true,
-                Organizer = "Önkormányzat",
-                IsPublished = true
-            });
-
-            await _context.SaveChangesAsync();
-        }
-
-        if (!_context.SiteSettings.Any())
-        {
-            _context.SiteSettings.Add(new SiteSetting
-            {
-                HistoryText = "Nádasdladány nevét az egykor itt elterülő hatalmas nádasokról és lápvidékről kapta. A település története szorosan összefonódott a gróf Nádasdy családdal, akik a 19. század második felében a község központjává tették birtokaikat, lendületet adva a térség ipari és kulturális fejlődésének. A lakosság évszázadokon át mezőgazdasággal és tőzegkitermeléssel foglalkozott.",
-
-                CoatOfArmsText = "Községünk címere csücskös talpú, álló katonai pajzs. A kék mezőben zöld halmon egy jobbra lépő, arany csőrű és lábú, ezüst tollazatú kócsag látható, amely felemelt jobb lábával egy arany követ tart. A kócsag a települést egykor körülölelő mocsárvilág és természetvédelem jelképe, míg a kő az éberséget és az összetartozást szimbolizálja.",
-                CoatOfArmsImageUrl = "/img/branding/coat-of-arms.png",
-
-                LandmarksText = "A település büszkesége a historizáló, Tudor-stílusú Nádasdy-kastély, melyet gyönyörű tájképi kert övez. Ugyancsak kiemelkedő építészeti emlékünk a neogótikus Szent Ilona római katolikus templom, melyet Hauszmann Alajos tervezett, és a Nádasdy család mauzóleumaként is szolgál, de a falu utcáit járva számos hangulatos, régi hivatali épületet és emlékhelyet is felfedezhetünk."
-            });
-            await _context.SaveChangesAsync();
-        }
-
         if (!_context.Organizations.Any())
         {
             _context.Organizations.AddRange(

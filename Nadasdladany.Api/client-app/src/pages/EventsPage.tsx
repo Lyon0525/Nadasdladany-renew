@@ -6,7 +6,7 @@ import { MainLayout } from '../layouts/MainLayout';
 import { Seo } from '../components/common/Seo';
 import apiClient from '../api/apiClient';
 import { cn } from '../lib/utils';
-import { MiniCalendar } from '../components/common/MiniCalendar';
+import { getImageUrl } from '../lib/imageUtils';
 
 interface Event {
     id: number;
@@ -19,6 +19,7 @@ interface Event {
     isAllDay: boolean;
     organizer?: string;
     isPublished: boolean;
+    imageUrl?: string;
 }
 
 export const EventsPage = () => {
@@ -27,12 +28,8 @@ export const EventsPage = () => {
     const [filter, setFilter] = useState<'upcoming' | 'past'>('upcoming');
 
     useEffect(() => {
-        console.log("Események lekérése a következő címről: /api/events...");
-
         apiClient.get('/events')
             .then(response => {
-                console.log("Szerver válasz érkezett:", response.data);
-
                 if (Array.isArray(response.data)) {
                     setEvents(response.data);
                 } else if (response.data && Array.isArray(response.data.items)) {
@@ -66,10 +63,6 @@ export const EventsPage = () => {
                 <div className="mb-12 text-center md:text-left">
                     <h1 className="text-4xl md:text-6xl font-serif font-bold text-primary mb-4">Események & Programok</h1>
                     <p className="text-gray-500 max-w-2xl">Böngésszen Nádasdladány kulturális, sport és önkormányzati rendezvényei között.</p>
-                </div>
-
-                <div className="mb-20">
-                    <MiniCalendar />
                 </div>
 
                 <div className="flex gap-2 mb-12 justify-center md:justify-start">
@@ -114,10 +107,9 @@ export const EventsPage = () => {
                                     transition={{ delay: index * 0.05 }}
                                     className="bg-white rounded-[32px] overflow-hidden border border-gray-50 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group relative"
                                 >
-                                    {/* Kép konténer gyári kastélyos háttérképpel */}
                                     <div className="h-52 overflow-hidden relative bg-gray-100">
                                         <img
-                                            src="/Nadasdladany-hero-banner.jpg"
+                                            src={event.imageUrl ? getImageUrl(event.imageUrl) : "/Nadasdladany-hero-banner.jpg"}
                                             alt={event.title}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                         />

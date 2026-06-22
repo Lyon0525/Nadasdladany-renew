@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Nadasdladany.Application.Common.Exceptions;
 using Nadasdladany.Application.Interfaces.Common;
 using Nadasdladany.Domain.Entities;
@@ -18,6 +19,7 @@ public record UpdateEventCommand : IRequest
     public string? Organizer { get; init; }
     public string? ContactInfo { get; init; }
     public string? EventUrl { get; init; }
+    public IFormFile? Image { get; init; }
 }
 
 public class UpdateEventCommandValidator : AbstractValidator<UpdateEventCommand>
@@ -37,11 +39,13 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand>
 {
     private readonly IApplicationDbContext _context;
     private readonly ISlugService _slugService;
+    private readonly IFileService _fileService;
 
-    public UpdateEventCommandHandler(IApplicationDbContext context, ISlugService slugService)
+    public UpdateEventCommandHandler(IApplicationDbContext context, ISlugService slugService, IFileService fileService)
     {
         _context = context;
         _slugService = slugService;
+        _fileService = fileService;
     }
 
     public async Task Handle(UpdateEventCommand request, CancellationToken cancellationToken)
@@ -59,6 +63,16 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand>
         entity.ContactInfo = request.ContactInfo;
         entity.EventUrl = request.EventUrl;
         entity.Slug = _slugService.GenerateSlug(request.Title);
+
+        if (request.Image != null)
+        {
+            if (!string.IsNullOrEmpty(entity.ImageUrl))
+            {
+                _fileService.DeleteFile(entity.ImageUrl);
+            }
+
+            entity.ImageUrl = await _fileService.UploadFileAsync(request.Image, "events");
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
     }

@@ -11,6 +11,7 @@ export interface VillageEvent {
     isAllDay: boolean;
     organizer?: string;
     eventUrl?: string;
+    imageUrl?: string;
 }
 
 export const eventService = {
@@ -22,12 +23,12 @@ export const eventService = {
         const response = await apiClient.get<VillageEvent>(`/events/${slug}`);
         return response.data;
     },
-    updateEvent: async (id: number, eventData: any) => {
-        await apiClient.put(`/events/${id}`, eventData);
-    },
-    createEvent: async (event: any) => {
-        const response = await apiClient.post<VillageEvent>('/events', event);
+    createEvent: async (formData: FormData) => {
+        const response = await apiClient.post<number>('/events', formData);
         return response.data;
+    },
+    updateEvent: async (id: number, formData: FormData) => {
+        await apiClient.put(`/events/${id}`, formData);
     },
     deleteEvent: async (id: number) => {
         await apiClient.delete(`/events/${id}`);

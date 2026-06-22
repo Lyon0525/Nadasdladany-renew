@@ -5,6 +5,7 @@ import { EventForm } from '../../features/admin/events/components/EventForm';
 import { Trash2, CalendarPlus, MapPin, Clock, Edit2, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { getImageUrl } from '../../lib/imageUtils'; // 🌟 ÚJ: Képek megjelenítése a listában
 
 export const AdminEventsPage = () => {
     const [events, setEvents] = useState<VillageEvent[]>([]);
@@ -44,15 +45,14 @@ export const AdminEventsPage = () => {
         setIsFormOpen(true);
     };
 
-    const handleSubmit = async (eventData: any) => {
+    const handleSubmit = async (formData: FormData) => {
         setLoading(true);
         try {
             if (editingEvent) {
-                eventData.id = editingEvent.id;
-                await eventService.updateEvent(editingEvent.id, eventData);
+                await eventService.updateEvent(editingEvent.id, formData);
                 toast.success("Esemény sikeresen frissítve!");
             } else {
-                await eventService.createEvent(eventData);
+                await eventService.createEvent(formData);
                 toast.success("Esemény sikeresen közzétéve!");
             }
             setIsFormOpen(false);
@@ -93,7 +93,14 @@ export const AdminEventsPage = () => {
                     <tbody className="divide-y divide-gray-50 text-sm">
                         {events.map((event) => (
                             <tr key={event.id} className="hover:bg-gray-50/50 transition-colors group">
-                                <td className="px-8 py-5 font-bold text-primary">{event.title}</td>
+                                <td className="px-8 py-5 font-bold text-primary">
+                                    <div className="flex items-center gap-4">
+                                        {event.imageUrl && (
+                                            <img src={getImageUrl(event.imageUrl)} className="w-10 h-10 rounded-lg object-cover border border-gray-100" alt="" />
+                                        )}
+                                        <span className="font-bold text-primary">{event.title}</span>
+                                    </div>
+                                </td>
                                 <td className="px-8 py-5 text-gray-500">
                                     <span className="flex items-center gap-1.5">
                                         <Clock size={14} className="text-accent" />

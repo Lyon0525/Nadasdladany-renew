@@ -4,6 +4,7 @@ import { ArrowLeft, Calendar, MapPin, Clock, User, Loader2 } from 'lucide-react'
 import { MainLayout } from '../layouts/MainLayout';
 import { Seo } from '../components/common/Seo';
 import apiClient from '../api/apiClient';
+import { getImageUrl } from '../lib/imageUtils';
 
 interface Event {
     id: number;
@@ -15,6 +16,7 @@ interface Event {
     endDate?: string;
     isAllDay: boolean;
     organizer?: string;
+    imageUrl?: string;
 }
 
 export const EventDetailPage = () => {
@@ -25,7 +27,6 @@ export const EventDetailPage = () => {
 
     useEffect(() => {
         if (slug) {
-            // Lekérjük a rendezvényeket a meglévő kollekcióból, és kikeresik slug szerint
             apiClient.get('/events')
                 .then(response => {
                     const items = Array.isArray(response.data) ? response.data : (response.data?.items || []);
@@ -44,7 +45,11 @@ export const EventDetailPage = () => {
 
     return (
         <MainLayout>
-            <Seo title={event.title} description={event.description} image="/Nadasdladany-hero-banner.jpg" />
+            <Seo
+                title={event.title}
+                description={event.description}
+                image={event.imageUrl ? getImageUrl(event.imageUrl) : "/Nadasdladany-hero-banner.jpg"}
+            />
 
             <div className="max-w-4xl mx-auto px-6 py-12">
                 <button
@@ -93,8 +98,12 @@ export const EventDetailPage = () => {
                     </div>
                 </header>
 
-                <div className="relative h-[450px] rounded-[40px] overflow-hidden mb-16 shadow-2xl">
-                    <img src="/Nadasdladany-hero-banner.jpg" alt={event.title} className="w-full h-full object-cover" />
+                <div className="relative h-[450px] rounded-[40px] overflow-hidden mb-16 shadow-2xl bg-gray-100">
+                    <img
+                        src={event.imageUrl ? getImageUrl(event.imageUrl) : "/Nadasdladany-hero-banner.jpg"}
+                        alt={event.title}
+                        className="w-full h-full object-cover"
+                    />
                 </div>
 
                 <div className="prose prose-lg prose-slate max-w-none shadow-sm bg-white p-8 md:p-16 rounded-[40px] border border-gray-50">

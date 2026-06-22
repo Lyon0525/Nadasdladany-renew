@@ -29,7 +29,7 @@ public class EventsController : ApiControllerBase
 
     [HttpPut("{id}")]
     [Authorize]
-    public async Task<ActionResult> Update(int id, UpdateEventCommand command)
+    public async Task<ActionResult> Update(int id, [FromForm] UpdateEventCommand command)
     {
         if (id != command.Id) return BadRequest("Az URL ID nem egyezik a küldött ID-val.");
 

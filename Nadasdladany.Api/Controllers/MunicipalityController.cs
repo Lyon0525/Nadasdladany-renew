@@ -6,27 +6,38 @@ using Nadasdladany.Application.Features.Municipality.Queries;
 
 namespace Nadasdladany.Api.Controllers;
 
-public class MunicipalityController : ApiControllerBase
+[Route("api/municipality/representatives")]
+public class RepresentativesController : ApiControllerBase
 {
-    [HttpGet("representatives")]
-    public async Task<ActionResult<List<RepresentativeDto>>> GetRepresentatives()
+    [HttpGet]
+    public async Task<ActionResult<List<RepresentativeDto>>> GetAll()
     {
         return await Mediator.Send(new GetRepresentativesQuery());
     }
 
-    [HttpPut("office-info")]
+    [HttpPost]
     [Authorize]
-    public async Task<ActionResult> UpdateOfficeInfo(UpdateOfficeInfoCommand command)
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<int>> Create([FromForm] CreateRepresentativeCommand command)
     {
+        return await Mediator.Send(command);
+    }
+
+    [HttpPut("{id}")]
+    [Authorize]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult> Update(int id, [FromForm] UpdateRepresentativeCommand command)
+    {
+        if (id != command.Id) return BadRequest();
         await Mediator.Send(command);
         return NoContent();
     }
 
-    [HttpPost("representatives")]
-    [Consumes("multipart/form-data")]
+    [HttpDelete("{id}")]
     [Authorize]
-    public async Task<ActionResult<int>> CreateRepresentative([FromForm] CreateRepresentativeCommand command)
+    public async Task<ActionResult> Delete(int id)
     {
-        return await Mediator.Send(command);
+        await Mediator.Send(new DeleteRepresentativeCommand(id));
+        return NoContent();
     }
 }

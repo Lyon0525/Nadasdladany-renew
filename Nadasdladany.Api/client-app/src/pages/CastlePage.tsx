@@ -95,7 +95,7 @@ export const CastlePage = () => {
                     >
                         <div className="absolute -inset-4 border border-accent/20 rounded-[40px] rotate-3" />
                         <img
-                            src="/castle/castle_inside.jpg"
+                            src="/castle/castle_inside.jpeg"
                             className="relative rounded-[40px] shadow-2xl z-10"
                             alt="Kastély belső"
                         />
