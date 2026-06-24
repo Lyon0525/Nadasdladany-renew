@@ -4,10 +4,9 @@ import apiClient from '../api/apiClient';
 import { type DocumentFile } from '../types/Municipality';
 import { type PaginatedResult } from '../api/articleService';
 import { DocumentItem } from '../features/documents/components/DocumentItem';
-import { electionApiService } from '../api/electionApiService'; // 🌟 Csak az API-t importáljuk, az interfészt helyben pontosítjuk
+import { electionApiService } from '../api/electionApiService';
 import { Vote, FileText, Search, BarChart3, Users, CheckCircle2, Percent } from 'lucide-react';
 
-// 🌟 Lokális, szigorúan típusos interfészek a hiba elhárítására
 interface CandidateResult {
     candidateName: string;
     organization: string;
@@ -22,7 +21,7 @@ export interface ElectionResult {
     registeredVoters: number;
     votedCount: number;
     turnoutPercentage: number;
-    results: CandidateResult[]; // 🌟 Itt pontosítottuk a belső rács típusát
+    results: CandidateResult[];
 }
 
 export const ElectionsPage = () => {
@@ -48,7 +47,6 @@ export const ElectionsPage = () => {
 
     useEffect(() => {
         setLoadingApi(true);
-        // Az any-re való kényszerítés itt biztosítja az átjárhatóságot az API szerviz és a pontosított interfész között
         electionApiService.getNadasdladanyResults(selectedYear)
             .then((data) => setApiResult(data as any))
             .finally(() => setLoadingApi(false));
@@ -56,7 +54,7 @@ export const ElectionsPage = () => {
 
     const filteredDocs = docs.filter(doc => {
         const matchesSearch = doc.title.toLowerCase().includes(searchTerm.toLowerCase());
-        const docYear = new Date(doc.publishedDate).getFullYear().toString();
+        const docYear = new Date(doc.createdAt).getFullYear().toString();
         const containsYear = doc.title.includes(selectedYear.toString()) || docYear === selectedYear.toString();
         return matchesSearch && containsYear;
     });
@@ -138,7 +136,6 @@ export const ElectionsPage = () => {
                                     <h3 className="text-2xl font-serif font-bold text-primary mb-6">{apiResult.type} - Nádasdladány</h3>
 
                                     <div className="space-y-6">
-                                        {/* 🌟 JAVÍTÁS: Explicit típusdefiníciók a paramétereknek a fordítási hiba megszüntetésére */}
                                         {apiResult.results.map((candidate: CandidateResult, i: number) => (
                                             <div key={i} className="space-y-2">
                                                 <div className="flex justify-between items-end text-sm">

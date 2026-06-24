@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LogIn, Lock, Mail, Loader2, Eye, EyeOff } from 'lucide-react';
-import { authService } from '../api/authService';
+import { useAuth } from '../contexts/AuthContext';
 
 export const LoginPage = () => {
+    const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -21,7 +22,7 @@ export const LoginPage = () => {
         setError('');
 
         try {
-            await authService.login({ email, password });
+            await login({ email, password });
             navigate('/admin/dashboard');
         } catch (err) {
             setError('Helytelen e-mail cím vagy jelszó!');

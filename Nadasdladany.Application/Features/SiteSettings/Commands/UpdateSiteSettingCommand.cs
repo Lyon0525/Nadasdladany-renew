@@ -6,7 +6,7 @@ using Nadasdladany.Domain.Entities;
 
 namespace Nadasdladany.Application.Features.SiteSettings.Commands;
 
-public record UpdateSiteSettingCommand : IRequest<int>
+public record UpdateSiteSettingCommand : IRequest
 {
     public int Id { get; init; }
     public required string MayorName { get; init; }
@@ -17,9 +17,13 @@ public record UpdateSiteSettingCommand : IRequest<int>
     public required string CoatOfArmsText { get; init; }
     public IFormFile? CoatOfArmsImage { get; init; }
     public required string LandmarksText { get; init; }
+    public string? CommitteeText { get; init; }
+    public string? ContactAddress { get; init; }
+    public string? ContactEmail { get; init; }
+    public string? ContactPhone { get; init; }
 }
 
-public class UpdateSiteSettingCommandHandler : IRequestHandler<UpdateSiteSettingCommand, int>
+public class UpdateSiteSettingCommandHandler : IRequestHandler<UpdateSiteSettingCommand>
 {
     private readonly IApplicationDbContext _context;
     private readonly IFileService _fileService;
@@ -30,51 +34,57 @@ public class UpdateSiteSettingCommandHandler : IRequestHandler<UpdateSiteSetting
         _fileService = fileService;
     }
 
-    public async Task<int> Handle(UpdateSiteSettingCommand request, CancellationToken cancellationToken)
+    public async Task Handle(UpdateSiteSettingCommand request, CancellationToken cancellationToken)
     {
-        var settings = await _context.SiteSettings.FirstOrDefaultAsync(cancellationToken);
+        var entity = await _context.SiteSettings.FirstOrDefaultAsync(cancellationToken);
 
-        bool isNew = false;
-        if (settings == null)
+        if (entity == null)
         {
-            settings = new SiteSetting();
-            isNew = true;
+            entity = new SiteSetting
+            {
+                MayorName = request.MayorName,
+                WelcomeTitle = request.WelcomeTitle,
+                WelcomeText = request.WelcomeText,
+                HistoryText = request.HistoryText,
+                CoatOfArmsText = request.CoatOfArmsText,
+                LandmarksText = request.LandmarksText,
+                CommitteeText = request.CommitteeText,
+                ContactAddress = request.ContactAddress,
+                ContactEmail = request.ContactEmail,
+                ContactPhone = request.ContactPhone
+            };
+            _context.SiteSettings.Add(entity);
         }
-
-        settings.MayorName = request.MayorName;
-        settings.WelcomeTitle = request.WelcomeTitle;
-        settings.WelcomeText = request.WelcomeText;
-        settings.HistoryText = request.HistoryText;
-        settings.CoatOfArmsText = request.CoatOfArmsText;
-        settings.LandmarksText = request.LandmarksText;
+        else
+        {
+            entity.MayorName = request.MayorName;
+            entity.WelcomeTitle = request.WelcomeTitle;
+            entity.WelcomeText = request.WelcomeText;
+            entity.HistoryText = request.HistoryText;
+            entity.CoatOfArmsText = request.CoatOfArmsText;
+            entity.LandmarksText = request.LandmarksText;
+            entity.CommitteeText = request.CommitteeText;
+            entity.ContactAddress = request.ContactAddress;
+            entity.ContactEmail = request.ContactEmail;
+            entity.ContactPhone = request.ContactPhone;
+        }
 
         if (request.MayorImage != null)
         {
-            if (!string.IsNullOrEmpty(settings.MayorImageUrl))
-            {
-                _fileService.DeleteFile(settings.MayorImageUrl);
-            }
+            if (!string.IsNullOrEmpty(entity.MayorImageUrl))
+                _fileService.DeleteFile(entity.MayorImageUrl);
 
-            settings.MayorImageUrl = await _fileService.UploadFileAsync(request.MayorImage, "mayor");
+            entity.MayorImageUrl = await _fileService.UploadFileAsync(request.MayorImage, "settings");
         }
 
         if (request.CoatOfArmsImage != null)
         {
-            if (!string.IsNullOrEmpty(settings.CoatOfArmsImageUrl))
-            {
-                _fileService.DeleteFile(settings.CoatOfArmsImageUrl);
-            }
+            if (!string.IsNullOrEmpty(entity.CoatOfArmsImageUrl))
+                _fileService.DeleteFile(entity.CoatOfArmsImageUrl);
 
-            settings.CoatOfArmsImageUrl = await _fileService.UploadFileAsync(request.CoatOfArmsImage, "branding");
-        }
-
-        if (isNew)
-        {
-            _context.SiteSettings.Add(settings);
+            entity.CoatOfArmsImageUrl = await _fileService.UploadFileAsync(request.CoatOfArmsImage, "settings");
         }
 
         await _context.SaveChangesAsync(cancellationToken);
-
-        return settings.Id;
     }
 }

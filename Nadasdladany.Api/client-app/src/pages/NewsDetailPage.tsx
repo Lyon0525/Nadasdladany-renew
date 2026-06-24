@@ -15,7 +15,6 @@ export const NewsDetailPage = () => {
 
     useEffect(() => {
         if (slug) {
-            // Lekérjük a híreket (mivel a backend PaginatedList-et ad vissza, a .items-ben van a tömb)
             apiClient.get('/articles?pageNumber=1&pageSize=100')
                 .then(res => {
                     const items = res.data?.items || [];

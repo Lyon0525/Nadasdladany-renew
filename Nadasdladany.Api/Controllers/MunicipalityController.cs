@@ -28,7 +28,8 @@ public class RepresentativesController : ApiControllerBase
     [Consumes("multipart/form-data")]
     public async Task<ActionResult> Update(int id, [FromForm] UpdateRepresentativeCommand command)
     {
-        if (id != command.Id) return BadRequest();
+        if (id != command.Id) return BadRequest("Az URL ID nem egyezik a küldött ID-val.");
+
         await Mediator.Send(command);
         return NoContent();
     }

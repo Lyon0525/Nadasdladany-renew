@@ -7,6 +7,16 @@ export const municipalityService = {
         const response = await apiClient.get<Representative[]>('/municipality/representatives');
         return response.data;
     },
+    createRepresentative: async (formData: FormData) => {
+        const response = await apiClient.post<number>('/municipality/representatives', formData);
+        return response.data;
+    },
+    updateRepresentative: async (id: number, formData: FormData) => {
+        await apiClient.put(`/municipality/representatives/${id}`, formData);
+    },
+    deleteRepresentative: async (id: number) => {
+        await apiClient.delete(`/municipality/representatives/${id}`);
+    },
 
     getDocuments: async (category?: string, pageNumber = 1, pageSize = 50) => {
         const response = await apiClient.get<PaginatedResult<DocumentFile>>('/documents', {

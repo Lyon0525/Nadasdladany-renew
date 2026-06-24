@@ -29,7 +29,6 @@ const createCustomIcon = (type: string) => {
     });
 };
 
-// 🌟 JAVÍTÁS: Eltávolítva a hibás 'public' kulcsszó, így az export újra szabályos
 export const VillageMap = () => {
     const [locations, setLocations] = useState<VillageLocation[]>([]);
     const [mapInstance, setMapInstance] = useState<L.Map | null>(null);

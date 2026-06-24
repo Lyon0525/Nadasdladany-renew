@@ -1,8 +1,24 @@
 import { useState } from 'react';
 import { X, Upload, Loader2, Check } from 'lucide-react';
-import { type Representative } from '../../../../api/representativeService';
+import { type Representative } from '../../../../types/Municipality';
 import { getImageUrl } from '../../../../lib/imageUtils';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import toast from 'react-hot-toast';
+
+const repSchema = z.object({
+    name: z.string().min(1, "A név megadása kötelező!").max(150),
+    role: z.string(),
+    customTitleOverride: z.string().optional(),
+    email: z.string().email("Érvénytelen e-mail cím!").optional().or(z.literal('')),
+    phoneNumber: z.string().optional(),
+    receptionHoursInfo: z.string().optional(),
+    displayOrder: z.coerce.number().int().default(10),
+    biography: z.string().optional()
+});
+
+type RepFormData = z.infer<typeof repSchema>;
 
 interface Props {
     representative?: Representative | null;
@@ -12,14 +28,19 @@ interface Props {
 }
 
 export const RepresentativeForm = ({ representative, onClose, onSubmit, loading }: Props) => {
-    const [name, setName] = useState(representative?.name || '');
-    const [role, setRole] = useState(representative?.role?.toString() || '2'); // 2 = Képviselő
-    const [customTitleOverride, setCustomTitleOverride] = useState(representative?.customTitleOverride || '');
-    const [email, setEmail] = useState(representative?.email || '');
-    const [phoneNumber, setPhoneNumber] = useState(representative?.phoneNumber || '');
-    const [receptionHoursInfo, setReceptionHoursInfo] = useState(representative?.receptionHoursInfo || '');
-    const [biography, setBiography] = useState(representative?.biography || '');
-    const [displayOrder, setDisplayOrder] = useState(representative?.displayOrder?.toString() || '10');
+    const { register, handleSubmit, formState: { errors } } = useForm<RepFormData>({
+        resolver: zodResolver(repSchema) as any,
+        defaultValues: {
+            name: representative?.name || '',
+            role: representative?.role?.toString() || '2',
+            customTitleOverride: representative?.customTitleOverride || '',
+            email: representative?.email || '',
+            phoneNumber: representative?.phoneNumber || '',
+            receptionHoursInfo: representative?.receptionHoursInfo || '',
+            displayOrder: representative?.displayOrder || 10,
+            biography: representative?.biography || ''
+        }
+    });
 
     const [image, setImage] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(
@@ -47,20 +68,19 @@ export const RepresentativeForm = ({ representative, onClose, onSubmit, loading 
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const onValidSubmit = (data: RepFormData) => {
         const formData = new FormData();
 
         if (representative) formData.append('Id', representative.id.toString());
-        formData.append('Name', name);
-        formData.append('Role', role);
-        formData.append('DisplayOrder', displayOrder);
+        formData.append('Name', data.name);
+        formData.append('Role', data.role);
+        formData.append('DisplayOrder', data.displayOrder.toString());
 
-        if (customTitleOverride) formData.append('CustomTitleOverride', customTitleOverride);
-        if (email) formData.append('Email', email);
-        if (phoneNumber) formData.append('PhoneNumber', phoneNumber);
-        if (receptionHoursInfo) formData.append('ReceptionHoursInfo', receptionHoursInfo);
-        if (biography) formData.append('Biography', biography);
+        if (data.customTitleOverride) formData.append('CustomTitleOverride', data.customTitleOverride);
+        if (data.email) formData.append('Email', data.email);
+        if (data.phoneNumber) formData.append('PhoneNumber', data.phoneNumber);
+        if (data.receptionHoursInfo) formData.append('ReceptionHoursInfo', data.receptionHoursInfo);
+        if (data.biography) formData.append('Biography', data.biography);
         if (image) formData.append('Image', image);
 
         onSubmit(formData);
@@ -80,16 +100,21 @@ export const RepresentativeForm = ({ representative, onClose, onSubmit, loading 
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6 pb-20">
+                <form onSubmit={handleSubmit(onValidSubmit)} className="space-y-6 pb-20">
                     <div className="grid grid-cols-2 gap-6">
                         <div className="col-span-2">
-                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Teljes Név</label>
-                            <input type="text" required className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm font-medium" value={name} onChange={(e) => setName(e.target.value)} />
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Teljes Név *</label>
+                            <input
+                                type="text"
+                                className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm font-medium ${errors.name ? 'border-red-400' : 'border-gray-100'}`}
+                                {...register('name')}
+                            />
+                            {errors.name && <p className="text-red-500 text-[10px] font-bold mt-1.5">{errors.name.message}</p>}
                         </div>
 
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Hivatali Szerepkör</label>
-                            <select className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm font-bold text-primary cursor-pointer" value={role} onChange={(e) => setRole(e.target.value)}>
+                            <select className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm font-bold text-primary cursor-pointer" {...register('role')}>
                                 <option value="0">Polgármester</option>
                                 <option value="1">Alpolgármester</option>
                                 <option value="2">Képviselő</option>
@@ -102,7 +127,7 @@ export const RepresentativeForm = ({ representative, onClose, onSubmit, loading 
 
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Egyedi titulus (Opcionális)</label>
-                            <input type="text" placeholder="Pl. Bizottsági Elnök" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" value={customTitleOverride} onChange={(e) => setCustomTitleOverride(e.target.value)} />
+                            <input type="text" placeholder="Pl. Bizottsági Elnök" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" {...register('customTitleOverride')} />
                         </div>
                     </div>
 
@@ -134,28 +159,29 @@ export const RepresentativeForm = ({ representative, onClose, onSubmit, loading 
                     <div className="grid grid-cols-2 gap-6">
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Telefonszám</label>
-                            <input type="text" placeholder="Pl. +36 20 123 4567" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+                            <input type="text" placeholder="Pl. +36 20 123 4567" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" {...register('phoneNumber')} />
                         </div>
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">E-mail cím</label>
-                            <input type="email" placeholder="nev@nadasdladany.hu" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" value={email} onChange={(e) => setEmail(e.target.value)} />
+                            <input type="email" placeholder="nev@nadasdladany.hu" className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm ${errors.email ? 'border-red-400' : 'border-gray-100'}`} {...register('email')} />
+                            {errors.email && <p className="text-red-500 text-[10px] font-bold mt-1.5">{errors.email.message}</p>}
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-6">
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Fogadóóra / Ügyfélfogadás</label>
-                            <input type="text" placeholder="Pl. Minden hónap első kedd" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" value={receptionHoursInfo} onChange={(e) => setReceptionHoursInfo(e.target.value)} />
+                            <input type="text" placeholder="Pl. Minden hónap első kedd" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" {...register('receptionHoursInfo')} />
                         </div>
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Sorrend (Megjelenéshez)</label>
-                            <input type="number" title="Kisebb szám van elöl (1=Polgármester)" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm font-bold text-accent" value={displayOrder} onChange={(e) => setDisplayOrder(e.target.value)} />
+                            <input type="number" title="Kisebb szám van elöl (1=Polgármester)" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm font-bold text-accent" {...register('displayOrder')} />
                         </div>
                     </div>
 
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Bemutatkozás / Életrajz</label>
-                        <textarea rows={5} placeholder="Pár mondatos bemutatkozás a lakosság felé..." className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm leading-relaxed" value={biography} onChange={(e) => setBiography(e.target.value)} />
+                        <textarea rows={5} placeholder="Pár mondatos bemutatkozás a lakosság felé..." className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm leading-relaxed" {...register('biography')} />
                     </div>
 
                     <div className="fixed bottom-0 right-0 w-full max-w-2xl p-6 bg-white/80 backdrop-blur-md border-t border-gray-100 flex gap-4">

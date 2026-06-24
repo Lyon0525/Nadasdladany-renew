@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Nadasdladany.Application.Features.PublicDataRequests.Commands;
 using Nadasdladany.Application.Features.PublicDataRequests.DTOs;
 using Nadasdladany.Application.Features.PublicDataRequests.Queries;
@@ -9,6 +10,7 @@ namespace Nadasdladany.Api.Controllers;
 public class PublicDataRequestsController : ApiControllerBase
 {
     [HttpPost]
+    [EnableRateLimiting("StrictSubmitPolicy")]
     public async Task<ActionResult<int>> Create(CreateDataRequestCommand command)
     {
         return await Mediator.Send(command);

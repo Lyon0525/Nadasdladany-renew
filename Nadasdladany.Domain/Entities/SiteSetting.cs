@@ -14,4 +14,8 @@ public class SiteSetting
     public string CoatOfArmsText { get; set; } = string.Empty;
     public string CoatOfArmsImageUrl { get; set; } = string.Empty;
     public string LandmarksText { get; set; } = string.Empty;
+    public string? CommitteeText { get; set; }
+    public string? ContactAddress { get; set; }
+    public string? ContactEmail { get; set; }
+    public string? ContactPhone { get; set; }
 }

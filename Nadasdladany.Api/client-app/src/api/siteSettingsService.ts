@@ -10,6 +10,10 @@ export interface SiteSetting {
     coatOfArmsText: string;
     coatOfArmsImageUrl: string | null;
     landmarksText: string;
+    committeeText?: string;
+    contactAddress?: string;
+    contactEmail?: string;
+    contactPhone?: string;
 }
 
 export const siteSettingsService = {

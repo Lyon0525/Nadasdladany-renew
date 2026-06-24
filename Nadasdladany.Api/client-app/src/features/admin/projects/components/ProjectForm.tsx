@@ -1,6 +1,20 @@
 import { useState } from 'react';
 import { X, Upload, Loader2, Check } from 'lucide-react';
 import { RichTextEditor } from '../../../../components/ui/RichTextEditor';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const projectSchema = z.object({
+    title: z.string().min(1, "A projekt neve kötelező!").max(250),
+    projectCode: z.string().optional(),
+    totalFunding: z.string().optional(),
+    supportRate: z.string().optional(),
+    excerpt: z.string().max(500).optional(),
+    content: z.string().min(5, "A tartalom kötelező!")
+});
+
+type ProjectFormData = z.infer<typeof projectSchema>;
 
 interface Props {
     onClose: () => void;
@@ -9,12 +23,12 @@ interface Props {
 }
 
 export const ProjectForm = ({ onClose, onSubmit, loading }: Props) => {
-    const [title, setTitle] = useState('');
-    const [projectCode, setProjectCode] = useState('');
-    const [totalFunding, setTotalFunding] = useState('');
-    const [supportRate, setSupportRate] = useState('100%');
-    const [excerpt, setExcerpt] = useState('');
-    const [content, setContent] = useState('<p>Írja ide a pályázat leírását, részleteit...</p>');
+    const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<ProjectFormData>({
+        resolver: zodResolver(projectSchema),
+        defaultValues: { content: '<p>Írja ide a pályázat leírását...</p>', supportRate: '100%' }
+    });
+
+    const contentValue = watch('content');
     const [image, setImage] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -28,18 +42,15 @@ export const ProjectForm = ({ onClose, onSubmit, loading }: Props) => {
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const onValidSubmit = (data: ProjectFormData) => {
         const formData = new FormData();
-        formData.append('Title', title);
-        formData.append('ProjectCode', projectCode);
-        formData.append('TotalFunding', totalFunding);
-        formData.append('SupportRate', supportRate);
-        formData.append('Excerpt', excerpt);
-        formData.append('Content', content);
-        if (image) {
-            formData.append('Image', image);
-        }
+        formData.append('Title', data.title);
+        formData.append('Content', data.content);
+        if (data.projectCode) formData.append('ProjectCode', data.projectCode);
+        if (data.totalFunding) formData.append('TotalFunding', data.totalFunding);
+        if (data.supportRate) formData.append('SupportRate', data.supportRate);
+        if (data.excerpt) formData.append('Excerpt', data.excerpt);
+        if (image) formData.append('Image', image);
         onSubmit(formData);
     };
 
@@ -49,66 +60,48 @@ export const ProjectForm = ({ onClose, onSubmit, loading }: Props) => {
                 <div className="flex justify-between items-center mb-10">
                     <div>
                         <h2 className="text-3xl font-serif font-bold text-primary">Új pályázat rögzítése</h2>
-                        <p className="text-gray-400 text-sm mt-1">Adja meg a nyertes projekt hivatalos adatait.</p>
                     </div>
-                    <button type="button" onClick={onClose} className="p-3 hover:bg-secondary rounded-full text-primary/50 hover:text-primary">
-                        <X size={24} />
-                    </button>
+                    <button type="button" onClick={onClose} className="p-3 hover:bg-secondary rounded-full text-primary/50 cursor-pointer"><X size={24} /></button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-8 pb-20">
+                <form onSubmit={handleSubmit(onValidSubmit)} className="space-y-8 pb-20">
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 ml-1">Projekt megnevezése</label>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 ml-1">Projekt megnevezése *</label>
                         <input
-                            type="text" required
-                            className="w-full border-b-2 border-gray-100 focus:border-accent outline-none py-3 text-xl font-serif text-primary placeholder:text-gray-200 transition-colors"
-                            placeholder="Pl. Belterületi utak felújítása Nádasdladányban"
-                            value={title} onChange={(e) => setTitle(e.target.value)}
+                            type="text"
+                            className={`w-full border-b-2 py-3 text-xl font-serif text-primary outline-none transition-colors ${errors.title ? 'border-red-400' : 'border-gray-100 focus:border-accent'}`}
+                            {...register('title')}
                         />
+                        {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Pályázati azonosító (Kód)</label>
-                            <input
-                                type="text" placeholder="Pl. MFP-UFT/2026"
-                                className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent"
-                                value={projectCode} onChange={(e) => setProjectCode(e.target.value)}
-                            />
+                            <input type="text" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent" {...register('projectCode')} />
                         </div>
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Támogatás összege</label>
-                            <input
-                                type="text" placeholder="Pl. 24 500 000 Ft"
-                                className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent"
-                                value={totalFunding} onChange={(e) => setTotalFunding(e.target.value)}
-                            />
+                            <input type="text" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent" {...register('totalFunding')} />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Támogatási intenzitás</label>
-                            <input
-                                type="text" placeholder="Pl. 100%"
-                                className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent"
-                                value={supportRate} onChange={(e) => setSupportRate(e.target.value)}
-                            />
+                            <input type="text" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent" {...register('supportRate')} />
                         </div>
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Kiemelt kép</label>
-                            <div className="relative h-14 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center group hover:border-accent transition-all overflow-hidden bg-white">
+                            <div className="relative h-14 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center group hover:border-accent overflow-hidden">
                                 {imagePreview ? (
-                                    <div className="flex items-center gap-3 w-full px-4">
+                                    <div className="flex items-center gap-3 px-4 w-full">
                                         <img src={imagePreview} className="w-8 h-8 object-cover rounded-lg" alt="" />
                                         <span className="text-xs font-bold text-accent truncate">{image?.name}</span>
                                         <Check className="ml-auto text-green-500" size={16} />
                                     </div>
                                 ) : (
-                                    <>
-                                        <Upload className="text-gray-300 mr-2 group-hover:text-accent" size={16} />
-                                        <p className="text-xs text-gray-400 font-bold uppercase">Fájl kiválasztása</p>
-                                    </>
+                                    <><Upload className="text-gray-300 mr-2 group-hover:text-accent" size={16} /><p className="text-xs text-gray-400 font-bold uppercase">Fájl kiválasztása</p></>
                                 )}
                                 <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleImageChange} />
                             </div>
@@ -116,26 +109,22 @@ export const ProjectForm = ({ onClose, onSubmit, loading }: Props) => {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Rövid kivonat (Bevezető)</label>
-                        <textarea
-                            rows={2} className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm"
-                            placeholder="A főoldalon és listákban megjelenő rövid összefoglaló..."
-                            value={excerpt} onChange={(e) => setExcerpt(e.target.value)}
-                        />
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Rövid kivonat</label>
+                        <textarea rows={2} className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" {...register('excerpt')} />
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Részletes leírás és tájékoztató</label>
-                        <RichTextEditor content={content} onChange={(html: string) => setContent(html)} />
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Részletes leírás *</label>
+                        <div className={errors.content ? "rounded-3xl border border-red-400" : ""}>
+                            <RichTextEditor content={contentValue} onChange={(html) => setValue('content', html, { shouldValidate: true })} />
+                        </div>
+                        {errors.content && <p className="text-red-500 text-xs mt-2">{errors.content.message}</p>}
                     </div>
 
                     <div className="fixed bottom-0 right-0 w-full max-w-3xl p-6 bg-white/80 backdrop-blur-md border-t border-gray-100 flex gap-4">
-                        <button type="button" onClick={onClose} className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-50">Mégse</button>
-                        <button
-                            type="submit" disabled={loading}
-                            className="flex-[2] bg-primary text-white font-bold py-4 rounded-2xl hover:bg-accent transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                        >
-                            {loading ? <Loader2 className="animate-spin" /> : <>Mentés és Közzététel</>}
+                        <button type="button" onClick={onClose} className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 cursor-pointer">Mégse</button>
+                        <button type="submit" disabled={loading} className="flex-[2] bg-primary text-white font-bold py-4 rounded-2xl hover:bg-accent flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50">
+                            {loading ? <Loader2 className="animate-spin" /> : 'Mentés és Közzététel'}
                         </button>
                     </div>
                 </form>

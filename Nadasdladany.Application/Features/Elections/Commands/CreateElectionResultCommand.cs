@@ -35,7 +35,6 @@ public class CreateElectionResultCommandHandler : IRequestHandler<CreateElection
 
     public async Task<int> Handle(CreateElectionResultCommand request, CancellationToken cancellationToken)
     {
-        // Ha az adott évhez már van adat, töröljük az újak felvitele előtt (felülírás lehetőség)
         var oldEntity = _context.Elections.FirstOrDefault(x => x.Year == request.Year);
         if (oldEntity != null)
         {

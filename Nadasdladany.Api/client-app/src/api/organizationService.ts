@@ -33,5 +33,13 @@ export const organizationService = {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         return response.data;
+    },
+    updateOrganization: async (id: number, formData: FormData) => {
+        await apiClient.put(`/organizations/${id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+    },
+    deleteOrganization: async (id: number) => {
+        await apiClient.delete(`/organizations/${id}`);
     }
 };

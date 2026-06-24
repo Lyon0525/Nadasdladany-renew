@@ -27,10 +27,8 @@ export const InstitutionDetailPage = () => {
 
     useEffect(() => {
         if (slug) {
-            // Lekérjük az intézményeket az éles /api/institutions végpontról
             apiClient.get('/institutions')
                 .then(response => {
-                    // Kezeljük a lapozott (items) és a sima tömb elrendezést is biztonságosan
                     const items = Array.isArray(response.data) ? response.data : (response.data?.items || []);
                     const found = items.find((i: Institution) => i.slug === slug);
                     setInst(found || null);
@@ -48,7 +46,6 @@ export const InstitutionDetailPage = () => {
             <Seo title={inst.name} description={inst.description} />
 
             <div className="max-w-5xl mx-auto px-6 py-12">
-                {/* Vissza gomb */}
                 <button
                     onClick={() => navigate('/intezmenyek')}
                     className="flex items-center gap-2 text-primary/50 hover:text-accent transition-colors mb-12 group uppercase text-xs font-bold tracking-widest cursor-pointer"
@@ -57,7 +54,6 @@ export const InstitutionDetailPage = () => {
                     Vissza az intézményekhez
                 </button>
 
-                {/* Fejléc */}
                 <header className="mb-12 text-center md:text-left">
                     <span className="px-4 py-1 bg-accent/10 text-accent text-xs font-bold uppercase tracking-widest rounded-full mb-4 inline-block">
                         Községi Intézmény
@@ -68,7 +64,6 @@ export const InstitutionDetailPage = () => {
                 </header>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
-                    {/* Bal oldali információs panel (Vezető, Cím, Kapcsolat, Nyitvatartás) */}
                     <div className="lg:col-span-1 space-y-6">
                         <div className="bg-white rounded-[40px] border border-gray-100 p-8 shadow-sm space-y-6">
                             <h3 className="text-lg font-serif font-bold text-primary border-b border-gray-50 pb-3 flex items-center gap-2">
@@ -118,7 +113,6 @@ export const InstitutionDetailPage = () => {
                             </div>
                         </div>
 
-                        {/* Nyitvatartási idő blokk */}
                         {inst.openingHours && (
                             <div className="bg-white rounded-[40px] border border-gray-100 p-8 shadow-sm space-y-4">
                                 <h3 className="text-lg font-serif font-bold text-primary border-b border-gray-50 pb-3 flex items-center gap-2">
@@ -131,15 +125,12 @@ export const InstitutionDetailPage = () => {
                         )}
                     </div>
 
-                    {/* Jobb oldali részletes leírás és tartalom panel */}
                     <div className="lg:col-span-2 bg-white p-8 md:p-12 rounded-[40px] border border-gray-100 shadow-sm">
                         {inst.content ? (
-                            /* Ha van részletes HTML tartalom az adminból feltöltve */
                             <div className="prose prose-slate max-w-none prose-headings:font-serif prose-headings:text-primary prose-p:leading-relaxed">
                                 <div dangerouslySetInnerHTML={{ __html: inst.content }} className="content-area" />
                             </div>
                         ) : (
-                            /* Alapértelmezett leírás, ha nincs külön HTML kód */
                             <div className="space-y-4">
                                 <h3 className="text-xl font-serif font-bold text-primary mb-4">Az intézményről</h3>
                                 <p className="text-gray-600 leading-relaxed text-sm whitespace-pre-line">

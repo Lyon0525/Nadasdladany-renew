@@ -37,7 +37,7 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, int
 {
     private readonly IApplicationDbContext _context;
     private readonly ISlugService _slugService;
-    private readonly IFileService _fileService; // 🌟 ÚJ: Fájlkezelő szerviz
+    private readonly IFileService _fileService;
 
     public CreateEventCommandHandler(IApplicationDbContext context, ISlugService slugService, IFileService fileService)
     {

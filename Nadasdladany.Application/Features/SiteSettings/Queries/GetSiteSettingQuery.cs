@@ -30,7 +30,11 @@ public class GetSiteSettingQueryHandler : IRequestHandler<GetSiteSettingQuery, S
                 WelcomeText = string.Empty,
                 HistoryText = string.Empty,
                 CoatOfArmsText = string.Empty,
-                LandmarksText = string.Empty
+                LandmarksText = string.Empty,
+                CommitteeText = string.Empty,
+                ContactAddress = string.Empty,
+                ContactEmail = string.Empty,
+                ContactPhone = string.Empty
             };
         }
 
@@ -44,7 +48,11 @@ public class GetSiteSettingQueryHandler : IRequestHandler<GetSiteSettingQuery, S
             HistoryText = settings.HistoryText,
             CoatOfArmsText = settings.CoatOfArmsText,
             CoatOfArmsImageUrl = settings.CoatOfArmsImageUrl,
-            LandmarksText = settings.LandmarksText
+            LandmarksText = settings.LandmarksText,
+            CommitteeText = settings.CommitteeText,
+            ContactAddress = settings.ContactAddress,
+            ContactEmail = settings.ContactEmail,
+            ContactPhone = settings.ContactPhone
         };
     }
 }

@@ -20,7 +20,6 @@
     }
 }
 
-/* Globális Leaflet finomítások a Nádasdladány dizájnhoz */
 .leaflet-popup-content-wrapper {
     background: white !important;
     color: #1a2e1a !important;
@@ -39,7 +38,6 @@
     font-family: inherit !important;
 }
 
-/* Eltünteti a gombok körüli Leaflet-specifikus fura fehér háttereket */
 .custom-leaflet-icon {
     background: transparent !important;
     border: none !important;

@@ -28,5 +28,6 @@ public interface IApplicationDbContext
     DbSet<OfficeStaff> OfficeStaff { get; }
     DbSet<ElectionResultEntity> Elections { get; }
     DbSet<VillageLocation> VillageLocations { get; }
+    DbSet<ContactMessage> ContactMessages { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

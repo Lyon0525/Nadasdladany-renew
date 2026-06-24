@@ -42,60 +42,78 @@ import { AdminUsersPage } from './pages/admin/AdminUsersPage';
 import { AboutTownPage } from './pages/AboutTownPage';
 import { AdminMapPage } from './pages/admin/AdminMapPage';
 import { AdminRepresentativesPage } from './pages/admin/AdminRepresentativesPage';
+import { AdminMessagesPage } from './pages/admin/AdminMessagesPage';
+import { AuthProvider } from './contexts/AuthContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            refetchOnWindowFocus: false,
+            retry: 1,
+            staleTime: 5 * 60 * 1000,
+        },
+    },
+});
 
 function App() {
     return (
         <HelmetProvider>
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/hirek/:slug" element={<NewsDetailPage />} />
-                    <Route path="/hirek" element={<NewsPage />} />
-                    <Route path="/kastely" element={<CastlePage />} />
-                    <Route path="/onkormanyzat" element={<MunicipalityPage />} />
-                    <Route path="/intezmenyek" element={<InstitutionsPage />} />
-                    <Route path="/intezmenyek/:slug" element={<InstitutionDetailPage />} />
-                    <Route path="/kapcsolat" element={<ContactPage />} />
-                    <Route path="/onkormanyzat" element={<MunicipalityPage />} />
-                    <Route path="/onkormanyzat/:id" element={<RepresentativeDetailPage />} />
-                    <Route path="/galeria" element={<GalleryPage />} />
-                    <Route path="/galeria/:slug" element={<AlbumDetailPage />} />
-                    <Route path="/esemenyek" element={<EventsPage />} />
-                    <Route path="/esemenyek/:slug" element={<EventDetailPage />} />
-                    <Route path="/admin/login" element={<LoginPage />} />
-                    <Route path="/palyazatok" element={<ProjectsPage />} />
-                    <Route path="/valasztasok" element={<ElectionsPage />} />
-                    <Route path="/kozossegek" element={<OrganizationsPage />} />
-                    <Route path="/allasok" element={<CareersPage />} />
-                    <Route path="/ugyintezes" element={<EAdministrationPage />} />
-                    <Route path="/kozerdeku-adatigenyles" element={<PublicDataRequestPage />} />
-                    <Route path="/hivatal" element={<OfficePage />} />
-                    <Route path="/jogi-nyilatkozatok" element={<LegalPage />} />
-                    <Route path="/dokumentumok" element={<DocumentsPage />} />
-                    <Route path="/a-kozsegrol" element={<AboutTownPage />} />
+            <QueryClientProvider client={queryClient}>
+                <AuthProvider>
+                    <BrowserRouter>
+                        <Routes>
+                            <Route path="/" element={<HomePage />} />
+                            <Route path="/hirek/:slug" element={<NewsDetailPage />} />
+                            <Route path="/hirek" element={<NewsPage />} />
+                            <Route path="/kastely" element={<CastlePage />} />
+                            <Route path="/onkormanyzat" element={<MunicipalityPage />} />
+                            <Route path="/intezmenyek" element={<InstitutionsPage />} />
+                            <Route path="/intezmenyek/:slug" element={<InstitutionDetailPage />} />
+                            <Route path="/kapcsolat" element={<ContactPage />} />
+                            <Route path="/onkormanyzat" element={<MunicipalityPage />} />
+                            <Route path="/onkormanyzat/:id" element={<RepresentativeDetailPage />} />
+                            <Route path="/galeria" element={<GalleryPage />} />
+                            <Route path="/galeria/:slug" element={<AlbumDetailPage />} />
+                            <Route path="/esemenyek" element={<EventsPage />} />
+                            <Route path="/esemenyek/:slug" element={<EventDetailPage />} />
+                            <Route path="/admin/login" element={<LoginPage />} />
+                            <Route path="/palyazatok" element={<ProjectsPage />} />
+                            <Route path="/valasztasok" element={<ElectionsPage />} />
+                            <Route path="/kozossegek" element={<OrganizationsPage />} />
+                            <Route path="/allasok" element={<CareersPage />} />
+                            <Route path="/ugyintezes" element={<EAdministrationPage />} />
+                            <Route path="/kozerdeku-adatigenyles" element={<PublicDataRequestPage />} />
+                            <Route path="/hivatal" element={<OfficePage />} />
+                            <Route path="/jogi-nyilatkozatok" element={<LegalPage />} />
+                            <Route path="/dokumentumok" element={<DocumentsPage />} />
+                            <Route path="/a-kozsegrol" element={<AboutTownPage />} />
 
-                    <Route element={<ProtectedRoute />}>
-                        <Route path="/admin/dashboard" element={<DashboardPage />} />
-                        <Route path="/admin/news" element={<AdminNewsPage />} />
-                        <Route path="/admin/events" element={<AdminEventsPage />} />
-                        <Route path="/admin/documents" element={<AdminDocumentsPage />} />
-                        <Route path="/admin/gallery" element={<AdminGalleryPage />} />
-                        <Route path="/admin/projects" element={<AdminProjectsPage />} />
-                        <Route path="/admin/careers" element={<AdminCareersPage />} />
-                        <Route path="/admin/institutions" element={<AdminInstitutionsPage />} />
-                        <Route path="/admin/organizations" element={<AdminOrganizationsPage />} />
-                        <Route path="/admin/newsletter" element={<AdminNewsletterPage />} />
-                        <Route path="/admin/data-requests" element={<AdminDataRequestsPage />} />
-                        <Route path="/admin/welcome" element={<AdminWelcomePage />} />
-                        <Route path="/admin/elections" element={<AdminElectionsPage />} />
-                        <Route path="/admin/users" element={<AdminUsersPage />} />
-                        <Route path="/admin/map" element={<AdminMapPage />} />
-                        <Route path="/admin/representatives" element={<AdminRepresentativesPage />} />
-                    </Route>
-                </Routes>
+                            <Route element={<ProtectedRoute />}>
+                                <Route path="/admin/dashboard" element={<DashboardPage />} />
+                                <Route path="/admin/news" element={<AdminNewsPage />} />
+                                <Route path="/admin/events" element={<AdminEventsPage />} />
+                                <Route path="/admin/documents" element={<AdminDocumentsPage />} />
+                                <Route path="/admin/gallery" element={<AdminGalleryPage />} />
+                                <Route path="/admin/projects" element={<AdminProjectsPage />} />
+                                <Route path="/admin/careers" element={<AdminCareersPage />} />
+                                <Route path="/admin/institutions" element={<AdminInstitutionsPage />} />
+                                <Route path="/admin/organizations" element={<AdminOrganizationsPage />} />
+                                <Route path="/admin/newsletter" element={<AdminNewsletterPage />} />
+                                <Route path="/admin/data-requests" element={<AdminDataRequestsPage />} />
+                                <Route path="/admin/welcome" element={<AdminWelcomePage />} />
+                                <Route path="/admin/elections" element={<AdminElectionsPage />} />
+                                <Route path="/admin/users" element={<AdminUsersPage />} />
+                                <Route path="/admin/map" element={<AdminMapPage />} />
+                                <Route path="/admin/representatives" element={<AdminRepresentativesPage />} />
+                                <Route path="/admin/messages" element={<AdminMessagesPage />} />
+                            </Route>
+                        </Routes>
 
-                <Toaster position="bottom-right" reverseOrder={false} />
-            </BrowserRouter>
+                        <Toaster position="bottom-right" reverseOrder={false} />
+                    </BrowserRouter>
+                </AuthProvider>
+            </QueryClientProvider>
         </HelmetProvider>
     );
 }

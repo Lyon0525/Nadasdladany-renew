@@ -1,12 +1,14 @@
 export interface Representative {
     id: number;
     name: string;
-    role: string;
-    customTitle?: string;
+    role: number | string;
+    customTitleOverride?: string;
     email?: string;
     phoneNumber?: string;
+    receptionHoursInfo?: string;
     imageUrl?: string;
     biography?: string;
+    displayOrder: number;
 }
 
 export interface DocumentFile {
@@ -16,6 +18,7 @@ export interface DocumentFile {
     filePath: string;
     fileType: string;
     fileSizeInBytes: number;
-    publishedDate: string;
+    createdAt: string;
+    documentCategoryId: number;
     categoryName: string;
 }

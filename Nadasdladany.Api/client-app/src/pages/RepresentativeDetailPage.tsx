@@ -28,9 +28,8 @@ export const RepresentativeDetailPage = () => {
     if (loading) return <div className="h-screen flex items-center justify-center font-serif italic text-accent text-2xl animate-pulse">Képviselői adatlap betöltése...</div>;
     if (!rep) return <div className="h-screen flex items-center justify-center font-serif text-2xl">A tisztségviselő nem található.</div>;
 
-    // Szerepkör szöveges meghatározása
     const getRoleTitle = (role: string | number) => {
-        if (rep.customTitle) return rep.customTitle;
+        if (rep.customTitleOverride) return rep.customTitleOverride;
         const r = Number(role);
         if (r === 0 || role === 'Polgarmester') return 'Polgármester';
         if (r === 1 || role === 'Alpolgarmester') return 'Alpolgármester';
@@ -97,7 +96,6 @@ export const RepresentativeDetailPage = () => {
                             )}
                         </div>
 
-                        {/* Kiegészítő infó blokk */}
                         <div className="bg-secondary/40 p-6 rounded-[24px] border border-gray-100/60 text-xs text-gray-400 flex items-start gap-3 leading-relaxed">
                             <Landmark size={16} className="text-accent flex-shrink-0 mt-0.5" />
                             <span>

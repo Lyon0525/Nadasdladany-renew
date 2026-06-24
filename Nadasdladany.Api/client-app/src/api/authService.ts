@@ -15,6 +15,14 @@ export const authService = {
         }
         return response.data;
     },
+    extendSession: async () => {
+        const response = await apiClient.post<LoginResponse>('/Auth/extend-session');
+        if (response.data.token) {
+            sessionStorage.setItem('admin_token', response.data.token);
+            sessionStorage.setItem('user', JSON.stringify(response.data));
+        }
+        return response.data;
+    },
     logout: () => {
         sessionStorage.removeItem('admin_token');
         sessionStorage.removeItem('user');

@@ -51,7 +51,6 @@ export const Navbar = () => {
         return () => document.removeEventListener('keydown', down);
     }, []);
 
-    // Close "Több" dropdown on outside click
     useEffect(() => {
         const handler = (e: MouseEvent) => {
             if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
@@ -74,8 +73,6 @@ export const Navbar = () => {
                     : "py-6 bg-primary/90 backdrop-blur-md shadow-lg"
             )}>
                 <div className="max-w-7xl mx-auto w-full flex items-center gap-x-4">
-
-                    {/* Logo */}
                     <Link to="/" className="flex items-center gap-3 group flex-shrink-0">
                         <img
                             src="/nadasdladany-cimer.png"
@@ -88,7 +85,6 @@ export const Navbar = () => {
                         )}>Nádasdladány</span>
                     </Link>
 
-                    {/* Primary links */}
                     <div className="hidden lg:flex items-center gap-x-0.5 flex-1 justify-center">
                         {primaryLinks.map((link) => (
                             <Link
@@ -108,7 +104,6 @@ export const Navbar = () => {
                             </Link>
                         ))}
 
-                        {/* Több dropdown */}
                         <div className="relative" ref={moreRef}>
                             <button
                                 onClick={() => setMoreOpen(o => !o)}
@@ -153,7 +148,6 @@ export const Navbar = () => {
                         </div>
                     </div>
 
-                    {/* Search button */}
                     <button
                         onClick={() => setIsSearchOpen(true)}
                         className={cn(
@@ -165,7 +159,6 @@ export const Navbar = () => {
                         <span className="text-xs font-bold uppercase tracking-widest hidden xl:inline">Keresés</span>
                     </button>
 
-                    {/* Mobile controls */}
                     <div className="lg:hidden flex items-center gap-4 flex-shrink-0 ml-auto">
                         <button onClick={() => setIsSearchOpen(true)} className={cn("cursor-pointer", isScrolled ? "text-primary" : "text-white")}>
                             <Search size={24} />
@@ -177,7 +170,6 @@ export const Navbar = () => {
                 </div>
             </nav>
 
-            {/* Mobile menu — all links */}
             <AnimatePresence>
                 {mobileMenuOpen && (
                     <motion.div

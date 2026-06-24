@@ -1,18 +1,14 @@
 import { type ReactNode } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import {
-    LayoutDashboard, Newspaper, FileText, Image as ImageIcon,
-    LogOut, ChevronLeft, Award, Building2, Users, Briefcase,
-    Mail, ShieldAlert, UserCheck, Map, Calendar
-} from 'lucide-react';
-import { authService } from '../api/authService';
+import { LayoutDashboard, Newspaper, FileText, Image as ImageIcon, LogOut, ChevronLeft, Award, Building2, Users, Briefcase, Mail, ShieldAlert, UserCheck, Map, Calendar } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 export const AdminLayout = ({ children }: { children: ReactNode }) => {
     const navigate = useNavigate();
-    const user = authService.getCurrentUser();
+    const { user, logout } = useAuth();
 
     const handleLogout = () => {
-        authService.logout();
+        logout();
         navigate('/');
     };
 
@@ -32,6 +28,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
         { name: 'Hírlevél küldés', path: '/admin/newsletter', icon: <Mail size={20} /> },
         { name: 'Adatigénylések', path: '/admin/data-requests', icon: <ShieldAlert size={20} /> },
         { name: 'Felhasználók', path: '/admin/users', icon: <Users size={20} /> },
+        { name: 'Beérkező üzenetek', path: '/admin/messages', icon: <Mail size={20} /> },
     ];
 
     return (

@@ -19,8 +19,6 @@ public record UpdateRepresentativeCommand : IRequest
     public string? ReceptionHoursInfo { get; init; }
     public string? Biography { get; init; }
     public int DisplayOrder { get; init; }
-
-    // 🌟 Kép fogadása
     public IFormFile? Image { get; init; }
 }
 

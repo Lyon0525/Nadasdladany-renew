@@ -23,7 +23,6 @@ public class DeleteRepresentativeCommandHandler : IRequestHandler<DeleteRepresen
         var entity = await _context.Representatives.FindAsync(new object[] { request.Id }, cancellationToken);
         if (entity == null) throw new NotFoundException(nameof(Representative), request.Id);
 
-        // Kép törlése a szerverről
         if (!string.IsNullOrEmpty(entity.ImageUrl))
         {
             _fileService.DeleteFile(entity.ImageUrl);

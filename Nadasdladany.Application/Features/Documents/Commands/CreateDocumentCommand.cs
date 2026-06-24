@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Nadasdladany.Application.Interfaces.Common;
 using Nadasdladany.Domain.Entities;
+using System.IO;
 
 namespace Nadasdladany.Application.Features.Documents.Commands;
 
@@ -20,7 +21,24 @@ public class CreateDocumentCommandValidator : AbstractValidator<CreateDocumentCo
     {
         RuleFor(v => v.Title).MaximumLength(255).NotEmpty();
         RuleFor(v => v.CategoryId).NotEmpty();
-        RuleFor(v => v.File).NotNull();
+        RuleFor(v => v.File)
+            .NotNull().WithMessage("Kérjük, válasszon ki egy fájlt a feltöltéshez!")
+            .Must(HaveSupportedExtension).WithMessage("Nem engedélyezett fájltípus! (Csak PDF, DOC, DOCX, XLS, XLSX, ZIP, RAR engedélyezett)")
+            .Must(BeUnderMaxSize).WithMessage("A fájl mérete nem haladhatja meg a 25 MB-ot.");
+    }
+
+    private bool HaveSupportedExtension(IFormFile file)
+    {
+        if (file == null) return false;
+        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var allowedExtensions = new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".zip", ".rar" };
+        return allowedExtensions.Contains(ext);
+    }
+
+    private bool BeUnderMaxSize(IFormFile file)
+    {
+        if (file == null) return false;
+        return file.Length <= 25 * 1024 * 1024;
     }
 }
 

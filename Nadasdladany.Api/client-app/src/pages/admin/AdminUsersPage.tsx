@@ -1,41 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { AdminLayout } from '../../layouts/AdminLayout';
 import { authService } from '../../api/authService';
 import { Trash2, UserPlus, Shield, Key, Loader2, X } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 export const AdminUsersPage = () => {
-    const [users, setUsers] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsFormOpen] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [submitting, setSubmitting] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const loadUsers = () => {
-        setLoading(true);
-        authService.getAllUsers()
-            .then(setUsers)
-            .catch(() => toast.error("Nem sikerült betölteni a felhasználókat."))
-            .finally(() => setLoading(false));
-    };
-
-    useEffect(() => { loadUsers(); }, []);
+    const { data: users = [], refetch, isLoading } = useQuery({
+        queryKey: ['adminUsers'],
+        queryFn: () => authService.getAllUsers()
+    });
 
     const handleCreateUser = async (e: React.FormEvent) => {
         e.preventDefault();
-        setSubmitting(true);
+        setIsSubmitting(true);
         try {
             await authService.registerUser({ email, password });
             toast.success("Új adminisztrátor sikeresen hozzáadva!");
             setIsFormOpen(false);
             setEmail('');
             setPassword('');
-            loadUsers();
+            refetch();
         } catch (err: any) {
             toast.error(err.response?.data?.message || "Hiba történt a regisztráció során.");
         } finally {
-            setSubmitting(false);
+            setIsSubmitting(false);
         }
     };
 
@@ -44,7 +38,7 @@ export const AdminUsersPage = () => {
         try {
             await authService.deleteUser(id);
             toast.success("Hozzáférés sikeresen megvonva.");
-            loadUsers();
+            refetch();
         } catch (err: any) {
             toast.error(err.response?.data?.message || "Nem sikerült törölni a felhasználót.");
         }
@@ -57,16 +51,13 @@ export const AdminUsersPage = () => {
                     <h1 className="text-4xl font-serif font-bold text-primary">Felhasználói Hozzáférések</h1>
                     <p className="text-gray-400 mt-1">A nádasdladányi hivatali portál adminisztrátora és tartalomkezelő munkatársai.</p>
                 </div>
-                <button
-                    onClick={() => setIsFormOpen(true)}
-                    className="flex items-center gap-2 bg-accent text-primary font-bold px-6 py-3.5 rounded-full text-xs uppercase tracking-wider hover:scale-105 transition-all shadow-md cursor-pointer"
-                >
+                <button onClick={() => setIsFormOpen(true)} className="flex items-center gap-2 bg-accent text-primary font-bold px-6 py-3.5 rounded-full text-xs uppercase tracking-wider hover:scale-105 transition-all shadow-md cursor-pointer">
                     <UserPlus size={16} /> Új admin felvétele
                 </button>
             </div>
 
             <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden max-w-4xl">
-                {loading ? (
+                {isLoading ? (
                     <div className="text-center py-20 font-serif italic text-accent text-lg animate-pulse">Felhasználói fiókok egyeztetése...</div>
                 ) : (
                     <table className="w-full text-left text-sm border-collapse">
@@ -78,20 +69,14 @@ export const AdminUsersPage = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50 text-gray-600 font-medium">
-                            {users.map((u) => (
+                            {users.map((u: any) => (
                                 <tr key={u.id} className="hover:bg-gray-50/40 transition-colors">
                                     <td className="p-5 pl-8 font-bold text-primary">{u.email}</td>
                                     <td className="p-5">
-                                        <span className="text-xs bg-blue-50 text-blue-600 font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1">
-                                            <Shield size={12} /> Administrator
-                                        </span>
+                                        <span className="text-xs bg-blue-50 text-blue-600 font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1"><Shield size={12} /> Administrator</span>
                                     </td>
                                     <td className="p-5 text-right pr-8">
-                                        <button
-                                            onClick={() => handleDelete(u.id)}
-                                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all cursor-pointer"
-                                            title="Fiók törlése"
-                                        >
+                                        <button onClick={() => handleDelete(u.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all cursor-pointer" title="Fiók törlése">
                                             <Trash2 size={16} />
                                         </button>
                                     </td>
@@ -102,7 +87,6 @@ export const AdminUsersPage = () => {
                 )}
             </div>
 
-            {/* Új felhasználó Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-primary/20 backdrop-blur-sm z-[150] flex items-center justify-center p-4">
                     <div className="bg-white rounded-[32px] p-8 max-w-md w-full shadow-2xl border border-gray-100 relative animate-in zoom-in-95 duration-200">
@@ -122,9 +106,9 @@ export const AdminUsersPage = () => {
                                     <input type="text" required placeholder="Minimum 6 karakter, kis/nagybetű" className="w-full bg-gray-50 border border-gray-200/60 p-3.5 pl-11 rounded-xl outline-none focus:border-accent text-sm" value={password} onChange={e => setPassword(e.target.value)} />
                                 </div>
                             </div>
-                            <button type="submit" disabled={submitting} className="w-full bg-primary text-white font-bold py-4 rounded-xl text-xs uppercase tracking-wider hover:bg-accent transition-all flex items-center justify-center gap-2 mt-2 cursor-pointer shadow-md disabled:opacity-50">
-                                {submitting ? <Loader2 className="animate-spin" size={14} /> : null}
-                                {submitting ? "Fiók létrehozása..." : "Adminisztrátor hozzáadása"}
+                            <button type="submit" disabled={isSubmitting} className="w-full bg-primary text-white font-bold py-4 rounded-xl text-xs uppercase tracking-wider hover:bg-accent transition-all flex items-center justify-center gap-2 mt-2 cursor-pointer shadow-md disabled:opacity-50">
+                                {isSubmitting ? <Loader2 className="animate-spin" size={14} /> : null}
+                                {isSubmitting ? "Fiók létrehozása..." : "Adminisztrátor hozzáadása"}
                             </button>
                         </form>
                     </div>

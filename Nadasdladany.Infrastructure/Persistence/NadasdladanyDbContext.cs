@@ -47,6 +47,7 @@ public class NadasdladanyDbContext : IdentityDbContext<ApplicationUser>, IApplic
     public DbSet<OfficeStaff> OfficeStaff => Set<OfficeStaff>();
     public DbSet<ElectionResultEntity> Elections => Set<ElectionResultEntity>();
     public DbSet<VillageLocation> VillageLocations => Set<VillageLocation>();
+    public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

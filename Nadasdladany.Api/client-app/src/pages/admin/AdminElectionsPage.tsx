@@ -36,7 +36,6 @@ export const AdminElectionsPage = () => {
         const updated = [...candidates];
         updated[index] = { ...updated[index], [field]: value };
 
-        // Automatikus százalékos kalkuláció ha változik a szavazat és a leadott szavazatok száma érvényes
         if (field === 'votesCount' && votedCount > 0) {
             updated[index].percentage = Number(((value / votedCount) * 100).toFixed(2));
         }
@@ -79,8 +78,6 @@ export const AdminElectionsPage = () => {
             </div>
 
             <form onSubmit={handleSave} className="space-y-8 bg-white p-8 md:p-10 rounded-[32px] border border-gray-100 shadow-sm max-w-5xl">
-
-                {/* Alapadatok Szekció */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Választás Éve</label>
@@ -98,7 +95,6 @@ export const AdminElectionsPage = () => {
                     </div>
                 </div>
 
-                {/* Részvételi statisztikák */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-2">
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Választásra jogosultak száma (fő)</label>
@@ -123,7 +119,6 @@ export const AdminElectionsPage = () => {
                     </div>
                 </div>
 
-                {/* Jelöltek listája */}
                 <div className="space-y-4 pt-6 border-t border-gray-50">
                     <div className="flex justify-between items-center">
                         <h3 className="text-lg font-serif font-bold text-primary">Szavazóköri jelöltek és eredmények</h3>
@@ -188,7 +183,6 @@ export const AdminElectionsPage = () => {
                     </div>
                 </div>
 
-                {/* Mentés gomb */}
                 <div className="pt-4 border-t border-gray-100 flex justify-end">
                     <button
                         type="submit" disabled={loading}

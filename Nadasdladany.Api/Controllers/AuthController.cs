@@ -1,17 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using Nadasdladany.Infrastructure.Identity;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Nadasdladany.Infrastructure.Identity;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace Nadasdladany.Api.Controllers;
 
@@ -43,14 +37,38 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "Helytelen e-mail cím vagy jelszó!" });
         }
 
-        var roles = await _userManager.GetRolesAsync(user);
+        return GenerateTokenForUser(user);
+    }
+
+    [HttpPost("extend-session")]
+    [Authorize]
+    public async Task<IActionResult> ExtendSession()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        return GenerateTokenForUser(user);
+    }
+
+    private IActionResult GenerateTokenForUser(ApplicationUser user)
+    {
+        var roles = _userManager.GetRolesAsync(user).Result;
         var primaryRole = roles.FirstOrDefault() ?? "Administrator";
 
         var jwtSettings = _configuration.GetSection("JwtSettings");
         var secretKey = jwtSettings.GetValue<string>("Key") ?? "ValamiNagyonHosszuEsTitkosKulcsMinimum32Karakter!";
         var issuer = jwtSettings.GetValue<string>("Issuer") ?? "NadasdladanyApi";
         var audience = jwtSettings.GetValue<string>("Audience") ?? "NadasdladanyReact";
-        var durationInMinutes = jwtSettings.GetValue<double>("DurationInMinutes", 1440);
+        var durationInMinutes = jwtSettings.GetValue<double>("DurationInMinutes", 30);
 
         var authClaims = new List<Claim>
         {

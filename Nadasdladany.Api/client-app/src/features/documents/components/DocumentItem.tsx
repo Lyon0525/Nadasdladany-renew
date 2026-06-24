@@ -3,14 +3,16 @@ import { type DocumentFile } from '../../../types/Municipality';
 
 export const DocumentItem = ({ doc }: { doc: DocumentFile }) => {
     const getIcon = (type: string) => {
-        if (type.includes('pdf')) return <FileText className="text-red-500" />;
-        if (type.includes('xls')) return <FileSpreadsheet className="text-green-600" />;
-        if (type.includes('zip')) return <FileArchive className="text-orange-500" />;
+        if (!type) return <FileText className="text-blue-500" />;
+        const lowerType = type.toLowerCase();
+        if (lowerType.includes('pdf')) return <FileText className="text-red-500" />;
+        if (lowerType.includes('xls') || lowerType.includes('csv')) return <FileSpreadsheet className="text-green-600" />;
+        if (lowerType.includes('zip') || lowerType.includes('rar')) return <FileArchive className="text-orange-500" />;
         return <FileText className="text-blue-500" />;
     };
 
     const formatSize = (bytes: number) => {
-        if (bytes === 0) return '0 Bytes';
+        if (!bytes || bytes === 0) return '0 Bytes';
         const k = 1024;
         const sizes = ['Bytes', 'KB', 'MB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -26,13 +28,14 @@ export const DocumentItem = ({ doc }: { doc: DocumentFile }) => {
                 <h4 className="font-bold text-primary mb-1">{doc.title}</h4>
                 <div className="flex gap-4 text-xs text-gray-400">
                     <span className="bg-gray-100 px-2 py-0.5 rounded text-primary font-medium">{doc.categoryName}</span>
-                    <span>{new Date(doc.publishedDate).toLocaleDateString('hu-HU')}</span>
+                    <span>{new Date(doc.createdAt).toLocaleDateString('hu-HU')}</span>
                     <span>{formatSize(doc.fileSizeInBytes)}</span>
                 </div>
             </div>
             <a
                 href={doc.filePath}
                 target="_blank"
+                rel="noreferrer"
                 className="p-3 rounded-full hover:bg-accent hover:text-white transition-colors text-accent border border-accent/20"
             >
                 <Download size={20} />

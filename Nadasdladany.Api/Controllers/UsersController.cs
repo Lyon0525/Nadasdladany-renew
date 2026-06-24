@@ -6,7 +6,7 @@ using Nadasdladany.Infrastructure.Identity;
 
 namespace Nadasdladany.Api.Controllers;
 
-[Authorize(Roles = "Administrator")] // Csak a főkormányzó admin érheti el
+[Authorize(Roles = "Administrator")]
 [ApiController]
 [Route("api/users")]
 public class UsersController : ControllerBase
@@ -45,7 +45,6 @@ public class UsersController : ControllerBase
         if (!result.Succeeded)
             return BadRequest(new { message = string.Join(", ", result.Errors.Select(e => e.Description)) });
 
-        // Alapértelmezetten hozzáadjuk az Administrator szerepkört
         await _userManager.AddToRoleAsync(user, "Administrator");
 
         return Ok(new { message = "Felhasználó sikeresen létrehozva!" });
@@ -57,7 +56,6 @@ public class UsersController : ControllerBase
         var user = await _userManager.FindByIdAsync(id);
         if (user == null) return NotFound();
 
-        // Védelem: Ne tudja magát törölni az éppen bejelentkezett admin
         var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (currentUserId == id) return BadRequest(new { message = "Saját magát nem törölheti az adminisztrátor!" });
 

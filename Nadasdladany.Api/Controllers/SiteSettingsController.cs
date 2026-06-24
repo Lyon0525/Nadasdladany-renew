@@ -20,8 +20,9 @@ public class SiteSettingsController : ApiControllerBase
     [HttpPut]
     [Consumes("multipart/form-data")]
     [Authorize]
-    public async Task<ActionResult<int>> UpdateSettings([FromForm] UpdateSiteSettingCommand command)
+    public async Task<ActionResult> UpdateSettings([FromForm] UpdateSiteSettingCommand command)
     {
-        return Ok(await Mediator.Send(command));
+        await Mediator.Send(command);
+        return NoContent();
     }
 }

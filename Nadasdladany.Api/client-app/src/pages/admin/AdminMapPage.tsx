@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'; // 🌟 JAVÍTÁS: 'useRef' törölve
+import React, { useEffect, useState } from 'react';
 import { AdminLayout } from '../../layouts/AdminLayout';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import { villageMapService, type VillageLocation } from '../../api/villageMapService';
@@ -6,8 +6,9 @@ import L from 'leaflet';
 import { renderToStaticMarkup } from 'react-dom/server';
 import {
     Landmark, Cross, Building, MapPin, Trash2, Plus, Save, Loader2,
-    HeartPulse, Pill, Baby, GraduationCap, Trophy, Home, Edit3, X // 🌟 JAVÍTÁS: 'Tent' törölve
+    HeartPulse, Pill, Baby, GraduationCap, Trophy, Home, Edit3, X
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import 'leaflet/dist/leaflet.css';
 
@@ -36,44 +37,29 @@ const createMapIcon = (type: string) => {
 };
 
 const MapEvents = ({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) => {
-    useMapEvents({
-        click(e) { onMapClick(e.latlng.lat, e.latlng.lng); }
-    });
+    useMapEvents({ click(e) { onMapClick(e.latlng.lat, e.latlng.lng); } });
     return null;
 };
 
 export const AdminMapPage = () => {
-    const [locations, setLocations] = useState<VillageLocation[]>([]);
-    const [loading, setLoading] = useState(true);
     const [editingId, setEditingId] = useState<number | null>(null);
-
     const [name, setName] = useState('');
     const [address, setAddress] = useState('');
     const [description, setDescription] = useState('');
     const [iconType, setIconType] = useState('default');
     const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-
     const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
 
-    useEffect(() => { loadLocations(); }, []);
-    useEffect(() => { if (mapInstance) { setTimeout(() => mapInstance.invalidateSize(), 250); } }, [mapInstance]);
+    const { data: locations = [], refetch, isLoading } = useQuery({
+        queryKey: ['adminMapLocations'],
+        queryFn: () => villageMapService.getLocations()
+    });
 
-    const loadLocations = async () => {
-        try {
-            const data = await villageMapService.getLocations();
-            setLocations(data);
-        } catch {
-            toast.error("Nem sikerült betölteni a térkép pontjait.");
-        } finally {
-            setLoading(false);
-        }
-    };
+    useEffect(() => { if (mapInstance) { setTimeout(() => mapInstance.invalidateSize(), 250); } }, [mapInstance]);
 
     const handleMapClick = (lat: number, lng: number) => {
         setCoords({ lat, lng });
-        if (!editingId) {
-            clearFormExceptCoords();
-        }
+        if (!editingId) clearFormExceptCoords();
         toast.success("Kattintási pont rögzítve!");
     };
 
@@ -84,10 +70,7 @@ export const AdminMapPage = () => {
         setDescription(loc.description || '');
         setIconType(loc.iconType);
         setCoords({ lat: loc.latitude, lng: loc.longitude });
-
-        if (mapInstance) {
-            mapInstance.flyTo([loc.latitude, loc.longitude], 16);
-        }
+        if (mapInstance) mapInstance.flyTo([loc.latitude, loc.longitude], 16);
     };
 
     const cancelEditOrCreation = () => {
@@ -110,17 +93,12 @@ export const AdminMapPage = () => {
         try {
             await villageMapService.saveLocation({
                 id: editingId || undefined,
-                name: name,
-                address: address,
-                description: description,
-                iconType: iconType,
-                latitude: coords.lat,
-                longitude: coords.lng
+                name, address, description, iconType,
+                latitude: coords.lat, longitude: coords.lng
             });
-
             toast.success(editingId ? "Helyszín sikeresen módosítva!" : "Új helyszín elmentve az adatbázisba!");
             cancelEditOrCreation();
-            loadLocations();
+            refetch();
         } catch {
             toast.error("Hiba történt a mentés során.");
         }
@@ -133,7 +111,7 @@ export const AdminMapPage = () => {
             await villageMapService.deleteLocation(id);
             toast.success("Helyszín eltávolítva.");
             if (editingId === id) cancelEditOrCreation();
-            loadLocations();
+            refetch();
         } catch {
             toast.error("Nem sikerült törölni a helyszínt.");
         }
@@ -142,23 +120,18 @@ export const AdminMapPage = () => {
     const handleMarkerDragEnd = async (loc: VillageLocation, newLat: number, newLng: number) => {
         try {
             await villageMapService.saveLocation({
-                id: loc.id,
-                name: loc.name,
-                address: loc.address,
-                description: loc.description,
-                iconType: loc.iconType,
-                latitude: newLat,
-                longitude: newLng
+                id: loc.id, name: loc.name, address: loc.address, description: loc.description,
+                iconType: loc.iconType, latitude: newLat, longitude: newLng
             });
             toast.success(`"${loc.name}" pozíciója frissítve!`);
             if (editingId === loc.id) setCoords({ lat: newLat, lng: newLng });
-            loadLocations();
+            refetch();
         } catch {
             toast.error("Nem sikerült elmenteni az új pozíciót.");
         }
     };
 
-    if (loading) {
+    if (isLoading) {
         return (
             <AdminLayout>
                 <div className="h-96 flex flex-col items-center justify-center gap-3">
@@ -192,34 +165,20 @@ export const AdminMapPage = () => {
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Megnevezés</label>
-                                    <input
-                                        type="text" required className="w-full bg-secondary/30 border border-gray-200/60 p-3 rounded-xl text-sm outline-none focus:border-accent text-primary font-medium"
-                                        value={name} onChange={e => setName(e.target.value)} placeholder="pl. Faluház"
-                                    />
+                                    <input type="text" required className="w-full bg-secondary/30 border border-gray-200/60 p-3 rounded-xl text-sm outline-none focus:border-accent text-primary font-medium" value={name} onChange={e => setName(e.target.value)} placeholder="pl. Faluház" />
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Pontos cím</label>
-                                    <input
-                                        type="text" required className="w-full bg-secondary/30 border border-gray-200/60 p-3 rounded-xl text-sm outline-none focus:border-accent text-primary font-medium"
-                                        value={address} onChange={e => setAddress(e.target.value)} placeholder="8145 Nádasdladány, Fő utca 1."
-                                    />
+                                    <input type="text" required className="w-full bg-secondary/30 border border-gray-200/60 p-3 rounded-xl text-sm outline-none focus:border-accent text-primary font-medium" value={address} onChange={e => setAddress(e.target.value)} placeholder="8145 Nádasdladány, Fő utca 1." />
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Rövid leírás / Nyitvatartás</label>
-                                    <textarea
-                                        rows={3} className="w-full bg-secondary/30 border border-gray-200/60 p-3 rounded-xl text-sm outline-none focus:border-accent text-primary leading-tight"
-                                        value={description} onChange={e => setDescription(e.target.value)} placeholder="Opcionális leírás..."
-                                    />
+                                    <textarea rows={3} className="w-full bg-secondary/30 border border-gray-200/60 p-3 rounded-xl text-sm outline-none focus:border-accent text-primary leading-tight" value={description} onChange={e => setDescription(e.target.value)} placeholder="Opcionális leírás..." />
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Ikon és kategória</label>
-                                    <select
-                                        className="w-full bg-secondary/30 border border-gray-200/60 p-3 rounded-xl text-sm outline-none focus:border-accent text-primary font-medium"
-                                        value={iconType} onChange={e => setIconType(e.target.value)}
-                                    >
-                                        {Object.entries(MAP_ICONS).map(([key, obj]) => (
-                                            <option key={key} value={key}>{obj.label}</option>
-                                        ))}
+                                    <select className="w-full bg-secondary/30 border border-gray-200/60 p-3 rounded-xl text-sm outline-none focus:border-accent text-primary font-medium" value={iconType} onChange={e => setIconType(e.target.value)}>
+                                        {Object.entries(MAP_ICONS).map(([key, obj]) => <option key={key} value={key}>{obj.label}</option>)}
                                     </select>
                                 </div>
                                 <button type="submit" className="w-full bg-primary text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider hover:bg-accent transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm">
@@ -240,27 +199,15 @@ export const AdminMapPage = () => {
                         <h3 className="font-serif font-bold text-primary text-sm border-b pb-2">Helyszínek kezelése ({locations.length})</h3>
                         <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
                             {locations.map(loc => (
-                                <div
-                                    key={loc.id}
-                                    onClick={() => startEdit(loc)}
-                                    className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all border ${editingId === loc.id ? 'border-accent bg-accent/5' : 'border-transparent bg-gray-50 hover:bg-gray-100'
-                                        }`}
-                                >
+                                <div key={loc.id} onClick={() => startEdit(loc)} className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all border ${editingId === loc.id ? 'border-accent bg-accent/5' : 'border-transparent bg-gray-50 hover:bg-gray-100'}`}>
                                     <div className="flex items-center gap-2 truncate flex-1">
-                                        <div className="text-primary flex-shrink-0">
-                                            {(MAP_ICONS[loc.iconType] || MAP_ICONS.default).icon}
-                                        </div>
+                                        <div className="text-primary flex-shrink-0">{(MAP_ICONS[loc.iconType] || MAP_ICONS.default).icon}</div>
                                         <div className="flex flex-col truncate">
                                             <span className="text-xs font-bold text-primary truncate">{loc.name}</span>
                                             <span className="text-[10px] text-gray-400 truncate">{loc.address || 'Nincs cím megadva'}</span>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={(e) => handleDelete(loc.id, e)}
-                                        className="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors ml-2 flex-shrink-0"
-                                    >
-                                        <Trash2 size={13} />
-                                    </button>
+                                    <button onClick={(e) => handleDelete(loc.id, e)} className="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors ml-2 flex-shrink-0 cursor-pointer"><Trash2 size={13} /></button>
                                 </div>
                             ))}
                         </div>
@@ -268,11 +215,7 @@ export const AdminMapPage = () => {
                 </div>
 
                 <div className="xl:col-span-3 w-full h-[680px] rounded-[36px] overflow-hidden shadow-inner border border-gray-100 z-0 relative">
-                    <MapContainer
-                        center={[47.136, 18.240]} zoom={15}
-                        style={{ height: '100%', width: '100%' }}
-                        scrollWheelZoom={true} ref={setMapInstance}
-                    >
+                    <MapContainer center={[47.136, 18.240]} zoom={15} style={{ height: '100%', width: '100%' }} scrollWheelZoom={true} ref={setMapInstance}>
                         <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
                         <MapEvents onMapClick={handleMapClick} />
 
@@ -288,22 +231,7 @@ export const AdminMapPage = () => {
                             const currentLng = isCurrentEdit && coords ? coords.lng : loc.longitude;
 
                             return (
-                                <Marker
-                                    key={loc.id}
-                                    position={[currentLat, currentLng]}
-                                    icon={createMapIcon(isCurrentEdit ? iconType : loc.iconType)}
-                                    draggable={true}
-                                    eventHandlers={{
-                                        dragend: (e) => {
-                                            const marker = e.target;
-                                            const position = marker.getLatLng();
-                                            handleMarkerDragEnd(loc, position.lat, position.lng);
-                                        },
-                                        click: () => {
-                                            startEdit(loc);
-                                        }
-                                    }}
-                                >
+                                <Marker key={loc.id} position={[currentLat, currentLng]} icon={createMapIcon(isCurrentEdit ? iconType : loc.iconType)} draggable={true} eventHandlers={{ dragend: (e) => { const marker = e.target; const position = marker.getLatLng(); handleMarkerDragEnd(loc, position.lat, position.lng); }, click: () => { startEdit(loc); } }}>
                                     <Popup>
                                         <div className="p-1 max-w-xs space-y-1">
                                             <h4 className="font-serif font-bold text-primary text-sm leading-tight">{loc.name}</h4>

@@ -1,6 +1,20 @@
-import { useState } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { RichTextEditor } from '../../../../components/ui/RichTextEditor';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const jobSchema = z.object({
+    title: z.string().min(1, "A munkakör neve kötelező!").max(200),
+    department: z.string().optional(),
+    employmentType: z.string().optional(),
+    location: z.string().optional(),
+    applicationDeadline: z.string().optional(),
+    excerpt: z.string().max(300).optional(),
+    content: z.string().min(5, "A pályázati kiírás kötelező!")
+});
+
+type JobFormData = z.infer<typeof jobSchema>;
 
 interface Props {
     onClose: () => void;
@@ -9,25 +23,26 @@ interface Props {
 }
 
 export const JobForm = ({ onClose, onSubmit, loading }: Props) => {
-    const [title, setTitle] = useState('');
-    const [department, setDepartment] = useState('');
-    const [employmentType, setEmploymentType] = useState('Közalkalmazotti jogviszony');
-    const [location, setLocation] = useState('8145 Nádasdladány, Fő utca 1.');
-    const [applicationDeadline, setApplicationDeadline] = useState('');
-    const [excerpt, setExcerpt] = useState('');
-    const [content, setContent] = useState('<p>Írja ide a pályázati felhívást, az elvárt végzettségeket, és a benyújtandó dokumentumok listáját...</p>');
+    const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<JobFormData>({
+        resolver: zodResolver(jobSchema),
+        defaultValues: {
+            employmentType: 'Közalkalmazotti jogviszony',
+            location: '8145 Nádasdladány, Fő utca 1.',
+            content: '<p>Írja ide a pályázati felhívást...</p>'
+        }
+    });
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const contentValue = watch('content');
 
+    const onValidSubmit = (data: JobFormData) => {
         onSubmit({
-            title,
-            department: department || null,
-            employmentType: employmentType || null,
-            location: location || null,
-            applicationDeadline: applicationDeadline ? new Date(applicationDeadline).toISOString() : null,
-            excerpt: excerpt || null,
-            content
+            title: data.title,
+            department: data.department || null,
+            employmentType: data.employmentType || null,
+            location: data.location || null,
+            applicationDeadline: data.applicationDeadline ? new Date(data.applicationDeadline).toISOString() : null,
+            excerpt: data.excerpt || null,
+            content: data.content
         });
     };
 
@@ -36,85 +51,61 @@ export const JobForm = ({ onClose, onSubmit, loading }: Props) => {
             <div className="w-full max-w-3xl h-full bg-white shadow-2xl p-10 overflow-y-auto animate-in slide-in-from-right duration-500">
                 <div className="flex justify-between items-center mb-10">
                     <div>
-                        <h2 className="text-3xl font-serif font-bold text-primary">Új álláshirdetés rögzítése</h2>
-                        <p className="text-gray-400 text-sm mt-1">Hirdessen meg új intézményi vagy hivatali pozíciót.</p>
+                        <h2 className="text-3xl font-serif font-bold text-primary">Új álláshirdetés</h2>
                     </div>
-                    <button type="button" onClick={onClose} className="p-3 hover:bg-secondary rounded-full text-primary/50 hover:text-primary transition-colors">
-                        <X size={24} />
-                    </button>
+                    <button type="button" onClick={onClose} className="p-3 hover:bg-secondary rounded-full text-primary/50 cursor-pointer"><X size={24} /></button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6 pb-20">
+                <form onSubmit={handleSubmit(onValidSubmit)} className="space-y-6 pb-20">
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Munkakör megnevezése</label>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Munkakör megnevezése *</label>
                         <input
-                            type="text" required
-                            className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm font-medium"
-                            placeholder="Pl. Óvodapedagógus / Hivatali ügyintéző"
-                            value={title} onChange={(e) => setTitle(e.target.value)}
+                            type="text"
+                            className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm font-medium ${errors.title ? 'border-red-400' : 'border-gray-100'}`}
+                            {...register('title')}
                         />
+                        {errors.title && <p className="text-red-500 text-[10px] font-bold mt-1.5">{errors.title.message}</p>}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Intézmény / Szervezeti egység</label>
-                            <input
-                                type="text" placeholder="Pl. Nádasdladányi Sün Balázs Óvoda"
-                                className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm"
-                                value={department} onChange={(e) => setDepartment(e.target.value)}
-                            />
+                            <input type="text" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" {...register('department')} />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Foglalkoztatás formája / Jogviszony</label>
-                            <input
-                                type="text" placeholder="Pl. Közalkalmazotti jogviszony / Teljes munkaidő"
-                                className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm"
-                                value={employmentType} onChange={(e) => setEmploymentType(e.target.value)}
-                            />
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Jogviszony</label>
+                            <input type="text" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" {...register('employmentType')} />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Munkavégzés helye</label>
-                            <input
-                                type="text"
-                                className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm"
-                                value={location} onChange={(e) => setLocation(e.target.value)}
-                            />
+                            <input type="text" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" {...register('location')} />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Jelentkezési határidő (Opcionális)</label>
-                            <input
-                                type="date"
-                                className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm text-primary"
-                                value={applicationDeadline} onChange={(e) => setApplicationDeadline(e.target.value)}
-                            />
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Határidő (Opcionális)</label>
+                            <input type="date" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm text-primary" {...register('applicationDeadline')} />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Rövid kivonat (Összefoglaló a listaoldalra)</label>
-                        <textarea
-                            rows={2} maxLength={300}
-                            className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm"
-                            placeholder="A pozíció lényegének egy-két mondatos összefoglalása..."
-                            value={excerpt} onChange={(e) => setExcerpt(e.target.value)}
-                        />
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Rövid kivonat</label>
+                        <textarea rows={2} className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" {...register('excerpt')} />
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Részletes pályázati kiírás és feltételek</label>
-                        <RichTextEditor content={content} onChange={(html: string) => setContent(html)} />
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Pályázati kiírás *</label>
+                        <div className={errors.content ? "rounded-3xl border border-red-400" : ""}>
+                            <RichTextEditor content={contentValue} onChange={(html) => setValue('content', html, { shouldValidate: true })} />
+                        </div>
+                        {errors.content && <p className="text-red-500 text-xs mt-2">{errors.content.message}</p>}
                     </div>
 
                     <div className="fixed bottom-0 right-0 w-full max-w-3xl p-6 bg-white/80 backdrop-blur-md border-t border-gray-100 flex gap-4">
-                        <button type="button" onClick={onClose} className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-colors">Mégse</button>
-                        <button
-                            type="submit" disabled={loading}
-                            className="flex-[2] bg-primary text-white font-bold py-4 rounded-2xl hover:bg-accent transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-md"
-                        >
-                            {loading ? <Loader2 className="animate-spin" /> : <>Pályázat közzététele</>}
+                        <button type="button" onClick={onClose} className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 cursor-pointer">Mégse</button>
+                        <button type="submit" disabled={loading} className="flex-[2] bg-primary text-white font-bold py-4 rounded-2xl hover:bg-accent flex justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50">
+                            {loading ? <Loader2 className="animate-spin" /> : 'Pályázat közzététele'}
                         </button>
                     </div>
                 </form>

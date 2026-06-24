@@ -2,7 +2,21 @@ import { useState } from 'react';
 import { X, Loader2, Upload, Check } from 'lucide-react';
 import { type VillageEvent } from '../../../../api/eventService';
 import { getImageUrl } from '../../../../lib/imageUtils';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import toast from 'react-hot-toast';
+
+const eventSchema = z.object({
+    title: z.string().min(1, "A rendezvény neve kötelező!").max(150),
+    location: z.string().min(1, "A helyszín megadása kötelező!"),
+    startDate: z.string().min(1, "Kérjük adja meg az esemény kezdetét!"),
+    eventUrl: z.string().url("Érvénytelen URL! (pl. https://facebook.com/...)").optional().or(z.literal('')),
+    isAllDay: z.boolean().default(false),
+    description: z.string().optional()
+});
+
+type EventFormData = z.infer<typeof eventSchema>;
 
 interface Props {
     event?: VillageEvent | null;
@@ -23,12 +37,17 @@ export const EventForm = ({ event, onClose, onSubmit, loading }: Props) => {
         return `${year}-${month}-${day}T${hours}:${minutes}`;
     };
 
-    const [title, setTitle] = useState(event?.title || '');
-    const [location, setLocation] = useState(event?.location || '');
-    const [startDate, setStartDate] = useState(formatDateTimeLocal(event?.startDate) || '');
-    const [eventUrl, setEventUrl] = useState(event?.eventUrl || '');
-    const [isAllDay, setIsAllDay] = useState(event?.isAllDay || false);
-    const [description, setDescription] = useState(event?.description || '');
+    const { register, handleSubmit, formState: { errors } } = useForm<EventFormData>({
+        resolver: zodResolver(eventSchema) as any,
+        defaultValues: {
+            title: event?.title || '',
+            location: event?.location || '',
+            startDate: formatDateTimeLocal(event?.startDate) || '',
+            eventUrl: event?.eventUrl || '',
+            isAllDay: event?.isAllDay || false,
+            description: event?.description || ''
+        }
+    });
 
     const [image, setImage] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(event?.imageUrl ? getImageUrl(event.imageUrl) : null);
@@ -54,18 +73,17 @@ export const EventForm = ({ event, onClose, onSubmit, loading }: Props) => {
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-
+    const onValidSubmit = (data: EventFormData) => {
         const formData = new FormData();
         if (event) formData.append('Id', event.id.toString());
-        formData.append('Title', title);
-        formData.append('Location', location);
-        formData.append('StartDate', startDate ? new Date(startDate).toISOString() : new Date().toISOString());
-        formData.append('IsAllDay', isAllDay.toString());
 
-        if (eventUrl) formData.append('EventUrl', eventUrl);
-        if (description) formData.append('Description', description);
+        formData.append('Title', data.title);
+        formData.append('Location', data.location);
+        formData.append('StartDate', new Date(data.startDate).toISOString());
+        formData.append('IsAllDay', data.isAllDay.toString());
+
+        if (data.eventUrl) formData.append('EventUrl', data.eventUrl);
+        if (data.description) formData.append('Description', data.description);
         if (image) formData.append('Image', image);
 
         onSubmit(formData);
@@ -86,10 +104,15 @@ export const EventForm = ({ event, onClose, onSubmit, loading }: Props) => {
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-5 pb-20">
+                <form onSubmit={handleSubmit(onValidSubmit)} className="space-y-5 pb-20">
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Esemény megnevezése</label>
-                        <input type="text" required className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm font-medium" value={title} onChange={(e) => setTitle(e.target.value)} />
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Esemény megnevezése *</label>
+                        <input
+                            type="text"
+                            className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm font-medium ${errors.title ? 'border-red-400' : 'border-gray-100'}`}
+                            {...register('title')}
+                        />
+                        {errors.title && <p className="text-red-500 text-[10px] font-bold mt-1.5">{errors.title.message}</p>}
                     </div>
 
                     <div>
@@ -118,34 +141,44 @@ export const EventForm = ({ event, onClose, onSubmit, loading }: Props) => {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Helyszín</label>
-                        <input type="text" required className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" value={location} onChange={(e) => setLocation(e.target.value)} />
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Helyszín *</label>
+                        <input
+                            type="text"
+                            className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm ${errors.location ? 'border-red-400' : 'border-gray-100'}`}
+                            {...register('location')}
+                        />
+                        {errors.location && <p className="text-red-500 text-[10px] font-bold mt-1.5">{errors.location.message}</p>}
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Időpont (Kezdet)</label>
-                        <input type="datetime-local" required className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm text-primary cursor-pointer" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Időpont (Kezdet) *</label>
+                        <input
+                            type="datetime-local"
+                            className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm text-primary cursor-pointer ${errors.startDate ? 'border-red-400' : 'border-gray-100'}`}
+                            {...register('startDate')}
+                        />
+                        {errors.startDate && <p className="text-red-500 text-[10px] font-bold mt-1.5">{errors.startDate.message}</p>}
                     </div>
 
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Külső hivatkozás / Facebook (Opcionális)</label>
                         <input
                             type="url"
-                            className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm"
+                            className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm ${errors.eventUrl ? 'border-red-400' : 'border-gray-100'}`}
                             placeholder="https://facebook.com/events/..."
-                            value={eventUrl}
-                            onChange={(e) => setEventUrl(e.target.value)}
+                            {...register('eventUrl')}
                         />
+                        {errors.eventUrl && <p className="text-red-500 text-[10px] font-bold mt-1.5">{errors.eventUrl.message}</p>}
                     </div>
 
                     <div className="flex items-center gap-3 py-2 pl-1">
-                        <input type="checkbox" id="isAllDay" className="w-4 h-4 rounded text-accent focus:ring-accent border-gray-300 cursor-pointer" checked={isAllDay} onChange={(e) => setIsAllDay(e.target.checked)} />
+                        <input type="checkbox" id="isAllDay" className="w-4 h-4 rounded text-accent focus:ring-accent border-gray-300 cursor-pointer" {...register('isAllDay')} />
                         <label htmlFor="isAllDay" className="text-sm font-medium text-primary cursor-pointer select-none">Egész napos esemény</label>
                     </div>
 
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Rövid tájékoztató szöveg</label>
-                        <textarea rows={3} className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm leading-relaxed" value={description} onChange={(e) => setDescription(e.target.value)} />
+                        <textarea rows={3} className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm leading-relaxed" {...register('description')} />
                     </div>
 
                     <div className="fixed bottom-0 right-0 w-full max-w-md p-6 bg-white/80 backdrop-blur-md border-t border-gray-100 flex gap-4">

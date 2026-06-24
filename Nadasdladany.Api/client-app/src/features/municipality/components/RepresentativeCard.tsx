@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Mail, Phone, User } from 'lucide-react';
 import { type Representative } from '../../../types/Municipality';
+import { getImageUrl } from '../../../lib/imageUtils';
 
 interface Props {
     rep: Representative;
@@ -8,6 +9,15 @@ interface Props {
 }
 
 export const RepresentativeCard = ({ rep, index }: Props) => {
+
+    const getRoleName = (role: number | string) => {
+        const r = Number(role);
+        if (r === 0) return 'Polgármester';
+        if (r === 1) return 'Alpolgármester';
+        if (r === 3) return 'Jegyző';
+        return 'Képviselő';
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -18,7 +28,7 @@ export const RepresentativeCard = ({ rep, index }: Props) => {
             <div className="relative w-32 h-32 mx-auto mb-6">
                 <div className="absolute inset-0 bg-accent rounded-full opacity-10 animate-pulse" />
                 {rep.imageUrl ? (
-                    <img src={rep.imageUrl} alt={rep.name} className="w-full h-full object-cover rounded-full border-4 border-white shadow-lg" />
+                    <img src={getImageUrl(rep.imageUrl)} alt={rep.name} className="w-full h-full object-cover rounded-full border-4 border-white shadow-lg" />
                 ) : (
                     <div className="w-full h-full bg-secondary rounded-full flex items-center justify-center text-primary/20">
                         <User size={48} />
@@ -27,7 +37,7 @@ export const RepresentativeCard = ({ rep, index }: Props) => {
             </div>
 
             <h3 className="text-xl font-serif font-bold text-primary mb-1">{rep.name}</h3>
-            <p className="text-accent text-sm font-bold uppercase tracking-widest mb-6">{rep.customTitle || rep.role}</p>
+            <p className="text-accent text-sm font-bold uppercase tracking-widest mb-6">{rep.customTitleOverride || getRoleName(rep.role)}</p>
 
             <div className="space-y-3">
                 {rep.email && (

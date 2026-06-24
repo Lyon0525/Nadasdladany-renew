@@ -69,11 +69,7 @@ export const MiniCalendar = () => {
 
     return (
         <div className="rounded-[28px] overflow-hidden border border-gray-100 bg-white">
-
-            {/* Dark header with month + grid */}
             <div className="bg-primary pb-4">
-
-                {/* Month navigation */}
                 <div className="flex items-center justify-between px-6 pt-5 pb-3">
                     <div>
                         <p className="text-white font-semibold text-lg leading-tight">{MONTHS[month]}</p>
@@ -97,7 +93,6 @@ export const MiniCalendar = () => {
                     </div>
                 </div>
 
-                {/* Day-of-week labels */}
                 <div className="grid grid-cols-7 px-5 mb-1">
                     {DOW_LABELS.map((d, i) => (
                         <div
@@ -109,7 +104,6 @@ export const MiniCalendar = () => {
                     ))}
                 </div>
 
-                {/* Day grid */}
                 <div className="grid grid-cols-7 gap-y-0.5 px-5">
                     {Array.from({ length: startOffset }).map((_, i) => <div key={`empty-${i}`} />)}
                     {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day => {
@@ -147,7 +141,6 @@ export const MiniCalendar = () => {
                 </div>
             </div>
 
-            {/* Events panel */}
             <div className="bg-white">
                 <p className="px-5 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
                     {selectedDateLabel}

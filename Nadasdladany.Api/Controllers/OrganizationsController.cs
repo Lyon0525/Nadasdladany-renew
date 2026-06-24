@@ -22,4 +22,22 @@ public class OrganizationsController : ApiControllerBase
     {
         return await Mediator.Send(command);
     }
+
+    [HttpPut("{id}")]
+    [Consumes("multipart/form-data")]
+    [Authorize]
+    public async Task<ActionResult> Update(int id, [FromForm] UpdateOrganizationCommand command)
+    {
+        if (id != command.Id) return BadRequest();
+        await Mediator.Send(command);
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    [Authorize]
+    public async Task<ActionResult> Delete(int id)
+    {
+        await Mediator.Send(new DeleteOrganizationCommand(id));
+        return NoContent();
+    }
 }
