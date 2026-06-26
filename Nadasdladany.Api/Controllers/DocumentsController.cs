@@ -23,6 +23,16 @@ public class DocumentsController : ApiControllerBase
         return await Mediator.Send(command);
     }
 
+    [HttpPut("{id}")]
+    [Consumes("multipart/form-data")]
+    [Authorize]
+    public async Task<ActionResult> Update(int id, [FromForm] UpdateDocumentCommand command)
+    {
+        if (id != command.Id) return BadRequest("Az URL ID nem egyezik a küldött ID-val.");
+        await Mediator.Send(command);
+        return NoContent();
+    }
+
     [HttpDelete("{id}")]
     [Authorize]
     public async Task<ActionResult> Delete(int id)

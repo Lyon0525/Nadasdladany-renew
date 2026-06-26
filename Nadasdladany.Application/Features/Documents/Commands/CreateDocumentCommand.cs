@@ -23,13 +23,14 @@ public class CreateDocumentCommandValidator : AbstractValidator<CreateDocumentCo
         RuleFor(v => v.CategoryId).NotEmpty();
         RuleFor(v => v.File)
             .NotNull().WithMessage("Kérjük, válasszon ki egy fájlt a feltöltéshez!")
+            .Must(f => f != null && f.Length > 0).WithMessage("A kiválasztott fájl üres (0 byte) vagy érvénytelen!")
             .Must(HaveSupportedExtension).WithMessage("Nem engedélyezett fájltípus! (Csak PDF, DOC, DOCX, XLS, XLSX, ZIP, RAR engedélyezett)")
             .Must(BeUnderMaxSize).WithMessage("A fájl mérete nem haladhatja meg a 25 MB-ot.");
     }
 
     private bool HaveSupportedExtension(IFormFile file)
     {
-        if (file == null) return false;
+        if (file == null || file.Length == 0) return false;
         var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
         var allowedExtensions = new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".zip", ".rar" };
         return allowedExtensions.Contains(ext);
@@ -37,7 +38,7 @@ public class CreateDocumentCommandValidator : AbstractValidator<CreateDocumentCo
 
     private bool BeUnderMaxSize(IFormFile file)
     {
-        if (file == null) return false;
+        if (file == null || file.Length == 0) return false;
         return file.Length <= 25 * 1024 * 1024;
     }
 }
@@ -58,7 +59,7 @@ public class CreateDocumentCommandHandler : IRequestHandler<CreateDocumentComman
         string? filePath = await _fileService.UploadFileAsync(request.File, "documents");
 
         if (string.IsNullOrEmpty(filePath))
-            throw new Exception("File upload failed.");
+            throw new InvalidOperationException("A fájl mentése biztonsági okokból sikertelen volt a szerveren.");
 
         var entity = new Document
         {

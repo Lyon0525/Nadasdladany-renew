@@ -34,7 +34,11 @@ public class GetSiteSettingQueryHandler : IRequestHandler<GetSiteSettingQuery, S
                 CommitteeText = string.Empty,
                 ContactAddress = string.Empty,
                 ContactEmail = string.Empty,
-                ContactPhone = string.Empty
+                ContactPhone = string.Empty,
+                ImpressumText = string.Empty,
+                GdprText = string.Empty,
+                AccessibilityText = string.Empty,
+                HostingProviderText = string.Empty
             };
         }
 
@@ -52,7 +56,11 @@ public class GetSiteSettingQueryHandler : IRequestHandler<GetSiteSettingQuery, S
             CommitteeText = settings.CommitteeText,
             ContactAddress = settings.ContactAddress,
             ContactEmail = settings.ContactEmail,
-            ContactPhone = settings.ContactPhone
+            ContactPhone = settings.ContactPhone,
+            ImpressumText = settings.ImpressumText,
+            GdprText = settings.GdprText,
+            AccessibilityText = settings.AccessibilityText,
+            HostingProviderText = settings.HostingProviderText
         };
     }
 }

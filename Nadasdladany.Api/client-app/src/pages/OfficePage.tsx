@@ -1,31 +1,15 @@
 import { useEffect, useState } from 'react';
 import { MainLayout } from '../layouts/MainLayout';
-import apiClient from '../api/apiClient';
-import { Building2, Clock, Phone, Mail, MapPin, UserCheck } from 'lucide-react';
-
-export interface StaffMember {
-    name: string;
-    position: string;
-    email?: string;
-    phone?: string;
-}
-
-export interface OfficeDetails {
-    officialName: string;
-    address: string;
-    phone: string;
-    email: string;
-    openingHoursJson: string;
-    staff: StaffMember[];
-}
+import { officeService, type OfficeDetails, type StaffMember } from '../api/officeService';
+import { Building2, Clock, Phone, Mail, MapPin, UserCheck, Loader2 } from 'lucide-react';
 
 export const OfficePage = () => {
     const [data, setData] = useState<OfficeDetails | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        apiClient.get<OfficeDetails>('/office/details')
-            .then(res => setData(res.data))
+        officeService.getDetails()
+            .then(setData)
             .catch(err => console.error(err))
             .finally(() => setLoading(false));
     }, []);
@@ -33,7 +17,10 @@ export const OfficePage = () => {
     if (loading) {
         return (
             <MainLayout>
-                <div className="text-center py-32 font-serif italic text-accent text-xl animate-pulse">Hivatali struktúra betöltése...</div>
+                <div className="text-center py-32 font-serif italic text-accent text-xl animate-pulse flex flex-col items-center gap-3">
+                    <Loader2 className="animate-spin" size={32} />
+                    Hivatali struktúra betöltése...
+                </div>
             </MainLayout>
         );
     }
@@ -45,7 +32,7 @@ export const OfficePage = () => {
             <div className="max-w-6xl mx-auto px-6 py-16">
                 <div className="text-center mb-16">
                     <Building2 size={48} className="mx-auto text-accent mb-6" />
-                    <h1 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-4">Közös Önkormányzati Hivatal</h1>
+                    <h1 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-4">Önkormányzati Hivatal</h1>
                     <p className="text-accent font-medium uppercase tracking-widest text-xs">{data?.officialName}</p>
                 </div>
 

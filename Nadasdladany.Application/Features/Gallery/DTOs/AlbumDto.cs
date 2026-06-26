@@ -11,10 +11,15 @@ public class AlbumDto : IMapFrom<GalleryAlbum>
     public string? Slug { get; set; }
     public int DisplayOrder { get; set; }
     public int ImageCount { get; set; }
+    public string? ThumbnailUrl { get; set; }
 
     public void Mapping(AutoMapper.Profile profile)
     {
         profile.CreateMap<GalleryAlbum, AlbumDto>()
-            .ForMember(d => d.ImageCount, opt => opt.MapFrom(s => s.Images.Count));
+            .ForMember(d => d.ImageCount, opt => opt.MapFrom(s => s.Images.Count))
+            .ForMember(d => d.ThumbnailUrl, opt => opt.MapFrom(s =>
+                s.Images.OrderBy(i => i.DisplayOrder).FirstOrDefault() != null
+                ? s.Images.OrderBy(i => i.DisplayOrder).FirstOrDefault()!.ThumbnailUrl
+                : null));
     }
 }

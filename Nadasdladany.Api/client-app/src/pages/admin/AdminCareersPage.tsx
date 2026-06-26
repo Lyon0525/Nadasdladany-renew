@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { AdminLayout } from '../../layouts/AdminLayout';
-import { jobService } from '../../api/jobService';
+import { jobService, type JobPosting } from '../../api/jobService';
 import { JobForm } from '../../features/admin/jobs/components/JobForm';
-import { Plus, Calendar, Building, ExternalLink, Loader2 } from 'lucide-react';
+import { Plus, Calendar, Building, ExternalLink, Loader2, Edit2, Trash2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 export const AdminCareersPage = () => {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
 
     const { data: jobs = [], refetch, isLoading } = useQuery({
         queryKey: ['adminJobs'],
@@ -18,14 +19,31 @@ export const AdminCareersPage = () => {
     const handleSubmit = async (jobData: any) => {
         setIsSubmitting(true);
         try {
-            await jobService.createJob(jobData);
-            toast.success("Álláshirdetés sikeresen közzétéve!");
+            if (editingJob) {
+                await jobService.updateJob(editingJob.id, { id: editingJob.id, ...jobData });
+                toast.success("Álláshirdetés sikeresen frissítve!");
+            } else {
+                await jobService.createJob(jobData);
+                toast.success("Álláshirdetés sikeresen közzétéve!");
+            }
             setIsFormOpen(false);
+            setEditingJob(null);
             refetch();
         } catch (err) {
-            toast.error("Hiba történt a rögzítés során!");
+            toast.error("Hiba történt a mentés során!");
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        if (!window.confirm('Biztosan törölni szeretné ezt az álláshirdetést?')) return;
+        try {
+            await jobService.deleteJob(id);
+            toast.success("Álláshirdetés törölve!");
+            refetch();
+        } catch (err) {
+            toast.error("Hiba a törlés során!");
         }
     };
 
@@ -36,7 +54,7 @@ export const AdminCareersPage = () => {
                     <h1 className="text-4xl font-serif font-bold text-primary">Álláshirdetések kezelése</h1>
                     <p className="text-gray-400 mt-1">Önkormányzati, intézményi álláspályázatok és karrier lehetőségek adminisztrációja.</p>
                 </div>
-                <button onClick={() => setIsFormOpen(true)} className="flex items-center gap-2 bg-accent text-primary font-bold px-8 py-4 rounded-full hover:scale-105 transition-all shadow-lg cursor-pointer">
+                <button onClick={() => { setEditingJob(null); setIsFormOpen(true); }} className="flex items-center gap-2 bg-accent text-primary font-bold px-8 py-4 rounded-full hover:scale-105 transition-all shadow-lg cursor-pointer">
                     <Plus size={20} /> Új pályázat kiírása
                 </button>
             </div>
@@ -65,8 +83,16 @@ export const AdminCareersPage = () => {
                                         ) : <span className="text-gray-400 italic">Visszavonásig</span>}
                                     </td>
                                     <td className="px-8 py-5">
-                                        <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <a href="/allasok" target="_blank" rel="noreferrer" className="p-2 text-gray-400 hover:text-accent transition-colors cursor-pointer" title="Megtekintés az oldalon"><ExternalLink size={18} /></a>
+                                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <a href="/allasok" target="_blank" rel="noreferrer" className="p-2 text-gray-400 hover:text-accent transition-colors cursor-pointer" title="Megtekintés az oldalon">
+                                                <ExternalLink size={18} />
+                                            </a>
+                                            <button onClick={() => { setEditingJob(job); setIsFormOpen(true); }} className="p-2 text-gray-400 hover:text-primary transition-colors cursor-pointer" title="Szerkesztés">
+                                                <Edit2 size={18} />
+                                            </button>
+                                            <button onClick={() => handleDelete(job.id)} className="p-2 text-gray-400 hover:text-red-500 transition-colors cursor-pointer" title="Törlés">
+                                                <Trash2 size={18} />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -77,7 +103,7 @@ export const AdminCareersPage = () => {
                 )}
             </div>
 
-            {isFormOpen && <JobForm onClose={() => setIsFormOpen(false)} onSubmit={handleSubmit} loading={isSubmitting} />}
+            {isFormOpen && <JobForm job={editingJob} onClose={() => setIsFormOpen(false)} onSubmit={handleSubmit} loading={isSubmitting} />}
         </AdminLayout>
     );
 };

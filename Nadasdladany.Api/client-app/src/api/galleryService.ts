@@ -4,6 +4,7 @@ export interface GalleryAlbum {
     id: number;
     title: string;
     slug: string;
+    description?: string;
     imageCount: number;
     thumbnailUrl?: string;
 }
@@ -26,6 +27,9 @@ export const galleryService = {
         const response = await apiClient.post('/gallery/albums', album);
         return response.data;
     },
+    updateAlbum: async (id: number, data: { id: number, name: string, description?: string }): Promise<void> => {
+        await apiClient.put(`/gallery/albums/${id}`, data);
+    },
     uploadImages: async (albumId: number, files: FileList): Promise<any> => {
         const formData = new FormData();
         Array.from(files).forEach(file => {
@@ -36,8 +40,10 @@ export const galleryService = {
         });
         return response.data;
     },
-
     deleteAlbum: async (id: number): Promise<void> => {
         await apiClient.delete(`/gallery/albums/${id}`);
+    },
+    deleteImage: async (id: number): Promise<void> => {
+        await apiClient.delete(`/gallery/image/${id}`);
     }
 };

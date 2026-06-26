@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Newspaper, FileText, Image as ImageIcon, LogOut, ChevronLeft, Award, Building2, Users, Briefcase, Mail, ShieldAlert, UserCheck, Map, Calendar } from 'lucide-react';
+import { LayoutDashboard, Newspaper, FileText, Image as ImageIcon, Vote, LogOut, ChevronLeft, Award, Building2, Users, Briefcase, Mail, ShieldAlert, UserCheck, Map, Calendar } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export const AdminLayout = ({ children }: { children: ReactNode }) => {
@@ -21,10 +21,12 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
         { name: 'Polgármesteri köszöntő', path: '/admin/welcome', icon: <UserCheck size={20} /> },
         { name: 'Térképszerkesztő', path: '/admin/map', icon: <Map size={20} /> },
         { name: 'Képviselők & Hivatal', path: '/admin/representatives', icon: <UserCheck size={20} /> },
-        { name: 'Civil & Egyházak', path: '/admin/organizations', icon: <Users size={20} /> },
+        { name: 'Közösségek', path: '/admin/organizations', icon: <Users size={20} /> },
         { name: 'Álláshirdetések', path: '/admin/careers', icon: <Briefcase size={20} /> },
         { name: 'Dokumentumok', path: '/admin/documents', icon: <FileText size={20} /> },
+        { name: 'Választások', path: '/admin/elections', icon: <Vote size={20} /> },
         { name: 'Galéria', path: '/admin/gallery', icon: <ImageIcon size={20} /> },
+        { name: 'Hivatal', path: '/admin/office', icon: <Building2 size={20} /> },
         { name: 'Hírlevél küldés', path: '/admin/newsletter', icon: <Mail size={20} /> },
         { name: 'Adatigénylések', path: '/admin/data-requests', icon: <ShieldAlert size={20} /> },
         { name: 'Felhasználók', path: '/admin/users', icon: <Users size={20} /> },

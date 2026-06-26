@@ -19,5 +19,8 @@ export const dataRequestService = {
     getAllRequests: async () => {
         const response = await apiClient.get<PublicDataRequest[]>('/publicdatarequests');
         return response.data;
+    },
+    updateStatus: async (id: number, isProcessed: boolean) => {
+        await apiClient.put(`/publicdatarequests/${id}/status`, { id, isProcessed });
     }
 };

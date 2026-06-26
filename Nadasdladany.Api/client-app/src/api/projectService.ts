@@ -27,5 +27,15 @@ export const projectService = {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         return response.data;
+    },
+
+    updateProject: async (id: number, formData: FormData) => {
+        await apiClient.put(`/projects/${id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+    },
+
+    deleteProject: async (id: number) => {
+        await apiClient.delete(`/projects/${id}`);
     }
 };

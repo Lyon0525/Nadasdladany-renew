@@ -45,6 +45,7 @@ import { AdminRepresentativesPage } from './pages/admin/AdminRepresentativesPage
 import { AdminMessagesPage } from './pages/admin/AdminMessagesPage';
 import { AuthProvider } from './contexts/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AdminOfficePage } from './pages/admin/AdminOfficePage';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -107,6 +108,7 @@ function App() {
                                 <Route path="/admin/map" element={<AdminMapPage />} />
                                 <Route path="/admin/representatives" element={<AdminRepresentativesPage />} />
                                 <Route path="/admin/messages" element={<AdminMessagesPage />} />
+                                <Route path="/admin/office" element={<AdminOfficePage />} />
                             </Route>
                         </Routes>
 

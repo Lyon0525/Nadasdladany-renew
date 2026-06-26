@@ -22,4 +22,13 @@ public class PublicDataRequestsController : ApiControllerBase
     {
         return await Mediator.Send(new GetPublicDataRequestsQuery());
     }
+
+    [HttpPut("{id}/status")]
+    [Authorize]
+    public async Task<ActionResult> UpdateStatus(int id, [FromBody] UpdateDataRequestStatusCommand command)
+    {
+        if (id != command.Id) return BadRequest("Az URL ID nem egyezik a küldött ID-val.");
+        await Mediator.Send(command);
+        return NoContent();
+    }
 }

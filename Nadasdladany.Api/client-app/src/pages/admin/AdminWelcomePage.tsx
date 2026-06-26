@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AdminLayout } from '../../layouts/AdminLayout';
 import { siteSettingsService } from '../../api/siteSettingsService';
 import { getImageUrl } from '../../lib/imageUtils';
-import { Save, Upload, Loader2, User, Landmark } from 'lucide-react';
+import { Save, Upload, Loader2, User, Landmark, Scale, Info } from 'lucide-react';
 import { RichTextEditor } from '../../components/ui/RichTextEditor';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,13 +16,41 @@ const settingsSchema = z.object({
     welcomeText: z.string().min(5, "A köszöntő szöveg kötelező!"),
     historyText: z.string().min(5, "A történelem szöveg kötelező!"),
     coatOfArmsText: z.string().min(1, "A címer leírás kötelező!"),
-    landmarksText: z.string().min(1, "A nevezetességek leírása kötelező!")
+    landmarksText: z.string().min(1, "A nevezetességek leírása kötelező!"),
+    impressumText: z.string().optional(),
+    gdprText: z.string().optional(),
+    accessibilityText: z.string().optional(),
+    hostingProviderText: z.string().optional()
 });
 
 type SettingsFormData = z.infer<typeof settingsSchema>;
 
+const defaultImpressum = `
+<p><strong>A honlap fenntartója:</strong><br>Nádasdladány Község Önkormányzata<br>Székhely: 8145 Nádasdladány, Fő utca 1.<br>Adószám: 15337225-1-07</p>
+<p><strong>Felelős kiadó:</strong><br>Pálfi Kristóf — Polgármester</p>
+`;
+
+const defaultHostingProvider = `
+<p><strong>Név:</strong> NISZ Nemzeti Infokommunikációs Szolgáltató Zrt.<br>
+<strong>Székhely:</strong> 1081 Budapest, Csokonai utca 3.<br>
+<strong>E-mail:</strong> info@nisz.hu<br>
+<strong>Weboldal:</strong> https://nisz.hu</p>
+`;
+
+const defaultGdpr = `
+<p>Önkormányzatunk elkötelezett a látogatók és az ügyfelek személyes adatainak védelme mellett az Európai Unió 2016/679 számú általános adatvédelmi rendelete (GDPR) szerint.</p>
+<p><strong>1. Közérdekű adatigénylések és panaszok:</strong><br>Az online űrlapokon megadott nevét, e-mail címét és telefonszámát kizárólag a kérelem feldolgozására, azonosítására és a törvényben meghatározott 15 napos válaszadási határidő betartására használjuk fel. Harmadik félnek az adatokat át nem adjuk.</p>
+<p><strong>2. Hírlevél feliratkozás:</strong><br>A feliratkozás során megadott e-mail címet kizárólag lakossági tájékoztató hírlevelek körözésére használjuk. A leiratkozás bármikor ingyenesen kezdeményezhető a hírlevél alján található linken.</p>
+`;
+
+const defaultAccessibility = `
+<p>Nádasdladány Község Önkormányzata elkötelezett amellett, hogy honlapját a közszférabeli szervezetek honlapjainak akadálymentesítéséről szóló <strong>2018. évi LXXV. törvénynek</strong> megfelelően akadálymentessé tegye.</p>
+<p><strong>Megfelelőségi státusz:</strong><br>Ez a honlap részben megfelel az MSZ EN 301 549 szabványnak, illetve a WCAG 2.1 AA szintű hozzáférhetőségi iránymutatásoknak. Fejlesztőcsapatunk folyamatosan dolgozik a vakbarát felolvasó szoftverek és a billentyűzet-navigáció tökéletesítésén.</p>
+<p><strong>Visszajelzés és elérhetőségek:</strong><br>Amennyiben a honlap használata során akadályba ütközik, észrevételeit az info@nadasdladany.hu e-mail címen jelezheti felénk. A bejelentéseket 15 napon belül felülvizsgáljuk.</p>
+`;
+
 export const AdminWelcomePage = () => {
-    const [activeTab, setActiveTab] = useState<'mayor' | 'town'>('mayor');
+    const [activeTab, setActiveTab] = useState<'mayor' | 'town' | 'legal'>('mayor');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -41,6 +69,10 @@ export const AdminWelcomePage = () => {
     });
 
     const welcomeTextValue = watch('welcomeText');
+    const impressumTextValue = watch('impressumText');
+    const gdprTextValue = watch('gdprText');
+    const accessibilityTextValue = watch('accessibilityText');
+    const hostingProviderTextValue = watch('hostingProviderText');
 
     useEffect(() => {
         if (settings) {
@@ -50,7 +82,11 @@ export const AdminWelcomePage = () => {
                 welcomeText: settings.welcomeText || '',
                 historyText: settings.historyText || '',
                 coatOfArmsText: settings.coatOfArmsText || '',
-                landmarksText: settings.landmarksText || ''
+                landmarksText: settings.landmarksText || '',
+                impressumText: settings.impressumText || defaultImpressum,
+                gdprText: settings.gdprText || defaultGdpr,
+                accessibilityText: settings.accessibilityText || defaultAccessibility,
+                hostingProviderText: settings.hostingProviderText || defaultHostingProvider
             });
         }
     }, [settings, reset]);
@@ -95,6 +131,10 @@ export const AdminWelcomePage = () => {
         formData.append('HistoryText', data.historyText);
         formData.append('CoatOfArmsText', data.coatOfArmsText);
         formData.append('LandmarksText', data.landmarksText);
+        formData.append('ImpressumText', data.impressumText || '');
+        formData.append('GdprText', data.gdprText || '');
+        formData.append('AccessibilityText', data.accessibilityText || '');
+        formData.append('HostingProviderText', data.hostingProviderText || '');
         formData.append('CommitteeText', settings?.committeeText || '');
         formData.append('ContactAddress', settings?.contactAddress || '');
         formData.append('ContactEmail', settings?.contactEmail || '');
@@ -133,19 +173,22 @@ export const AdminWelcomePage = () => {
         <AdminLayout>
             <div className="mb-12">
                 <h1 className="text-4xl font-serif font-bold text-primary">Hivatali & Települési Adatok</h1>
-                <p className="text-gray-400 mt-1">Főoldali köszöntő, a község története, címere és nevezetességei.</p>
+                <p className="text-gray-400 mt-1">Főoldali köszöntő, a község története, címere, nevezetességei és jogi nyilatkozatai.</p>
             </div>
 
-            <div className="flex gap-4 border-b border-gray-100 mb-8 max-w-4xl">
+            <div className="flex flex-wrap gap-4 border-b border-gray-100 mb-8 max-w-5xl">
                 <button type="button" onClick={() => setActiveTab('mayor')} className={`pb-4 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition-all cursor-pointer ${activeTab === 'mayor' ? 'border-accent text-primary' : 'border-transparent text-gray-400 hover:text-primary'}`}>
                     <User size={14} /> Főoldali köszöntő
                 </button>
                 <button type="button" onClick={() => setActiveTab('town')} className={`pb-4 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition-all cursor-pointer ${activeTab === 'town' ? 'border-accent text-primary' : 'border-transparent text-gray-400 hover:text-primary'}`}>
                     <Landmark size={14} /> „A községről” aloldal
                 </button>
+                <button type="button" onClick={() => setActiveTab('legal')} className={`pb-4 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition-all cursor-pointer ${activeTab === 'legal' ? 'border-accent text-primary' : 'border-transparent text-gray-400 hover:text-primary'}`}>
+                    <Scale size={14} /> Jogi Nyilatkozatok
+                </button>
             </div>
 
-            <form onSubmit={handleSubmit(onValidSubmit)} className="bg-white p-8 md:p-10 rounded-[32px] border border-gray-100 shadow-sm space-y-6 max-w-4xl">
+            <form onSubmit={handleSubmit(onValidSubmit)} className="bg-white p-8 md:p-10 rounded-[32px] border border-gray-100 shadow-sm space-y-6 max-w-5xl">
                 <div className={`space-y-6 animate-in fade-in duration-150 ${activeTab !== 'mayor' ? 'hidden' : ''}`}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -215,6 +258,35 @@ export const AdminWelcomePage = () => {
                     <div>
                         <label className="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Nevezetességek & Épületek Kiegészítő Leírása *</label>
                         <textarea rows={4} className={`w-full bg-secondary/40 border p-4 rounded-2xl outline-none focus:border-accent text-sm leading-relaxed text-primary ${errors.landmarksText ? 'border-red-400' : 'border-gray-200/50'}`} {...register('landmarksText')} />
+                    </div>
+                </div>
+
+                <div className={`space-y-6 animate-in fade-in duration-150 ${activeTab !== 'legal' ? 'hidden' : ''}`}>
+                    <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-2xl mb-6 flex gap-3 items-start">
+                        <Info size={20} className="text-blue-500 mt-0.5 flex-shrink-0" />
+                        <p className="text-blue-800 text-xs font-medium leading-relaxed">
+                            Itt szerkesztheti az ÁSZF, GDPR és Impresszum szöveges tartalmát. A főcímek és a design elemek (sárga doboz) védettek a publikus oldalon, itt csak a tartalmukat kell megszerkesztenie.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label className="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Impresszum (Hivatalos adatok)</label>
+                        <RichTextEditor content={impressumTextValue || ''} onChange={(html: string) => setValue('impressumText', html)} placeholder="A honlap fenntartója és a felelős kiadó adatai..." />
+                    </div>
+
+                    <div className="p-6 bg-secondary/30 rounded-3xl border border-gray-100">
+                        <label className="block text-[11px] font-bold uppercase tracking-widest text-accent mb-2">Tárhelyszolgáltató (Sárga Kiemelt Doboz a weboldalon)</label>
+                        <RichTextEditor content={hostingProviderTextValue || ''} onChange={(html: string) => setValue('hostingProviderText', html)} placeholder="Tárhelyszolgáltató adatai..." />
+                    </div>
+
+                    <div>
+                        <label className="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Adatkezelési Tájékoztató (GDPR)</label>
+                        <RichTextEditor content={gdprTextValue || ''} onChange={(html: string) => setValue('gdprText', html)} placeholder="Részletes adatvédelmi irányelvek..." />
+                    </div>
+
+                    <div>
+                        <label className="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Akadálymentesítési Nyilatkozat</label>
+                        <RichTextEditor content={accessibilityTextValue || ''} onChange={(html: string) => setValue('accessibilityText', html)} placeholder="WCAG és törvényi megfelelőségi információk..." />
                     </div>
                 </div>
 

@@ -3,6 +3,7 @@ import { RichTextEditor } from '../../../../components/ui/RichTextEditor';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { type JobPosting } from '../../../../api/jobService';
 
 const jobSchema = z.object({
     title: z.string().min(1, "A munkakör neve kötelező!").max(200),
@@ -17,18 +18,23 @@ const jobSchema = z.object({
 type JobFormData = z.infer<typeof jobSchema>;
 
 interface Props {
+    job?: JobPosting | null;
     onClose: () => void;
     onSubmit: (jobData: any) => void;
     loading: boolean;
 }
 
-export const JobForm = ({ onClose, onSubmit, loading }: Props) => {
+export const JobForm = ({ job, onClose, onSubmit, loading }: Props) => {
     const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<JobFormData>({
         resolver: zodResolver(jobSchema),
         defaultValues: {
-            employmentType: 'Közalkalmazotti jogviszony',
-            location: '8145 Nádasdladány, Fő utca 1.',
-            content: '<p>Írja ide a pályázati felhívást...</p>'
+            title: job?.title || '',
+            department: job?.department || '',
+            employmentType: job?.employmentType || 'Közalkalmazotti jogviszony',
+            location: job?.location || '8145 Nádasdladány, Fő utca 1.',
+            applicationDeadline: job?.applicationDeadline ? job.applicationDeadline.split('T')[0] : '',
+            excerpt: job?.excerpt || '',
+            content: job?.content || ''
         }
     });
 
@@ -51,7 +57,7 @@ export const JobForm = ({ onClose, onSubmit, loading }: Props) => {
             <div className="w-full max-w-3xl h-full bg-white shadow-2xl p-10 overflow-y-auto animate-in slide-in-from-right duration-500">
                 <div className="flex justify-between items-center mb-10">
                     <div>
-                        <h2 className="text-3xl font-serif font-bold text-primary">Új álláshirdetés</h2>
+                        <h2 className="text-3xl font-serif font-bold text-primary">{job ? 'Hirdetés szerkesztése' : 'Új álláshirdetés'}</h2>
                     </div>
                     <button type="button" onClick={onClose} className="p-3 hover:bg-secondary rounded-full text-primary/50 cursor-pointer"><X size={24} /></button>
                 </div>
@@ -97,7 +103,11 @@ export const JobForm = ({ onClose, onSubmit, loading }: Props) => {
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Pályázati kiírás *</label>
                         <div className={errors.content ? "rounded-3xl border border-red-400" : ""}>
-                            <RichTextEditor content={contentValue} onChange={(html) => setValue('content', html, { shouldValidate: true })} />
+                            <RichTextEditor
+                                content={contentValue}
+                                onChange={(html) => setValue('content', html, { shouldValidate: true })}
+                                placeholder="Írja ide a pályázati felhívást és a részleteket..."
+                            />
                         </div>
                         {errors.content && <p className="text-red-500 text-xs mt-2">{errors.content.message}</p>}
                     </div>
@@ -105,7 +115,7 @@ export const JobForm = ({ onClose, onSubmit, loading }: Props) => {
                     <div className="fixed bottom-0 right-0 w-full max-w-3xl p-6 bg-white/80 backdrop-blur-md border-t border-gray-100 flex gap-4">
                         <button type="button" onClick={onClose} className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 cursor-pointer">Mégse</button>
                         <button type="submit" disabled={loading} className="flex-[2] bg-primary text-white font-bold py-4 rounded-2xl hover:bg-accent flex justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50">
-                            {loading ? <Loader2 className="animate-spin" /> : 'Pályázat közzététele'}
+                            {loading ? <Loader2 className="animate-spin" /> : (job ? 'Módosítások mentése' : 'Pályázat közzététele')}
                         </button>
                     </div>
                 </form>

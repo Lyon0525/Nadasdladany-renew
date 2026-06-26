@@ -27,15 +27,31 @@ public class AuthController : ControllerBase
     {
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null)
-        {
             return Unauthorized(new { message = "Helytelen e-mail cím vagy jelszó!" });
-        }
 
         var isPasswordValid = await _userManager.CheckPasswordAsync(user, request.Password);
         if (!isPasswordValid)
-        {
             return Unauthorized(new { message = "Helytelen e-mail cím vagy jelszó!" });
-        }
+
+        return GenerateTokenForUser(user);
+    }
+
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) return Unauthorized();
+
+        var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+        if (!result.Succeeded)
+            return BadRequest(new { message = string.Join(", ", result.Errors.Select(e => e.Description)) });
+
+        user.MustChangePassword = false;
+        await _userManager.UpdateAsync(user);
 
         return GenerateTokenForUser(user);
     }
@@ -45,16 +61,10 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> ExtendSession()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId))
-        {
-            return Unauthorized();
-        }
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
         var user = await _userManager.FindByIdAsync(userId);
-        if (user == null)
-        {
-            return Unauthorized();
-        }
+        if (user == null) return Unauthorized();
 
         return GenerateTokenForUser(user);
     }
@@ -92,7 +102,8 @@ public class AuthController : ControllerBase
         {
             email = user.Email,
             token = new JwtSecurityTokenHandler().WriteToken(token),
-            role = primaryRole
+            role = primaryRole,
+            mustChangePassword = user.MustChangePassword
         });
     }
 }
@@ -101,4 +112,10 @@ public class LoginRequestDto
 {
     public required string Email { get; set; }
     public required string Password { get; set; }
+}
+
+public class ChangePasswordRequestDto
+{
+    public required string CurrentPassword { get; set; }
+    public required string NewPassword { get; set; }
 }

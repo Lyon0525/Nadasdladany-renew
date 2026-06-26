@@ -21,6 +21,10 @@ public record UpdateSiteSettingCommand : IRequest
     public string? ContactAddress { get; init; }
     public string? ContactEmail { get; init; }
     public string? ContactPhone { get; init; }
+    public string? HostingProviderText { get; init; }
+    public string? ImpressumText { get; init; }
+    public string? GdprText { get; init; }
+    public string? AccessibilityText { get; init; }
 }
 
 public class UpdateSiteSettingCommandHandler : IRequestHandler<UpdateSiteSettingCommand>
@@ -51,7 +55,11 @@ public class UpdateSiteSettingCommandHandler : IRequestHandler<UpdateSiteSetting
                 CommitteeText = request.CommitteeText,
                 ContactAddress = request.ContactAddress,
                 ContactEmail = request.ContactEmail,
-                ContactPhone = request.ContactPhone
+                ContactPhone = request.ContactPhone,
+                ImpressumText = request.ImpressumText ?? string.Empty,
+                GdprText = request.GdprText ?? string.Empty,
+                AccessibilityText = request.AccessibilityText ?? string.Empty,
+                HostingProviderText = request.HostingProviderText ?? string.Empty
             };
             _context.SiteSettings.Add(entity);
         }
@@ -67,6 +75,9 @@ public class UpdateSiteSettingCommandHandler : IRequestHandler<UpdateSiteSetting
             entity.ContactAddress = request.ContactAddress;
             entity.ContactEmail = request.ContactEmail;
             entity.ContactPhone = request.ContactPhone;
+            entity.ImpressumText = request.ImpressumText ?? string.Empty;
+            entity.GdprText = request.GdprText ?? string.Empty;
+            entity.AccessibilityText = request.AccessibilityText ?? string.Empty;
         }
 
         if (request.MayorImage != null)

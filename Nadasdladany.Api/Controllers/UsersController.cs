@@ -22,7 +22,7 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> GetAllUsers()
     {
         var users = await _userManager.Users
-            .Select(u => new { u.Id, u.UserName, u.Email })
+            .Select(u => new { u.Id, u.UserName, u.Email, u.MustChangePassword })
             .ToListAsync();
 
         return Ok(users);
@@ -38,16 +38,48 @@ public class UsersController : ControllerBase
         {
             UserName = model.Email,
             Email = model.Email,
-            EmailConfirmed = true
+            EmailConfirmed = true,
+            MustChangePassword = true
         };
 
         var result = await _userManager.CreateAsync(user, model.Password);
         if (!result.Succeeded)
-            return BadRequest(new { message = string.Join(", ", result.Errors.Select(e => e.Description)) });
+            return BadRequest(new { message = string.Join(" ", result.Errors.Select(e => e.Description)) });
 
         await _userManager.AddToRoleAsync(user, "Administrator");
 
         return Ok(new { message = "Felhasználó sikeresen létrehozva!" });
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto model)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return NotFound();
+
+        if (!string.IsNullOrWhiteSpace(model.Email) && model.Email != user.Email)
+        {
+            var existing = await _userManager.FindByEmailAsync(model.Email);
+            if (existing != null && existing.Id != user.Id)
+                return BadRequest(new { message = "Ez az e-mail cím már használatban van!" });
+
+            user.Email = model.Email;
+            user.UserName = model.Email;
+            await _userManager.UpdateAsync(user);
+        }
+
+        if (!string.IsNullOrWhiteSpace(model.Password))
+        {
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, model.Password);
+            if (!result.Succeeded)
+                return BadRequest(new { message = string.Join(" ", result.Errors.Select(e => e.Description)) });
+
+            user.MustChangePassword = true;
+            await _userManager.UpdateAsync(user);
+        }
+
+        return Ok(new { message = "Felhasználó adatai frissítve!" });
     }
 
     [HttpDelete("{id}")]
@@ -68,4 +100,10 @@ public class CreateUserDto
 {
     public required string Email { get; set; }
     public required string Password { get; set; }
+}
+
+public class UpdateUserDto
+{
+    public string? Email { get; set; }
+    public string? Password { get; set; }
 }

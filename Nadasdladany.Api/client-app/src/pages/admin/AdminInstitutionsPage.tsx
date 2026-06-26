@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { AdminLayout } from '../../layouts/AdminLayout';
-import { institutionService } from '../../api/institutionService';
+import { institutionService, type Institution } from '../../api/institutionService';
 import { InstitutionForm } from '../../features/admin/institutions/components/InstitutionForm';
-import { Plus, Trash2, Phone, MapPin, ExternalLink, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Phone, MapPin, ExternalLink, Loader2, Edit2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 export const AdminInstitutionsPage = () => {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [editingInst, setEditingInst] = useState<Institution | null>(null);
 
     const { data: institutions = [], refetch, isLoading } = useQuery({
         queryKey: ['adminInstitutions'],
@@ -18,9 +19,15 @@ export const AdminInstitutionsPage = () => {
     const handleSubmit = async (formData: FormData) => {
         setIsSubmitting(true);
         try {
-            await institutionService.createInstitution(formData);
-            toast.success("Intézmény sikeresen létrehozva!");
+            if (editingInst) {
+                await institutionService.updateInstitution(editingInst.id, formData);
+                toast.success("Intézmény adatai frissítve!");
+            } else {
+                await institutionService.createInstitution(formData);
+                toast.success("Intézmény sikeresen létrehozva!");
+            }
             setIsFormOpen(false);
+            setEditingInst(null);
             refetch();
         } catch (err) {
             toast.error("Hiba a mentés során. Ellenőrizze az adatokat!");
@@ -47,7 +54,7 @@ export const AdminInstitutionsPage = () => {
                     <h1 className="text-4xl font-serif font-bold text-primary">Intézmények kezelése</h1>
                     <p className="text-gray-400 mt-1">Hivatalok, egészségügyi, nevelési és oktatási egységek nyilvántartása.</p>
                 </div>
-                <button onClick={() => setIsFormOpen(true)} className="flex items-center gap-2 bg-accent text-primary font-bold px-8 py-4 rounded-full hover:scale-105 transition-all shadow-lg cursor-pointer">
+                <button onClick={() => { setEditingInst(null); setIsFormOpen(true); }} className="flex items-center gap-2 bg-accent text-primary font-bold px-8 py-4 rounded-full hover:scale-105 transition-all shadow-lg cursor-pointer">
                     <Plus size={20} /> Új intézmény rögzítése
                 </button>
             </div>
@@ -75,8 +82,9 @@ export const AdminInstitutionsPage = () => {
                                     </td>
                                     <td className="px-8 py-5">
                                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <a href={`/intezmenyek/${inst.slug}`} target="_blank" rel="noreferrer" className="p-2 text-gray-400 hover:text-accent cursor-pointer"><ExternalLink size={18} /></a>
-                                            <button onClick={() => handleDelete(inst.id)} className="p-2 text-gray-400 hover:text-red-500 cursor-pointer"><Trash2 size={18} /></button>
+                                            <a href={`/intezmenyek/${inst.slug}`} target="_blank" rel="noreferrer" className="p-2 text-gray-400 hover:text-accent cursor-pointer" title="Megtekintés"><ExternalLink size={18} /></a>
+                                            <button onClick={() => { setEditingInst(inst); setIsFormOpen(true); }} className="p-2 text-gray-400 hover:text-primary cursor-pointer" title="Szerkesztés"><Edit2 size={18} /></button>
+                                            <button onClick={() => handleDelete(inst.id)} className="p-2 text-gray-400 hover:text-red-500 cursor-pointer" title="Törlés"><Trash2 size={18} /></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -87,7 +95,7 @@ export const AdminInstitutionsPage = () => {
                 )}
             </div>
 
-            {isFormOpen && <InstitutionForm onClose={() => setIsFormOpen(false)} onSubmit={handleSubmit} loading={isSubmitting} />}
+            {isFormOpen && <InstitutionForm institution={editingInst} onClose={() => setIsFormOpen(false)} onSubmit={handleSubmit} loading={isSubmitting} />}
         </AdminLayout>
     );
 };

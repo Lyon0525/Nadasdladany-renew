@@ -14,6 +14,10 @@ export interface SiteSetting {
     contactAddress?: string;
     contactEmail?: string;
     contactPhone?: string;
+    impressumText?: string;
+    gdprText?: string;
+    accessibilityText?: string;
+    hostingProviderText?: string;
 }
 
 export const siteSettingsService = {

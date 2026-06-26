@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Nadasdladany.Application.Features.Elections.Commands;
+using Nadasdladany.Application.Features.Elections.Queries;
 using Nadasdladany.Infrastructure.Persistence;
 using System.Text.Json;
 
@@ -16,6 +17,13 @@ public class ElectionsController : ApiControllerBase
         _context = context;
     }
 
+    [HttpGet]
+    [Authorize]
+    public async Task<ActionResult<List<ElectionDto>>> GetAll()
+    {
+        return await Mediator.Send(new GetAllElectionsQuery());
+    }
+
     [HttpGet("{year}")]
     public async Task<IActionResult> GetByYear(int year)
     {
@@ -24,6 +32,7 @@ public class ElectionsController : ApiControllerBase
 
         return Ok(new
         {
+            id = election.Id,
             year = election.Year,
             type = election.Type,
             registeredVoters = election.RegisteredVoters,
@@ -38,5 +47,13 @@ public class ElectionsController : ApiControllerBase
     public async Task<ActionResult<int>> Create(CreateElectionResultCommand command)
     {
         return await Mediator.Send(command);
+    }
+
+    [HttpDelete("{id}")]
+    [Authorize]
+    public async Task<ActionResult> Delete(int id)
+    {
+        await Mediator.Send(new DeleteElectionCommand(id));
+        return NoContent();
     }
 }

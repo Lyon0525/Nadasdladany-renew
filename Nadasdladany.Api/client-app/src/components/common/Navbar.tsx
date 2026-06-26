@@ -19,6 +19,7 @@ const secondaryLinks = [
     { name: 'Intézmények', path: '/intezmenyek' },
     { name: 'Dokumentumtár', path: '/dokumentumok' },
     { name: 'Pályázatok', path: '/palyazatok' },
+    { name: 'Galéria', path: '/galeria' },
     { name: 'Közösségek', path: '/kozossegek' },
     { name: 'Ügyintézés', path: '/ugyintezes' },
     { name: 'Hivatal', path: '/hivatal' },

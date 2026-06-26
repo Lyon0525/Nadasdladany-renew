@@ -20,4 +20,21 @@ public class JobPostingsController : ApiControllerBase
     {
         return await Mediator.Send(command);
     }
+
+    [HttpPut("{id}")]
+    [Authorize]
+    public async Task<ActionResult> Update(int id, UpdateJobPostingCommand command)
+    {
+        if (id != command.Id) return BadRequest("Az URL ID nem egyezik a küldött ID-val.");
+        await Mediator.Send(command);
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    [Authorize]
+    public async Task<ActionResult> Delete(int id)
+    {
+        await Mediator.Send(new DeleteJobPostingCommand(id));
+        return NoContent();
+    }
 }

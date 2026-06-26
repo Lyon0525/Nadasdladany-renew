@@ -37,7 +37,7 @@ export const DocumentsPage = () => {
 
         switch (activeTab) {
             case 'rendelet':
-                return (doc as any).categoryId === 1 || doc.title.toLowerCase().includes('rendelet');
+                return doc.documentCategoryId === 1 || doc.title.toLowerCase().includes('rendelet');
             case 'budget':
                 const t = doc.title.toLowerCase();
                 return t.includes('költségvetés') || t.includes('zárszámadás') || t.includes('pénzügy') || t.includes('zárszámadási');
@@ -48,7 +48,7 @@ export const DocumentsPage = () => {
                 const titleLower = doc.title.toLowerCase();
                 return titleLower.includes('esélyegyenlőség') || titleLower.includes('hep') || titleLower.includes('közzététel') || titleLower.includes('program');
             case 'kozerdeku':
-                return (doc as any).categoryId === 4 || doc.title.toLowerCase().includes('jegyzőkönyv') || doc.title.toLowerCase().includes('kivonat');
+                return doc.documentCategoryId === 4 || doc.title.toLowerCase().includes('jegyzőkönyv') || doc.title.toLowerCase().includes('kivonat');
             default:
                 return true;
         }
@@ -71,42 +71,42 @@ export const DocumentsPage = () => {
 
                         <button
                             onClick={() => { setActiveTab('all'); setSearchTerm(''); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'all' ? 'bg-primary text-white shadow-md' : 'text-gray-500 hover:bg-secondary/50 hover:text-primary'}`}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${activeTab === 'all' ? 'bg-primary text-white shadow-md' : 'text-gray-500 hover:bg-secondary/50 hover:text-primary'}`}
                         >
                             <Folder size={16} /> Összes dokumentum
                         </button>
 
                         <button
                             onClick={() => { setActiveTab('rendelet'); setSearchTerm(''); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'rendelet' ? 'bg-primary text-white shadow-md' : 'text-gray-500 hover:bg-secondary/50 hover:text-primary'}`}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${activeTab === 'rendelet' ? 'bg-primary text-white shadow-md' : 'text-gray-500 hover:bg-secondary/50 hover:text-primary'}`}
                         >
-                            <Scale size={16} /> Önkormányzati rendeletek
+                            <Scale size={16} /> Önkormányzati rendeleteink
                         </button>
 
                         <button
                             onClick={() => { setActiveTab('budget'); setSearchTerm(''); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'budget' ? 'bg-primary text-white shadow-md' : 'text-gray-500 hover:bg-secondary/50 hover:text-primary'}`}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${activeTab === 'budget' ? 'bg-primary text-white shadow-md' : 'text-gray-500 hover:bg-secondary/50 hover:text-primary'}`}
                         >
                             <Coins size={16} /> Költségvetés & Zárszámadás
                         </button>
 
                         <button
                             onClick={() => { setActiveTab('contracts'); setSearchTerm(''); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'contracts' ? 'bg-primary text-white shadow-md' : 'text-gray-500 hover:bg-secondary/50 hover:text-primary'}`}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${activeTab === 'contracts' ? 'bg-primary text-white shadow-md' : 'text-gray-500 hover:bg-secondary/50 hover:text-primary'}`}
                         >
-                            <Scale size={16} /> 5M Ft feletti Szerződések
+                            <Scale size={16} /> Szerződések & Szabályzatok
                         </button>
 
                         <button
                             onClick={() => { setActiveTab('eselyegyenloseg'); setSearchTerm(''); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'eselyegyenloseg' ? 'bg-primary text-white shadow-md' : 'text-gray-500 hover:bg-secondary/50 hover:text-primary'}`}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${activeTab === 'eselyegyenloseg' ? 'bg-primary text-white shadow-md' : 'text-gray-500 hover:bg-secondary/50 hover:text-primary'}`}
                         >
                             <ShieldCheck size={16} /> Közzétételi lista & HEP
                         </button>
 
                         <button
                             onClick={() => { setActiveTab('kozerdeku'); setSearchTerm(''); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'kozerdeku' ? 'bg-primary text-white shadow-md' : 'text-gray-500 hover:bg-secondary/50 hover:text-primary'}`}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${activeTab === 'kozerdeku' ? 'bg-primary text-white shadow-md' : 'text-gray-500 hover:bg-secondary/50 hover:text-primary'}`}
                         >
                             <FileText size={16} /> Jegyzőkönyvek & Közérdekű
                         </button>

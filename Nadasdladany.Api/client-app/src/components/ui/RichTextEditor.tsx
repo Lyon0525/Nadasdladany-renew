@@ -2,12 +2,14 @@ import { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
+import Placeholder from '@tiptap/extension-placeholder';
 import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Quote, Undo, Redo } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 interface Props {
     content: string;
     onChange: (html: string) => void;
+    placeholder?: string; // Új opcionális prop
 }
 
 const MenuBar = ({ editor }: { editor: any }) => {
@@ -35,7 +37,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
                     type="button"
                     onClick={btn.action}
                     className={cn(
-                        "p-2 rounded-lg transition-all",
+                        "p-2 rounded-lg transition-all cursor-pointer",
                         editor.isActive(btn.active) ? "bg-accent text-white" : "text-gray-400 hover:bg-white"
                     )}
                 >
@@ -43,29 +45,34 @@ const MenuBar = ({ editor }: { editor: any }) => {
                 </button>
             ))}
             <div className="ml-auto flex gap-1">
-                <button type="button" onClick={() => editor.chain().focus().undo().run()} className="p-2 text-gray-400"><Undo size={18} /></button>
-                <button type="button" onClick={() => editor.chain().focus().redo().run()} className="p-2 text-gray-400"><Redo size={18} /></button>
+                <button type="button" onClick={() => editor.chain().focus().undo().run()} className="p-2 text-gray-400 cursor-pointer hover:text-primary"><Undo size={18} /></button>
+                <button type="button" onClick={() => editor.chain().focus().redo().run()} className="p-2 text-gray-400 cursor-pointer hover:text-primary"><Redo size={18} /></button>
             </div>
         </div>
     );
 };
 
-export const RichTextEditor = ({ content, onChange }: Props) => {
+export const RichTextEditor = ({ content, onChange, placeholder }: Props) => {
     const editor = useEditor({
         extensions: [
             StarterKit,
             Link.configure({ openOnClick: false }),
+            Placeholder.configure({
+                placeholder: placeholder || 'Írjon ide...',
+            }),
         ],
         content: content,
         onUpdate: ({ editor }) => {
             const html = editor.getHTML();
-            if (html !== content) {
+            if (html === '<p></p>') {
+                onChange('');
+            } else {
                 onChange(html);
             }
         },
         editorProps: {
             attributes: {
-                class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl outline-none min-h-[300px] p-6 focus:ring-0 max-w-none',
+                class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl outline-none min-h-[300px] p-6 focus:ring-0 max-w-none tiptap-editor',
             },
         },
     });

@@ -1,33 +1,21 @@
 import { useState } from 'react';
 import { AdminLayout } from '../../layouts/AdminLayout';
-import { galleryService } from '../../api/galleryService';
-import { Upload, Trash2, FolderPlus, Loader2 } from 'lucide-react';
+import { galleryService, type GalleryAlbum } from '../../api/galleryService';
+import { Trash2, FolderPlus, Loader2, Image as ImageIcon } from 'lucide-react';
 import { AlbumForm } from '../../features/admin/gallery/components/AlbumForm';
+import { AlbumManagerModal } from '../../features/admin/gallery/components/AlbumManagerModal';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { getImageUrl } from '../../lib/imageUtils';
 
 export const AdminGalleryPage = () => {
-    const [isUploading, setIsUploading] = useState(false);
     const [isAlbumFormOpen, setIsAlbumFormOpen] = useState(false);
+    const [managingAlbum, setManagingAlbum] = useState<GalleryAlbum | null>(null);
 
     const { data: albums = [], refetch, isLoading } = useQuery({
         queryKey: ['adminAlbums'],
         queryFn: () => galleryService.getAlbums()
     });
-
-    const handleFileUpload = async (albumId: number, files: FileList | null) => {
-        if (!files) return;
-        setIsUploading(true);
-        try {
-            await galleryService.uploadImages(albumId, files);
-            toast.success('Képek sikeresen hozzáadva az albumhoz!');
-            refetch();
-        } catch (err) {
-            toast.error('Hiba történt a képek feltöltése során.');
-        } finally {
-            setIsUploading(false);
-        }
-    };
 
     const handleAlbumDelete = async (id: number) => {
         if (!window.confirm("Biztosan törölni szeretné ezt az albumot a benne lévő összes képpel együtt?")) return;
@@ -43,9 +31,12 @@ export const AdminGalleryPage = () => {
     return (
         <AdminLayout>
             <div className="flex justify-between items-center mb-12">
-                <h1 className="text-4xl font-serif font-bold text-primary">Galériák kezelése</h1>
+                <div>
+                    <h1 className="text-4xl font-serif font-bold text-primary">Galériák kezelése</h1>
+                    <p className="text-gray-400 mt-1">Községi események fényképeinek feltöltése és menedzselése.</p>
+                </div>
                 <button onClick={() => setIsAlbumFormOpen(true)} className="flex items-center gap-2 bg-accent text-primary font-bold px-8 py-4 rounded-full hover:scale-105 transition-all cursor-pointer shadow-md">
-                    <FolderPlus size={20} /> Új album
+                    <FolderPlus size={20} /> Új album létrehozása
                 </button>
             </div>
 
@@ -54,19 +45,38 @@ export const AdminGalleryPage = () => {
             ) : (
                 <div className="grid grid-cols-1 gap-6">
                     {albums.map(album => (
-                        <div key={album.id} className="bg-white p-8 rounded-[32px] border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm hover:shadow-md transition-shadow">
-                            <div>
-                                <h3 className="text-xl font-bold text-primary">{album.title}</h3>
-                                <p className="text-gray-400 text-sm">{album.imageCount} kép az albumban</p>
+                        <div key={album.id} className="bg-white p-6 rounded-[32px] border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex items-center gap-6">
+                                <div className="w-20 h-20 rounded-2xl bg-secondary overflow-hidden border border-gray-100 flex-shrink-0">
+                                    {album.thumbnailUrl ? (
+                                        <img src={getImageUrl(album.thumbnailUrl)} alt="" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-primary/10">
+                                            <ImageIcon size={32} />
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-serif font-bold text-primary mb-1">{album.title}</h3>
+                                    <span className="text-[10px] font-bold uppercase tracking-widest bg-secondary text-accent px-3 py-1 rounded-full">
+                                        {album.imageCount} fotó
+                                    </span>
+                                </div>
                             </div>
 
-                            <div className="flex items-center gap-4">
-                                <label className={`flex items-center gap-2 px-6 py-3 bg-secondary rounded-full transition-colors ${isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-200'}`}>
-                                    {isUploading ? <Loader2 className="animate-spin" size={18} /> : <><Upload size={18} /> Képek hozzáadása</>}
-                                    <input type="file" multiple accept="image/*" className="hidden" disabled={isUploading} onChange={(e) => handleFileUpload(album.id, e.target.files)} />
-                                </label>
-                                <button onClick={() => handleAlbumDelete(album.id)} className="p-3 text-red-400 hover:bg-red-50 rounded-full transition-colors cursor-pointer" title="Album törlése">
-                                    <Trash2 size={20} />
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => setManagingAlbum(album)}
+                                    className="flex items-center gap-2 px-6 py-3.5 bg-primary text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-accent transition-colors cursor-pointer shadow-sm"
+                                >
+                                    <ImageIcon size={16} /> Képek kezelése
+                                </button>
+                                <button
+                                    onClick={() => handleAlbumDelete(album.id)}
+                                    className="p-3.5 bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
+                                    title="Album törlése"
+                                >
+                                    <Trash2 size={18} />
                                 </button>
                             </div>
                         </div>
@@ -81,6 +91,7 @@ export const AdminGalleryPage = () => {
             )}
 
             {isAlbumFormOpen && <AlbumForm onClose={() => setIsAlbumFormOpen(false)} onSuccess={() => refetch()} />}
+            {managingAlbum && <AlbumManagerModal album={managingAlbum} onClose={() => setManagingAlbum(null)} />}
         </AdminLayout>
     );
 };

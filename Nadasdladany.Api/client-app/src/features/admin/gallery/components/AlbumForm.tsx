@@ -26,13 +26,29 @@ export const AlbumForm = ({ onClose, onSuccess }: Props) => {
     const [coverImage, setCoverImage] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files ? e.target.files[0] : null;
-        if (file) {
-            setCoverImage(file);
-            setImagePreview(URL.createObjectURL(file));
+        if (file) processFile(file);
+    };
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setIsDragging(false);
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            const file = e.dataTransfer.files[0];
+            if (file.type.startsWith('image/')) {
+                processFile(file);
+            } else {
+                toast.error("Kérjük, csak képfájlt húzzon ide!");
+            }
         }
+    };
+
+    const processFile = (file: File) => {
+        setCoverImage(file);
+        setImagePreview(URL.createObjectURL(file));
     };
 
     const onValidSubmit = async (data: AlbumFormData) => {
@@ -84,17 +100,27 @@ export const AlbumForm = ({ onClose, onSuccess }: Props) => {
 
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Album borítóképe</label>
-                        <div className="relative h-28 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center group hover:border-accent transition-all overflow-hidden bg-white">
+                        <div
+                            onDragOver={(e) => e.preventDefault()}
+                            onDragEnter={(e) => { e.preventDefault(); setIsDragging(true); }}
+                            onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDragging(false); }}
+                            onDrop={handleDrop}
+                            className={`relative h-28 border-2 border-dashed rounded-2xl flex items-center justify-center group transition-all overflow-hidden cursor-pointer ${isDragging ? 'border-accent bg-accent/5 scale-[1.02]' : 'border-gray-200 hover:border-accent bg-white'
+                                }`}
+                        >
                             {imagePreview ? (
-                                <div className="flex items-center gap-3 w-full px-4">
+                                <div className="flex items-center gap-3 w-full px-4 relative z-20 pointer-events-none">
                                     <img src={imagePreview} className="w-14 h-14 object-cover rounded-lg" alt="" />
                                     <span className="text-xs font-bold text-accent truncate flex-1">{coverImage?.name}</span>
                                     <Check className="text-green-500" size={16} />
                                 </div>
                             ) : (
-                                <><Upload className="text-gray-300 mr-2 group-hover:text-accent" size={18} /><p className="text-xs text-gray-400 font-bold uppercase">Borítókép kiválasztása</p></>
+                                <div className="flex flex-col items-center gap-1 pointer-events-none relative z-20 py-4">
+                                    <Upload className={`transition-colors ${isDragging ? 'text-accent' : 'text-gray-300 group-hover:text-accent'}`} size={20} />
+                                    <p className={`text-[10px] font-bold uppercase mt-1 transition-colors ${isDragging ? 'text-accent' : 'text-gray-400 group-hover:text-accent'}`}>Borítókép kiválasztása</p>
+                                </div>
                             )}
-                            <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleImageChange} />
+                            <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={handleImageChange} />
                         </div>
                     </div>
 

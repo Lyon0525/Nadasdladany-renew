@@ -9,6 +9,16 @@ export interface LoginCredentials {
 export const authService = {
     login: async (credentials: LoginCredentials) => {
         const response = await apiClient.post<LoginResponse>('/Auth/login', credentials);
+        if (response.data.token && !response.data.mustChangePassword) {
+            sessionStorage.setItem('admin_token', response.data.token);
+            sessionStorage.setItem('user', JSON.stringify(response.data));
+        }
+        return response.data;
+    },
+    changePassword: async (data: any, tempToken: string) => {
+        const response = await apiClient.post<LoginResponse>('/Auth/change-password', data, {
+            headers: { Authorization: `Bearer ${tempToken}` }
+        });
         if (response.data.token) {
             sessionStorage.setItem('admin_token', response.data.token);
             sessionStorage.setItem('user', JSON.stringify(response.data));
@@ -42,6 +52,10 @@ export const authService = {
     },
     registerUser: async (userData: any) => {
         const response = await apiClient.post('/users/register', userData);
+        return response.data;
+    },
+    updateUser: async (id: string, userData: any) => {
+        const response = await apiClient.put(`/users/${id}`, userData);
         return response.data;
     },
     deleteUser: async (id: string) => {

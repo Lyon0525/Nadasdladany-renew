@@ -71,6 +71,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var initialiser = scope.ServiceProvider.GetRequiredService<Nadasdladany.Infrastructure.Persistence.NadasdladanyDbContextInitialiser>();
+    await initialiser.InitialiseAsync();
+    await initialiser.SeedAsync();
+}
+
 var rootUploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "app_data_uploads");
 if (!Directory.Exists(rootUploadsPath))
 {

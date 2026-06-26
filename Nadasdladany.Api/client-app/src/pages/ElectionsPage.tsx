@@ -4,25 +4,8 @@ import apiClient from '../api/apiClient';
 import { type DocumentFile } from '../types/Municipality';
 import { type PaginatedResult } from '../api/articleService';
 import { DocumentItem } from '../features/documents/components/DocumentItem';
-import { electionApiService } from '../api/electionApiService';
+import { electionApiService, type ElectionResult, type CandidateResult } from '../api/electionApiService';
 import { Vote, FileText, Search, BarChart3, Users, CheckCircle2, Percent } from 'lucide-react';
-
-interface CandidateResult {
-    candidateName: string;
-    organization: string;
-    votesCount: number;
-    percentage: number;
-    isWinner: boolean;
-}
-
-export interface ElectionResult {
-    year: number;
-    type: string;
-    registeredVoters: number;
-    votedCount: number;
-    turnoutPercentage: number;
-    results: CandidateResult[];
-}
 
 export const ElectionsPage = () => {
     const [docs, setDocs] = useState<DocumentFile[]>([]);
@@ -48,7 +31,7 @@ export const ElectionsPage = () => {
     useEffect(() => {
         setLoadingApi(true);
         electionApiService.getNadasdladanyResults(selectedYear)
-            .then((data) => setApiResult(data as any))
+            .then((data) => setApiResult(data))
             .finally(() => setLoadingApi(false));
     }, [selectedYear]);
 
@@ -136,7 +119,7 @@ export const ElectionsPage = () => {
                                     <h3 className="text-2xl font-serif font-bold text-primary mb-6">{apiResult.type} - Nádasdladány</h3>
 
                                     <div className="space-y-6">
-                                        {apiResult.results.map((candidate: CandidateResult, i: number) => (
+                                        {(apiResult.results || []).map((candidate: CandidateResult, i: number) => (
                                             <div key={i} className="space-y-2">
                                                 <div className="flex justify-between items-end text-sm">
                                                     <div>

@@ -15,4 +15,8 @@ public class SiteSettingDto
     public string? ContactAddress { get; set; }
     public string? ContactEmail { get; set; }
     public string? ContactPhone { get; set; }
+    public string ImpressumText { get; set; } = string.Empty;
+    public string GdprText { get; set; } = string.Empty;
+    public string AccessibilityText { get; set; } = string.Empty;
+    public string HostingProviderText { get; set; } = string.Empty;
 }

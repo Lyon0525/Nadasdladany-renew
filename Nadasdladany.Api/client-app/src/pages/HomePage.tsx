@@ -8,14 +8,16 @@ import { NewsCard } from '../features/news/components/NewsCard';
 import { NewsCardSkeleton } from '../features/news/components/NewsCardSkeleton';
 import { VillageMap } from '../features/map/components/VillageMap';
 import { getImageUrl } from '../lib/imageUtils';
-import { ChevronDown, User, Bell, CalendarDays, Newspaper } from 'lucide-react';
+import { ChevronDown, User, Bell, CalendarDays, Newspaper, Camera, FolderOpen } from 'lucide-react';
 import { newsletterService } from '../api/newsletterService';
 import { siteSettingsService, type SiteSetting } from '../api/siteSettingsService';
+import { galleryService, type GalleryAlbum } from '../api/galleryService';
 import toast from 'react-hot-toast';
 import { MiniCalendar } from '../components/common/MiniCalendar';
 
 export const HomePage = () => {
     const [articles, setArticles] = useState<Article[]>([]);
+    const [albums, setAlbums] = useState<GalleryAlbum[]>([]);
     const [loading, setLoading] = useState(true);
     const [settings, setSettings] = useState<SiteSetting | null>(null);
     const [email, setEmail] = useState('');
@@ -30,6 +32,10 @@ export const HomePage = () => {
         siteSettingsService.getSettings()
             .then(data => setSettings(data || null))
             .catch(err => console.error("Hiba a köszöntő betöltésekor:", err));
+
+        galleryService.getAlbums()
+            .then(data => setAlbums(data ? data.slice(0, 3) : []))
+            .catch(err => console.error("Hiba a galéria betöltésekor:", err));
     }, []);
 
     const handleSubscribe = async (e: React.FormEvent) => {
@@ -198,7 +204,59 @@ export const HomePage = () => {
                 </div>
             </section>
 
-            <section className="w-full pb-24 px-6 md:px-12 xl:px-20">
+            <section className="bg-secondary/20 py-24 px-6 md:px-12 xl:px-20 w-full border-t border-gray-50">
+                <div className="w-full">
+                    <div className="flex justify-between items-end border-b border-gray-100 pb-4 mb-12">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-accent/10 text-accent rounded-xl">
+                                <Camera size={22} />
+                            </div>
+                            <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary">Pillanatképek</h2>
+                        </div>
+                        <Link to="/galeria" className="text-accent font-bold uppercase tracking-widest text-xs hover:underline whitespace-nowrap mb-1">
+                            Teljes galéria →
+                        </Link>
+                    </div>
+
+                    {albums.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {albums.map((album, index) => (
+                                <motion.div
+                                    key={album.id}
+                                    initial={{ opacity: 0, y: 30 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: index * 0.1 }}
+                                >
+                                    <Link to={`/galeria/${album.slug}`} className="group block h-full">
+                                        <div className="relative h-72 rounded-[32px] overflow-hidden shadow-sm group-hover:shadow-xl transition-all duration-500 border border-gray-100">
+                                            <img
+                                                src={album.thumbnailUrl ? getImageUrl(album.thumbnailUrl) : 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&q=80'}
+                                                alt={album.title}
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/20 to-transparent flex flex-col justify-end p-6">
+                                                <div className="flex items-center gap-2 text-accent text-[10px] font-bold uppercase tracking-widest mb-1">
+                                                    <FolderOpen size={12} /> {album.imageCount} fotó
+                                                </div>
+                                                <h3 className="text-xl font-serif font-bold text-white group-hover:text-accent transition-colors line-clamp-2">
+                                                    {album.title}
+                                                </h3>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                </motion.div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-10 text-gray-400 italic text-sm">
+                            Jelenleg nincsenek feltöltött fotóalbumok.
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            <section className="w-full py-24 px-6 md:px-12 xl:px-20">
                 <div className="bg-primary text-white py-16 px-8 md:px-16 rounded-[40px] text-center shadow-xl relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-r from-accent/10 to-transparent pointer-events-none" />
                     <div className="relative z-10">

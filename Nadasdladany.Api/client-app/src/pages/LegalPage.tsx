@@ -1,9 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MainLayout } from '../layouts/MainLayout';
-import { Scale, ShieldAlert, FileText, Info } from 'lucide-react';
+import { Scale, ShieldAlert, FileText, Info, Loader2 } from 'lucide-react';
+import { siteSettingsService, type SiteSetting } from '../api/siteSettingsService';
 
 export const LegalPage = () => {
     const [activeTab, setActiveTab] = useState<'impresszum' | 'gdpr' | 'accessibility'>('impresszum');
+    const [settings, setSettings] = useState<SiteSetting | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        siteSettingsService.getSettings()
+            .then(data => setSettings(data))
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, []);
+
+    const defaultImpressum = `
+        <p><strong>A honlap fenntartója:</strong><br>Nádasdladány Község Önkormányzata<br>Székhely: 8145 Nádasdladány, Fő utca 1.<br>Adószám: 15337225-1-07</p>
+        <p><strong>Felelős kiadó:</strong><br>Pálfi Kristóf — Polgármester</p>
+    `;
+
+    const defaultHostingProvider = `
+        <p><strong>Név:</strong> NISZ Nemzeti Infokommunikációs Szolgáltató Zrt.<br>
+        <strong>Székhely:</strong> 1081 Budapest, Csokonai utca 3.<br>
+        <strong>E-mail:</strong> info@nisz.hu<br>
+        <strong>Weboldal:</strong> https://nisz.hu</p>
+    `;
+
+    const defaultGdpr = `
+        <p>Önkormányzatunk elkötelezett a látogatók és az ügyfelek személyes adatainak védelme mellett az Európai Unió 2016/679 számú általános adatvédelmi rendelete (GDPR) szerint.</p>
+        <p><strong>1. Közérdekű adatigénylések és panaszok:</strong><br>Az online űrlapokon megadott nevét, e-mail címét és telefonszámát kizárólag a kérelem feldolgozására, azonosítására és a törvényben meghatározott 15 napos válaszadási határidő betartására használjuk fel. Harmadik félnek az adatokat át nem adjuk.</p>
+        <p><strong>2. Hírlevél feliratkozás:</strong><br>A feliratkozás során megadott e-mail címet kizárólag lakossági tájékoztató hírlevelek körözésére használjuk. A leiratkozás bármikor ingyenesen kezdeményezhető a hírlevél alján található linken.</p>
+    `;
+
+    const defaultAccessibility = `
+        <p>Nádasdladány Község Önkormányzata elkötelezett amellett, hogy honlapját a közszférabeli szervezetek honlapjainak akadálymentesítéséről szóló <strong>2018. évi LXXV. törvénynek</strong> megfelelően akadálymentessé tegye.</p>
+        <p><strong>Megfelelőségi státusz:</strong><br>Ez a honlap részben megfelel az MSZ EN 301 549 szabványnak, illetve a WCAG 2.1 AA szintű hozzáférhetőségi iránymutatásoknak. Fejlesztőcsapatunk folyamatosan dolgozik a vakbarát felolvasó szoftverek és a billentyűzet-navigáció tökéletesítésén.</p>
+        <p><strong>Visszajelzés és elérhetőségek:</strong><br>Amennyiben a honlap használata során akadályba ütközik, észrevételeit az info@nadasdladany.hu e-mail címen jelezheti felénk. A bejelentéseket 15 napon belül felülvizsgáljuk.</p>
+    `;
 
     return (
         <MainLayout>
@@ -36,60 +70,45 @@ export const LegalPage = () => {
                 </div>
 
                 <div className="bg-white p-8 md:p-12 rounded-[40px] border border-gray-100 shadow-sm prose prose-sm max-w-none text-primary leading-relaxed">
+                    {loading ? (
+                        <div className="flex justify-center py-20">
+                            <Loader2 className="animate-spin text-accent" size={32} />
+                        </div>
+                    ) : (
+                        <div className="animate-in fade-in duration-300">
 
-                    {activeTab === 'impresszum' && (
-                        <div className="animate-in fade-in duration-300 space-y-6">
-                            <h2 className="font-serif text-2xl font-bold text-primary border-b border-gray-50 pb-3">Hivatalos Impresszum</h2>
-                            <div>
-                                <h4 className="font-bold mb-1">A honlap fenntartója:</h4>
-                                <p>Nádasdladány Község Önkormányzata<br />Székhely: 8145 Nádasdladány, Fő utca 1.<br />Adószám: 15337225-1-07</p>
-                            </div>
-                            <div>
-                                <h4 className="font-bold mb-1">Felelős kiadó:</h4>
-                                <p>Pálfi Kristóf — Polgármester</p>
-                            </div>
-                            <div className="bg-secondary/40 p-6 rounded-2xl border border-gray-100/50">
-                                <h4 className="font-bold text-accent uppercase tracking-wider text-xs mb-2">Törvényi kötelező Tárhelyszolgáltatói adatok:</h4>
-                                <p className="text-sm">
-                                    <strong>Név:</strong> NISZ Nemzeti Infokommunikációs Szolgáltató Zrt.<br />
-                                    <strong>Székhely:</strong> 1081 Budapest, Csokonai utca 3.<br />
-                                    <strong>E-mail:</strong> info@nisz.hu<br />
-                                    <strong>Weboldal:</strong> https://nisz.hu
-                                </p>
-                            </div>
+                            {activeTab === 'impresszum' && (
+                                <>
+                                    <h2 className="font-serif text-2xl font-bold text-primary border-b border-gray-50 pb-3 mb-6">Hivatalos Impresszum</h2>
+
+                                    <div dangerouslySetInnerHTML={{ __html: settings?.impressumText || defaultImpressum }} />
+
+                                    <div className="bg-secondary/40 p-6 rounded-2xl border border-gray-100/50 mt-8">
+                                        <h4 className="font-bold text-accent uppercase tracking-wider text-xs mb-2">Törvényi kötelező Tárhelyszolgáltatói adatok:</h4>
+                                        <div
+                                            className="text-sm m-0 prose-p:m-0"
+                                            dangerouslySetInnerHTML={{ __html: settings?.hostingProviderText || defaultHostingProvider }}
+                                        />
+                                    </div>
+                                </>
+                            )}
+
+                            {activeTab === 'gdpr' && (
+                                <>
+                                    <h2 className="font-serif text-2xl font-bold text-primary border-b border-gray-50 pb-3 mb-6">Adatkezelési Tájékoztató (Kivonat)</h2>
+                                    <div dangerouslySetInnerHTML={{ __html: settings?.gdprText || defaultGdpr }} />
+                                </>
+                            )}
+
+                            {activeTab === 'accessibility' && (
+                                <>
+                                    <h2 className="font-serif text-2xl font-bold text-primary border-b border-gray-50 pb-3 mb-6">Akadálymentesítési Nyilatkozat</h2>
+                                    <div dangerouslySetInnerHTML={{ __html: settings?.accessibilityText || defaultAccessibility }} />
+                                </>
+                            )}
+
                         </div>
                     )}
-
-                    {activeTab === 'gdpr' && (
-                        <div className="animate-in fade-in duration-300 space-y-6">
-                            <h2 className="font-serif text-2xl font-bold text-primary border-b border-gray-50 pb-3">Adatkezelési Tájékoztató (Kivonat)</h2>
-                            <p>Önkormányzatunk elkötelezett a látogatók és az ügyfelek személyes adatainak védelme mellett az Európai Unió 2016/679 számú általános adatvédelmi rendelete (GDPR) szerint.</p>
-                            <div>
-                                <h4 className="font-bold">1. Közérdekű adatigénylések és panaszok:</h4>
-                                <p>Az online űrlapokon megadott nevét, e-mail címét és telefonszámát kizárólag a kérelem feldolgozására, azonosítására és a törvényben meghatározott 15 napos válaszadási határidő betartására használjuk fel. Harmadik félnek az adatokat át nem adjuk.</p>
-                            </div>
-                            <div>
-                                <h4 className="font-bold">2. Hírlevél feliratkozás:</h4>
-                                <p>A feliratkozás során megadott e-mail címet kizárólag lakossági tájékoztató hírlevelek körözésére használjuk. A leiratkozás bármikor ingyenesen kezdeményezhető a hírlevél alján található linken.</p>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'accessibility' && (
-                        <div className="animate-in fade-in duration-300 space-y-6">
-                            <h2 className="font-serif text-2xl font-bold text-primary border-b border-gray-50 pb-3">Akadálymentesítési Nyilatkozat</h2>
-                            <p>Nádasdladány Község Önkormányzata elkötelezett amellett, hogy honlapját a közszférabeli szervezetek honlapjainak akadálymentesítéséről szóló <strong>2018. évi LXXV. törvénynek</strong> megfelelően akadálymentessé tegye.</p>
-                            <div>
-                                <h4 className="font-bold">Megfelelőségi státusz:</h4>
-                                <p>Ez a honlap részben megfelel az <strong>MSZ EN 301 549</strong> szabványnak, illetve a <strong>WCAG 2.1 AA</strong> szintű hozzáférhetőségi iránymutatásoknak. Fejlesztőcsapatunk folyamatosan dolgozik a vakbarát felolvasó szoftverek és a billentyűzet-navigáció tökéletesítésén.</p>
-                            </div>
-                            <div>
-                                <h4 className="font-bold">Visszajelzés és elérhetőségek:</h4>
-                                <p>Amennyiben a honlap használata során akadályba ütközik, észrevételeit az <strong>info@nadasdladany.hu</strong> e-mail címen jelezheti felénk. A bejelentéseket 15 napon belül felülvizsgáljuk.</p>
-                            </div>
-                        </div>
-                    )}
-
                 </div>
             </div>
         </MainLayout>
