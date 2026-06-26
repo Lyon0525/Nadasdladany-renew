@@ -141,7 +141,6 @@ export const AdminOfficePage = () => {
                     </div>
                 </div>
 
-                {/* 3. Munkatársak */}
                 <div className="bg-white p-8 md:p-10 rounded-[32px] border border-gray-100 shadow-sm space-y-6">
                     <div className="flex justify-between items-center border-b border-gray-50 pb-4">
                         <h2 className="text-xl font-serif font-bold text-primary flex items-center gap-2">
