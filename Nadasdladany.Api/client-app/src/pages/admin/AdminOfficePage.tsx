@@ -89,12 +89,11 @@ export const AdminOfficePage = () => {
     return (
         <AdminLayout>
             <div className="mb-12">
-                <h1 className="text-4xl font-serif font-bold text-primary">Hivatal (Kirendeltség) Kezelése</h1>
+                <h1 className="text-4xl font-serif font-bold text-primary">Hivatal Kezelése</h1>
                 <p className="text-gray-400 mt-1">Szerkessze az elérhetőségeket, az ügyfélfogadási rendet és a munkatársak listáját.</p>
             </div>
 
             <form onSubmit={handleSave} className="space-y-12 max-w-5xl pb-10">
-                {/* 1. Alapadatok */}
                 <div className="bg-white p-8 md:p-10 rounded-[32px] border border-gray-100 shadow-sm space-y-6">
                     <h2 className="text-xl font-serif font-bold text-primary flex items-center gap-2 border-b border-gray-50 pb-4">
                         <Building className="text-accent" size={20} /> Általános Információk
@@ -102,7 +101,7 @@ export const AdminOfficePage = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="md:col-span-2">
-                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Hivatal / Kirendeltség hivatalos neve *</label>
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Hivatal hivatalos neve *</label>
                             <input type="text" required className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm font-bold text-primary" value={officialName} onChange={e => setOfficialName(e.target.value)} />
                         </div>
                         <div className="md:col-span-2">
