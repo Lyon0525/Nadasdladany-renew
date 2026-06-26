@@ -94,7 +94,6 @@ export const AdminDocumentsPage = () => {
                                         </td>
                                         <td className="p-5">
                                             <span className="text-xs bg-secondary text-primary font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1">
-                                                {/* JAVÍTVA: doc.categoryId helyett doc.documentCategoryId */}
                                                 <Folder size={12} className="text-accent" /> {getCategoryName(doc.documentCategoryId)}
                                             </span>
                                         </td>

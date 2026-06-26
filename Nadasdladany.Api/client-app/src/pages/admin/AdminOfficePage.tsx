@@ -119,7 +119,6 @@ export const AdminOfficePage = () => {
                     </div>
                 </div>
 
-                {/* 2. Ügyfélfogadás */}
                 <div className="bg-white p-8 md:p-10 rounded-[32px] border border-gray-100 shadow-sm space-y-6">
                     <h2 className="text-xl font-serif font-bold text-primary flex items-center gap-2 border-b border-gray-50 pb-4">
                         <Clock className="text-accent" size={20} /> Ügyfélfogadási Rend

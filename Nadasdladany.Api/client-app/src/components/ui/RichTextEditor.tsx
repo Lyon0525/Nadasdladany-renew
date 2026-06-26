@@ -9,7 +9,7 @@ import { cn } from '../../lib/utils';
 interface Props {
     content: string;
     onChange: (html: string) => void;
-    placeholder?: string; // Új opcionális prop
+    placeholder?: string;
 }
 
 const MenuBar = ({ editor }: { editor: any }) => {

@@ -37,7 +37,6 @@ export const LoginPage = () => {
                 setStep('change-password');
                 setError('');
             } else {
-                // Hard redirect, hogy a context és a jogosultságok tisztán újra betöltődjenek
                 window.location.href = '/admin/dashboard';
             }
         } catch (err) {

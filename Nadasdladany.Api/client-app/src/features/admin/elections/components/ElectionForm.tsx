@@ -31,9 +31,7 @@ export const ElectionForm = ({ election, onClose, onSubmit, loading }: Props) =>
             if (election.candidatesJson) {
                 try {
                     setCandidates(JSON.parse(election.candidatesJson));
-                } catch {
-                    // fall back to default
-                }
+                } catch { }
             }
         }
     }, [election]);
@@ -50,7 +48,6 @@ export const ElectionForm = ({ election, onClose, onSubmit, loading }: Props) =>
         const updated = [...candidates];
         updated[index] = { ...updated[index], [field]: value };
 
-        // Automatikus százalék kalkuláció
         if (field === 'votesCount' && votedCount > 0) {
             updated[index].percentage = Number(((value / votedCount) * 100).toFixed(2));
         }
