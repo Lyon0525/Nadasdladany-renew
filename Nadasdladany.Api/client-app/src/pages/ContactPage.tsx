@@ -1,25 +1,40 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { MainLayout } from '../layouts/MainLayout';
 import { Mail, Phone, MapPin, Send, Loader2, CheckCircle2 } from 'lucide-react';
 import { contactService } from '../api/contactService';
-import { siteSettingsService, type SiteSetting } from '../api/siteSettingsService';
+import { siteSettingsService } from '../api/siteSettingsService';
+import { useQuery } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const contactSchema = z.object({
+    name: z.string().min(1, "A név megadása kötelező!"),
+    email: z.string().email("Érvénytelen e-mail cím!"),
+    subject: z.string().min(1, "A tárgy megadása kötelező!"),
+    message: z.string().min(10, "Az üzenet túl rövid (min. 10 karakter)!")
+});
+
+type ContactFormData = z.infer<typeof contactSchema>;
 
 export const ContactPage = () => {
-    const [settings, setSettings] = useState<SiteSetting | null>(null);
-    const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
-    useEffect(() => {
-        siteSettingsService.getSettings().then(data => setSettings(data)).catch(console.error);
-    }, []);
+    const { data: settings } = useQuery({
+        queryKey: ['publicSiteSettings'],
+        queryFn: () => siteSettingsService.getSettings()
+    });
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const { register, handleSubmit, reset, formState: { errors } } = useForm<ContactFormData>({
+        resolver: zodResolver(contactSchema)
+    });
+
+    const onValidSubmit = async (data: ContactFormData) => {
         setStatus('loading');
         try {
-            await contactService.submitMessage(formData);
+            await contactService.submitMessage(data);
             setStatus('success');
-            setFormData({ name: '', email: '', subject: '', message: '' });
+            reset();
             setTimeout(() => setStatus('idle'), 5000);
         } catch (err) {
             setStatus('error');
@@ -84,29 +99,33 @@ export const ContactPage = () => {
                                 <p className="text-gray-500">Köszönjük megkeresését. Munkatársaink hamarosan válaszolni fognak a megadott e-mail címen.</p>
                             </div>
                         ) : (
-                            <form onSubmit={handleSubmit} className="space-y-6">
+                            <form onSubmit={handleSubmit(onValidSubmit)} className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Teljes Név *</label>
-                                        <input required type="text" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                                        <input type="text" className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm ${errors.name ? 'border-red-400' : 'border-gray-100'}`} {...register('name')} />
+                                        {errors.name && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.name.message}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">E-mail Cím *</label>
-                                        <input required type="email" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                                        <input type="email" className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm ${errors.email ? 'border-red-400' : 'border-gray-100'}`} {...register('email')} />
+                                        {errors.email && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.email.message}</p>}
                                     </div>
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Tárgy *</label>
-                                    <input required type="text" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" value={formData.subject} onChange={e => setFormData({ ...formData, subject: e.target.value })} />
+                                    <input type="text" className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm ${errors.subject ? 'border-red-400' : 'border-gray-100'}`} {...register('subject')} />
+                                    {errors.subject && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.subject.message}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Üzenet Szövege *</label>
-                                    <textarea required rows={5} className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm resize-none" value={formData.message} onChange={e => setFormData({ ...formData, message: e.target.value })} />
+                                    <textarea rows={5} className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm resize-none ${errors.message ? 'border-red-400' : 'border-gray-100'}`} {...register('message')} />
+                                    {errors.message && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.message.message}</p>}
                                 </div>
 
                                 {status === 'error' && <p className="text-red-500 text-sm font-bold text-center">Hiba történt az üzenet küldése során. Kérjük, próbálja újra később!</p>}
 
-                                <button disabled={status === 'loading'} type="submit" className="w-full bg-primary text-white font-bold py-5 rounded-2xl hover:bg-accent transition-all shadow-lg flex justify-center items-center gap-3 disabled:opacity-70">
+                                <button disabled={status === 'loading'} type="submit" className="w-full bg-primary text-white font-bold py-5 rounded-2xl hover:bg-accent transition-all shadow-lg flex justify-center items-center gap-3 disabled:opacity-70 cursor-pointer">
                                     {status === 'loading' ? <Loader2 className="animate-spin" size={20} /> : <><Send size={20} /> Üzenet Elküldése</>}
                                 </button>
                             </form>

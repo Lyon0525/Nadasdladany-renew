@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
+import { OptimizedImage } from '../../../../components/ui/OptimizedImage';
 
 const repSchema = z.object({
     name: z.string().min(1, "A név megadása kötelező!").max(150),
@@ -142,7 +143,11 @@ export const RepresentativeForm = ({ representative, onClose, onSubmit, loading 
                         >
                             {imagePreview ? (
                                 <div className="flex items-center gap-4 w-full px-4">
-                                    <img src={imagePreview} className="w-16 h-16 object-cover rounded-full shadow-sm border border-gray-100" alt="" />
+                                    <OptimizedImage 
+                                        src={imagePreview} 
+                                        className="w-16 h-16 object-cover rounded-full shadow-sm border border-gray-100" 
+                                        alt="" 
+                                    />
                                     <span className="text-xs font-bold text-accent truncate">{image ? image.name : 'Jelenlegi fotó'}</span>
                                     <Check className="text-green-500 ml-auto" size={18} />
                                 </div>

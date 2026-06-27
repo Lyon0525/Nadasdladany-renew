@@ -12,18 +12,11 @@ public class GalleryImageDto
 
 public record GetGalleryImagesQuery(string Slug) : IRequest<List<GalleryImageDto>>;
 
-public class GetGalleryImagesQueryHandler : IRequestHandler<GetGalleryImagesQuery, List<GalleryImageDto>>
+public class GetGalleryImagesQueryHandler(IApplicationDbContext context) : IRequestHandler<GetGalleryImagesQuery, List<GalleryImageDto>>
 {
-    private readonly IApplicationDbContext _context;
-
-    public GetGalleryImagesQueryHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<List<GalleryImageDto>> Handle(GetGalleryImagesQuery request, CancellationToken cancellationToken)
     {
-        return await _context.GalleryImages
+        return await context.GalleryImages
             .Include(i => i.GalleryAlbum)
             .Where(i => i.IsPublished && i.GalleryAlbum != null && i.GalleryAlbum.Slug == request.Slug)
             .OrderBy(i => i.DisplayOrder)

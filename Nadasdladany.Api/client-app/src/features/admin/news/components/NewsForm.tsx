@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
+import { OptimizedImage } from '../../../../components/ui/OptimizedImage';
 
 const newsSchema = z.object({
     title: z.string().min(1, "A hír címe kötelező!").max(200, "Maximum 200 karakter."),
@@ -29,7 +30,7 @@ export const NewsForm = ({ article, onClose, onSubmit, loading }: Props) => {
         resolver: zodResolver(newsSchema),
         defaultValues: {
             title: article?.title || '',
-            categoryId: article ? (article as any).categoryId?.toString() || '1' : '1',
+            categoryId: article?.categoryId?.toString() || '1',
             excerpt: article?.excerpt || '',
             content: article?.content || ''
         }
@@ -121,7 +122,11 @@ export const NewsForm = ({ article, onClose, onSubmit, loading }: Props) => {
                             >
                                 {imagePreview ? (
                                     <div className="flex flex-col items-center gap-3 w-full">
-                                        <img src={imagePreview} className="w-20 h-20 object-cover rounded-xl shadow-sm border border-gray-100" alt="" />
+                                        <OptimizedImage 
+                                            src={imagePreview} 
+                                            className="w-20 h-20 object-cover rounded-xl shadow-sm border border-gray-100" 
+                                            alt="" 
+                                        />
                                         <span className="text-xs font-bold text-accent truncate max-w-full px-4 text-center">{image ? image.name : 'Jelenlegi borítókép'}</span>
                                     </div>
                                 ) : (

@@ -1,54 +1,69 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AdminLayout } from '../../layouts/AdminLayout';
-import { authService } from '../../api/authService';
+import { authService, type AdminUser } from '../../api/authService';
 import { Trash2, UserPlus, Shield, Key, Loader2, X, Edit2, AlertTriangle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import toast from 'react-hot-toast';
+
+const userSchema = z.object({
+    email: z.string().email("Érvénytelen e-mail cím!"),
+    password: z.string().optional()
+});
+
+type UserFormData = z.infer<typeof userSchema>;
 
 export const AdminUsersPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingUser, setEditingUser] = useState<any>(null);
-
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const { data: users = [], refetch, isLoading } = useQuery({
+    const { data: users = [], refetch, isLoading } = useQuery<AdminUser[]>({
         queryKey: ['adminUsers'],
         queryFn: () => authService.getAllUsers()
     });
 
+    const { register, handleSubmit, reset, formState: { errors } } = useForm<UserFormData>({
+        resolver: zodResolver(userSchema)
+    });
+
     const openCreateModal = () => {
         setEditingUser(null);
-        setEmail('');
-        setPassword('');
+        reset({ email: '', password: '' });
         setIsModalOpen(true);
     };
 
-    const openEditModal = (user: any) => {
+    const openEditModal = (user: AdminUser) => {
         setEditingUser(user);
-        setEmail(user.email);
-        setPassword('');
+        reset({ email: user.email, password: '' });
         setIsModalOpen(true);
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const onValidSubmit = async (data: UserFormData) => {
         setIsSubmitting(true);
         try {
             if (editingUser) {
-                const payload: any = { email };
-                if (password) payload.password = password;
-                await authService.updateUser(editingUser.id, payload);
+                await authService.updateUser(editingUser.id, {
+                    email: data.email,
+                    password: data.password || undefined
+                });
                 toast.success("Felhasználó adatai sikeresen frissítve!");
             } else {
-                await authService.registerUser({ email, password });
+                if (!data.password) {
+                    toast.error("Új felhasználó esetén a jelszó megadása kötelező!");
+                    setIsSubmitting(false);
+                    return;
+                }
+                await authService.registerUser({ email: data.email, password: data.password });
                 toast.success("Új adminisztrátor sikeresen hozzáadva!");
             }
             setIsModalOpen(false);
             refetch();
-        } catch (err: any) {
-            toast.error(err.response?.data?.message || "Hiba történt a mentés során.");
+        } catch (err: unknown) {
+            const errorMsg = (err as any).response?.data?.message || "Hiba történt a mentés során.";
+            toast.error(errorMsg);
         } finally {
             setIsSubmitting(false);
         }
@@ -60,8 +75,9 @@ export const AdminUsersPage = () => {
             await authService.deleteUser(id);
             toast.success("Hozzáférés sikeresen megvonva.");
             refetch();
-        } catch (err: any) {
-            toast.error(err.response?.data?.message || "Nem sikerült törölni a felhasználót.");
+        } catch (err: unknown) {
+            const errorMsg = (err as any).response?.data?.message || "Nem sikerült törölni a felhasználót.";
+            toast.error(errorMsg);
         }
     };
 
@@ -91,7 +107,7 @@ export const AdminUsersPage = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50 text-gray-600 font-medium">
-                            {users.map((u: any) => (
+                            {users.map((u) => (
                                 <tr key={u.id} className="hover:bg-gray-50/40 transition-colors">
                                     <td className="p-5 pl-8 font-bold text-primary">{u.email}</td>
                                     <td className="p-5">
@@ -135,10 +151,11 @@ export const AdminUsersPage = () => {
                                 : 'A megadott e-mail címmel és jelszóval a kolléga azonnal be tud majd lépni a teljes admin felületre.'}
                         </p>
 
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        <form onSubmit={handleSubmit(onValidSubmit)} className="space-y-4">
                             <div>
-                                <label className="block text-[11px] font-bold uppercase text-gray-400 mb-1.5">Hivatali e-mail cím</label>
-                                <input type="email" required placeholder="nev@nadasdladany.hu" className="w-full bg-gray-50 border border-gray-200/60 p-3.5 rounded-xl outline-none focus:border-accent text-sm font-medium" value={email} onChange={e => setEmail(e.target.value)} />
+                                <label className="block text-[11px] font-bold uppercase text-gray-400 mb-1.5">Hivatali e-mail cím *</label>
+                                <input type="email" placeholder="nev@nadasdladany.hu" className={`w-full bg-gray-50 border p-3.5 rounded-xl outline-none focus:border-accent text-sm font-medium ${errors.email ? 'border-red-400' : 'border-gray-200/60'}`} {...register('email')} />
+                                {errors.email && <p className="text-red-500 text-[10px] font-bold mt-1.5">{errors.email.message}</p>}
                             </div>
                             <div>
                                 <label className="block text-[11px] font-bold uppercase text-gray-400 mb-1.5">
@@ -148,11 +165,9 @@ export const AdminUsersPage = () => {
                                     <Key size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                     <input
                                         type="text"
-                                        required={!editingUser}
                                         placeholder="Min. 8 karakter, kis/nagybetű, szám, spec. kar."
                                         className="w-full bg-gray-50 border border-gray-200/60 p-3.5 pl-11 rounded-xl outline-none focus:border-accent text-sm"
-                                        value={password}
-                                        onChange={e => setPassword(e.target.value)}
+                                        {...register('password')}
                                     />
                                 </div>
                                 {editingUser && <p className="text-[10px] text-amber-600 font-bold mt-1.5">Ha megad új jelszót, a felhasználónak az első belépéskor kötelező lesz megváltoztatnia azt!</p>}

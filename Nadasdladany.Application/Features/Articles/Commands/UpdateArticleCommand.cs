@@ -26,22 +26,11 @@ public class UpdateArticleCommandValidator : AbstractValidator<UpdateArticleComm
     }
 }
 
-public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand>
+public class UpdateArticleCommandHandler(IApplicationDbContext context, ISlugService slugService, IFileService fileService) : IRequestHandler<UpdateArticleCommand>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly ISlugService _slugService;
-    private readonly IFileService _fileService;
-
-    public UpdateArticleCommandHandler(IApplicationDbContext context, ISlugService slugService, IFileService fileService)
-    {
-        _context = context;
-        _slugService = slugService;
-        _fileService = fileService;
-    }
-
     public async Task Handle(UpdateArticleCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Articles.FindAsync(new object[] { request.Id }, cancellationToken);
+        var entity = await context.Articles.FindAsync(new object[] { request.Id }, cancellationToken);
 
         if (entity == null)
             throw new NotFoundException(nameof(Article), request.Id);
@@ -50,16 +39,16 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand>
         entity.Content = request.Content;
         entity.Excerpt = request.Excerpt;
         entity.CategoryId = request.CategoryId;
-        entity.Slug = _slugService.GenerateSlug(request.Title);
+        entity.Slug = slugService.GenerateSlug(request.Title);
 
         if (request.Image != null)
         {
             if (!string.IsNullOrEmpty(entity.FeaturedImageUrl))
-                _fileService.DeleteFile(entity.FeaturedImageUrl);
+                fileService.DeleteFile(entity.FeaturedImageUrl);
 
-            entity.FeaturedImageUrl = await _fileService.UploadFileAsync(request.Image, "articles");
+            entity.FeaturedImageUrl = await fileService.UploadFileAsync(request.Image, "articles");
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

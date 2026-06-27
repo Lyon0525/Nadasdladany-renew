@@ -1,42 +1,18 @@
-import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, MapPin, Clock, User, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { MainLayout } from '../layouts/MainLayout';
 import { Seo } from '../components/common/Seo';
-import apiClient from '../api/apiClient';
+import { eventService, type VillageEvent } from '../api/eventService';
+import { OptimizedImage } from '../components/ui/OptimizedImage';
 import { getImageUrl } from '../lib/imageUtils';
-
-interface Event {
-    id: number;
-    title: string;
-    slug: string;
-    description: string;
-    location?: string;
-    startDate: string;
-    endDate?: string;
-    isAllDay: boolean;
-    organizer?: string;
-    imageUrl?: string;
-}
+import { useEventBySlug } from '../hooks/useEvents';
 
 export const EventDetailPage = () => {
     const { slug } = useParams<{ slug: string }>();
-    const [event, setEvent] = useState<Event | null>(null);
-    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (slug) {
-            apiClient.get('/events')
-                .then(response => {
-                    const items = Array.isArray(response.data) ? response.data : (response.data?.items || []);
-                    const foundEvent = items.find((e: Event) => e.slug === slug);
-                    setEvent(foundEvent || null);
-                })
-                .catch(err => console.error("Hiba az esemény betöltésekor:", err))
-                .finally(() => setLoading(false));
-        }
-    }, [slug]);
+    const { data: event, isLoading: loading } = useEventBySlug(slug);
 
     if (loading) return <div className="h-screen flex items-center justify-center font-serif italic text-accent text-2xl gap-3"><Loader2 className="animate-spin" /> Rendezvény adatai betöltése...</div>;
     if (!event) return <div className="h-screen flex items-center justify-center font-serif text-2xl">A program nem található.</div>;
@@ -48,7 +24,8 @@ export const EventDetailPage = () => {
             <Seo
                 title={event.title}
                 description={event.description}
-                image={event.imageUrl ? getImageUrl(event.imageUrl) : "/Nadasdladany-hero-banner.jpg"}
+                image={getImageUrl(event.imageUrl)}
+                type="article"
             />
 
             <div className="max-w-4xl mx-auto px-6 py-12">
@@ -99,11 +76,7 @@ export const EventDetailPage = () => {
                 </header>
 
                 <div className="relative h-[450px] rounded-[40px] overflow-hidden mb-16 shadow-2xl bg-gray-100">
-                    <img
-                        src={event.imageUrl ? getImageUrl(event.imageUrl) : "/Nadasdladany-hero-banner.jpg"}
-                        alt={event.title}
-                        className="w-full h-full object-cover"
-                    />
+                    <OptimizedImage src={event.imageUrl} alt={event.title} isHero={true} className="w-full h-full" />
                 </div>
 
                 <div className="prose prose-lg prose-slate max-w-none shadow-sm bg-white p-8 md:p-16 rounded-[40px] border border-gray-50">

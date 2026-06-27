@@ -23,15 +23,8 @@ public class CreateDataRequestCommandValidator : AbstractValidator<CreateDataReq
     }
 }
 
-public class CreateDataRequestCommandHandler : IRequestHandler<CreateDataRequestCommand, int>
+public class CreateDataRequestCommandHandler(IApplicationDbContext context) : IRequestHandler<CreateDataRequestCommand, int>
 {
-    private readonly IApplicationDbContext _context;
-
-    public CreateDataRequestCommandHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<int> Handle(CreateDataRequestCommand request, CancellationToken cancellationToken)
     {
         var entity = new PublicDataRequest
@@ -43,8 +36,8 @@ public class CreateDataRequestCommandHandler : IRequestHandler<CreateDataRequest
             IsProcessed = false
         };
 
-        _context.PublicDataRequests.Add(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.PublicDataRequests.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }

@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { Landmark, Cross, Building, MapPin } from 'lucide-react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { useQuery } from '@tanstack/react-query';
 
 const getIconNode = (type: string) => {
     if (type === 'castle') return <Landmark size={20} />;
@@ -30,14 +31,12 @@ const createCustomIcon = (type: string) => {
 };
 
 export const VillageMap = () => {
-    const [locations, setLocations] = useState<VillageLocation[]>([]);
     const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
 
-    useEffect(() => {
-        villageMapService.getLocations()
-            .then((data: VillageLocation[]) => setLocations(data))
-            .catch((err: unknown) => console.error("Térkép pontok betöltési hibája:", err));
-    }, []);
+    const { data: locations = [] } = useQuery<VillageLocation[]>({
+        queryKey: ['publicVillageLocations'],
+        queryFn: () => villageMapService.getLocations()
+    });
 
     useEffect(() => {
         if (mapInstance) {

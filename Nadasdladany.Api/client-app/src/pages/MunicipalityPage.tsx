@@ -1,43 +1,60 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { MainLayout } from '../layouts/MainLayout';
 import { municipalityService } from '../api/municipalityService';
-import { siteSettingsService, type SiteSetting } from '../api/siteSettingsService';
+import { siteSettingsService } from '../api/siteSettingsService';
 import { type Representative } from '../types/Municipality';
-import { getImageUrl } from '../lib/imageUtils';
 import { Users, User, Shield, Landmark, ClipboardList, ArrowRight, Loader2 } from 'lucide-react';
+import { OptimizedImage } from '../components/ui/OptimizedImage';
+
+interface PublicCommittee {
+    id: string;
+    name: string;
+    description: string;
+    chair?: Representative;
+    members: Representative[];
+}
 
 export const MunicipalityPage = () => {
-    const [representatives, setRepresentatives] = useState<Representative[]>([]);
-    const [settings, setSettings] = useState<SiteSetting | null>(null);
-    const [loading, setLoading] = useState(true);
     const [activeSection, setActiveSection] = useState<'board' | 'committees'>('board');
 
-    useEffect(() => {
-        Promise.all([
-            municipalityService.getRepresentatives(),
-            siteSettingsService.getSettings()
-        ]).then(([repsData, settingsData]) => {
-            setRepresentatives(repsData || []);
-            setSettings(settingsData);
-        }).catch(err => console.error(err))
-          .finally(() => setLoading(false));
-    }, []);
+    const { data: representatives = [], isLoading: isLoadingReps } = useQuery({
+        queryKey: ['publicRepresentatives'],
+        queryFn: () => municipalityService.getRepresentatives().then(res => res || [])
+    });
+
+    const { data: settings, isLoading: isLoadingSettings } = useQuery({
+        queryKey: ['publicSiteSettings'],
+        queryFn: () => siteSettingsService.getSettings()
+    });
+
+    const loading = isLoadingReps || isLoadingSettings;
 
     const mayor = representatives.find(r => Number(r.role) === 0);
     const viceMayor = representatives.find(r => Number(r.role) === 1);
     const boardMembers = representatives.filter(r => Number(r.role) === 2 || Number(r.role) === 4);
 
-    let dynamicCommittees: any[] = [];
+    let dynamicCommittees: PublicCommittee[] = [];
+
     if (settings?.committeeText) {
         try {
-            const parsed = JSON.parse(settings.committeeText);
-            dynamicCommittees = parsed.map((c: any) => ({
+            const parsed = JSON.parse(settings.committeeText) as {
+                id: string;
+                name: string;
+                description: string;
+                chairId: string;
+                memberIds: number[];
+            }[];
+
+            dynamicCommittees = parsed.map(c => ({
                 id: c.id,
                 name: c.name,
                 description: c.description,
                 chair: representatives.find(r => r.id === Number(c.chairId)),
-                members: c.memberIds.map((id: number) => representatives.find(r => r.id === id)).filter(Boolean)
+                members: c.memberIds
+                    .map(id => representatives.find(r => r.id === id))
+                    .filter((r): r is Representative => r !== undefined)
             }));
         } catch (e) {
             console.error("Hiba a bizottságok betöltésekor");
@@ -86,7 +103,7 @@ export const MunicipalityPage = () => {
                                         <div className="space-y-4">
                                             <div className="w-40 h-40 mx-auto rounded-full overflow-hidden bg-secondary border-2 border-accent relative group-hover:scale-105 transition-transform duration-500">
                                                 {mayor.imageUrl ? (
-                                                    <img src={getImageUrl(mayor.imageUrl)} alt={mayor.name} className="w-full h-full object-cover" />
+                                                        <OptimizedImage src={mayor.imageUrl} alt={mayor.name} isHero={true} className="w-full h-full" />
                                                 ) : <User size={64} className="text-primary/10 absolute inset-0 m-auto" />}
                                             </div>
                                             <div>
@@ -107,7 +124,7 @@ export const MunicipalityPage = () => {
                                         <div className="space-y-4">
                                             <div className="w-40 h-40 mx-auto rounded-full overflow-hidden bg-secondary border-2 border-gray-200 relative group-hover:scale-105 transition-transform duration-500">
                                                 {viceMayor.imageUrl ? (
-                                                    <img src={getImageUrl(viceMayor.imageUrl)} alt={viceMayor.name} className="w-full h-full object-cover" />
+                                                        <OptimizedImage src={viceMayor.imageUrl} alt={viceMayor.name} isHero={true} className="w-full h-full" />
                                                 ) : <User size={64} className="text-primary/10 absolute inset-0 m-auto" />}
                                             </div>
                                             <div>
@@ -132,7 +149,7 @@ export const MunicipalityPage = () => {
                                             <div className="space-y-4">
                                                 <div className="w-28 h-28 mx-auto rounded-full overflow-hidden bg-secondary relative group-hover:scale-105 transition-transform duration-500">
                                                     {member.imageUrl ? (
-                                                        <img src={getImageUrl(member.imageUrl)} alt={member.name} className="w-full h-full object-cover" />
+                                                        <OptimizedImage src={member.imageUrl} alt={member.name} className="w-full h-full" />
                                                     ) : <User size={48} className="text-primary/10 absolute inset-0 m-auto" />}
                                                 </div>
                                                 <div>
@@ -177,7 +194,7 @@ export const MunicipalityPage = () => {
                                             <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 block pl-1">Bizottsági tagok:</span>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                 {committee.members.length > 0 ? (
-                                                    committee.members.map((m: any, idx: number) => (
+                                                    committee.members.map((m, idx) => (
                                                         <div key={idx} className="bg-gray-50/60 px-4 py-2.5 rounded-xl border border-gray-100/50 text-xs font-medium text-primary flex items-center gap-2">
                                                             <div className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
                                                             {m.name}

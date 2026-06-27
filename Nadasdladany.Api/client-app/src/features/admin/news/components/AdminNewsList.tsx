@@ -1,6 +1,7 @@
 import { Edit2, Trash2, ExternalLink } from 'lucide-react';
 import { type Article } from '../../../../types/Article';
 import { Link } from 'react-router-dom';
+import { OptimizedImage } from '../../../../components/ui/OptimizedImage';
 
 interface Props {
     articles: Article[];
@@ -26,7 +27,11 @@ export const AdminNewsList = ({ articles, onDelete, onEdit }: Props) => {
                             <td className="px-8 py-5">
                                 <div className="flex items-center gap-4">
                                     {art.featuredImageUrl && (
-                                        <img src={art.featuredImageUrl} className="w-12 h-12 rounded-lg object-cover" alt="" />
+                                        <OptimizedImage
+                                            src={art.featuredImageUrl}
+                                            className="w-12 h-12 rounded-lg object-cover"
+                                            alt="Hír borítókép"
+                                        />
                                     )}
                                     <span className="font-medium text-primary">{art.title}</span>
                                 </div>

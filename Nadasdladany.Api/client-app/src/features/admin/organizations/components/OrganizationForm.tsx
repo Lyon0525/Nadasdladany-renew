@@ -5,6 +5,7 @@ import { getImageUrl } from '../../../../lib/imageUtils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { OptimizedImage } from '../../../../components/ui/OptimizedImage';
 
 const orgSchema = z.object({
     name: z.string().min(1, "A szervezet neve kötelező!").max(200),
@@ -149,7 +150,11 @@ export const OrganizationForm = ({ organization, onClose, onSubmit, loading }: P
                         <div onDragOver={(e) => e.preventDefault()} onDragEnter={() => setIsDragging(true)} onDragLeave={() => setIsDragging(false)} onDrop={handleDrop} className={`relative border-2 border-dashed rounded-2xl p-5 text-center transition-all overflow-hidden cursor-pointer group ${isDragging ? 'border-accent bg-accent/5' : 'border-gray-200 hover:border-accent'}`}>
                             {imagePreview ? (
                                 <div className="flex items-center gap-4 w-full">
-                                    <img src={imagePreview} className="w-12 h-12 object-cover rounded-xl" alt="" />
+                                    <OptimizedImage 
+                                        src={imagePreview} 
+                                        className="w-12 h-12 object-cover rounded-xl" 
+                                        alt="" 
+                                    />
                                     <span className="text-xs font-bold text-accent truncate">{imageFile ? imageFile.name : 'Jelenlegi logó'}</span>
                                     <Check className="text-green-500 ml-auto" size={18} />
                                 </div>

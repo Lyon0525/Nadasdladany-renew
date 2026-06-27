@@ -43,20 +43,11 @@ public class CreateDocumentCommandValidator : AbstractValidator<CreateDocumentCo
     }
 }
 
-public class CreateDocumentCommandHandler : IRequestHandler<CreateDocumentCommand, int>
+public class CreateDocumentCommandHandler(IApplicationDbContext context, IFileService fileService) : IRequestHandler<CreateDocumentCommand, int>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IFileService _fileService;
-
-    public CreateDocumentCommandHandler(IApplicationDbContext context, IFileService fileService)
-    {
-        _context = context;
-        _fileService = fileService;
-    }
-
     public async Task<int> Handle(CreateDocumentCommand request, CancellationToken cancellationToken)
     {
-        string? filePath = await _fileService.UploadFileAsync(request.File, "documents");
+        string? filePath = await fileService.UploadFileAsync(request.File, "documents");
 
         if (string.IsNullOrEmpty(filePath))
             throw new InvalidOperationException("A fájl mentése biztonsági okokból sikertelen volt a szerveren.");
@@ -72,8 +63,8 @@ public class CreateDocumentCommandHandler : IRequestHandler<CreateDocumentComman
             IsPublished = true
         };
 
-        _context.Documents.Add(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.Documents.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }

@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { OptimizedImage } from '../../components/ui/OptimizedImage';
 
 const settingsSchema = z.object({
     mayorName: z.string().min(1, "A név kötelező!"),
@@ -206,7 +207,11 @@ export const AdminWelcomePage = () => {
                         <label className="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Polgármester fotója</label>
                         <div className="flex flex-col sm:flex-row items-center gap-6 p-4 bg-gray-50 rounded-2xl border border-gray-100">
                             <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-2 border-white shadow-md flex-shrink-0">
-                                <img src={imagePreview || (settings?.mayorImageUrl ? getImageUrl(settings.mayorImageUrl) : 'https://via.placeholder.com/150')} className="w-full h-full object-cover" alt="Polgármester" />
+                                <OptimizedImage 
+                                    src={imagePreview || (settings?.mayorImageUrl ? getImageUrl(settings.mayorImageUrl) : 'https://via.placeholder.com/150')} 
+                                    className="w-full h-full object-cover" 
+                                    alt="Polgármester" 
+                                />
                             </div>
                             <div onDragOver={e => e.preventDefault()} onDragEnter={() => setIsMayorDragging(true)} onDragLeave={() => setIsMayorDragging(false)} onDrop={handleMayorImageDrop} className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-all bg-white flex-1 w-full cursor-pointer group ${isMayorDragging ? 'border-accent bg-accent/5 scale-[1.01]' : 'border-gray-200 hover:border-accent'}`}>
                                 <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={handleImageChange} />
@@ -238,7 +243,11 @@ export const AdminWelcomePage = () => {
                         <label className="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Hivatalos Települési Címer</label>
                         <div className="flex flex-col sm:flex-row items-center gap-6 p-4 bg-gray-50 rounded-2xl border border-gray-100">
                             <div className="w-24 h-24 rounded-2xl bg-white border border-gray-200 shadow-sm flex items-center justify-center p-2 flex-shrink-0">
-                                <img src={coatOfArmsPreview || (settings?.coatOfArmsImageUrl ? getImageUrl(settings.coatOfArmsImageUrl) : '/img/branding/coat-of-arms.png')} className="h-full object-contain" alt="Címer" />
+                                <OptimizedImage 
+                                    src={coatOfArmsPreview || (settings?.coatOfArmsImageUrl ? getImageUrl(settings.coatOfArmsImageUrl) : '/img/branding/coat-of-arms.png')} 
+                                    className="h-full object-contain" 
+                                    alt="Címer" 
+                                />
                             </div>
                             <div onDragOver={e => e.preventDefault()} onDragEnter={() => setIsCoatDragging(true)} onDragLeave={() => setIsCoatDragging(false)} onDrop={handleCoatOfArmsDrop} className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-all bg-white flex-1 w-full cursor-pointer group ${isCoatDragging ? 'border-accent bg-accent/5 scale-[1.01]' : 'border-gray-200 hover:border-accent'}`}>
                                 <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={handleCoatOfArmsChange} />

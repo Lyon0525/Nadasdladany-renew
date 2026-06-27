@@ -29,22 +29,11 @@ public class CreateOrganizationCommandValidator : AbstractValidator<CreateOrgani
     }
 }
 
-public class CreateOrganizationCommandHandler : IRequestHandler<CreateOrganizationCommand, int>
+public class CreateOrganizationCommandHandler(IApplicationDbContext context, IFileService fileService, ISlugService slugService) : IRequestHandler<CreateOrganizationCommand, int>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IFileService _fileService;
-    private readonly ISlugService _slugService;
-
-    public CreateOrganizationCommandHandler(IApplicationDbContext context, IFileService fileService, ISlugService slugService)
-    {
-        _context = context;
-        _fileService = fileService;
-        _slugService = slugService;
-    }
-
     public async Task<int> Handle(CreateOrganizationCommand request, CancellationToken cancellationToken)
     {
-        string? imageUrl = await _fileService.UploadFileAsync(request.Image, "organizations");
+        string? imageUrl = await fileService.UploadFileAsync(request.Image, "organizations");
 
         var entity = new Organization
         {
@@ -58,11 +47,11 @@ public class CreateOrganizationCommandHandler : IRequestHandler<CreateOrganizati
             Type = request.Type,
             ImageUrl = imageUrl,
             DisplayOrder = request.DisplayOrder,
-            Slug = _slugService.GenerateSlug(request.Name)
+            Slug = slugService.GenerateSlug(request.Name)
         };
 
-        _context.Organizations.Add(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.Organizations.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }

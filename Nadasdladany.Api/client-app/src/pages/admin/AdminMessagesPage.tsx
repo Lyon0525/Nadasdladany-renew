@@ -1,19 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { AdminLayout } from '../../layouts/AdminLayout';
 import { contactService, type ContactMessage } from '../../api/contactService';
 import { siteSettingsService } from '../../api/siteSettingsService';
 import { Mail, MailOpen, Trash2, MapPin, Phone, Settings, X, Loader2 } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import toast from 'react-hot-toast';
+
+const contactSettingsSchema = z.object({
+    contactAddress: z.string().min(1, "A cím megadása kötelező!"),
+    contactEmail: z.string().email("Érvénytelen e-mail cím!"),
+    contactPhone: z.string().min(1, "A telefonszám megadása kötelező!")
+});
+
+type ContactSettingsFormData = z.infer<typeof contactSettingsSchema>;
 
 export const AdminMessagesPage = () => {
     const queryClient = useQueryClient();
     const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [contactAddress, setContactAddress] = useState('');
-    const [contactEmail, setContactEmail] = useState('');
-    const [contactPhone, setContactPhone] = useState('');
 
     const { data: messages = [], refetch: refetchMessages, isLoading: isLoadingMessages } = useQuery({
         queryKey: ['adminMessages'],
@@ -25,13 +33,20 @@ export const AdminMessagesPage = () => {
         queryFn: () => siteSettingsService.getSettings()
     });
 
-    useEffect(() => {
+    const { register, handleSubmit, reset, formState: { errors } } = useForm<ContactSettingsFormData>({
+        resolver: zodResolver(contactSettingsSchema)
+    });
+
+    const openSettingsModal = () => {
         if (settings) {
-            setContactAddress(settings.contactAddress || '');
-            setContactEmail(settings.contactEmail || '');
-            setContactPhone(settings.contactPhone || '');
+            reset({
+                contactAddress: settings.contactAddress || '',
+                contactEmail: settings.contactEmail || '',
+                contactPhone: settings.contactPhone || ''
+            });
         }
-    }, [settings]);
+        setIsSettingsModalOpen(true);
+    };
 
     const openMessage = async (msg: ContactMessage) => {
         setSelectedMessage(msg);
@@ -54,8 +69,7 @@ export const AdminMessagesPage = () => {
         }
     };
 
-    const handleSettingsSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const onValidSubmit = async (data: ContactSettingsFormData) => {
         setIsSubmitting(true);
         try {
             const formData = new FormData();
@@ -72,9 +86,9 @@ export const AdminMessagesPage = () => {
                 formData.append('Id', '1');
             }
 
-            formData.append('ContactAddress', contactAddress);
-            formData.append('ContactEmail', contactEmail);
-            formData.append('ContactPhone', contactPhone);
+            formData.append('ContactAddress', data.contactAddress);
+            formData.append('ContactEmail', data.contactEmail);
+            formData.append('ContactPhone', data.contactPhone);
 
             await siteSettingsService.updateSettings(formData);
             toast.success("Kapcsolati adatok frissítve!");
@@ -95,7 +109,7 @@ export const AdminMessagesPage = () => {
                     <h1 className="text-4xl font-serif font-bold text-primary">Beérkező Üzenetek</h1>
                     <p className="text-gray-400 mt-1">A weboldalról küldött lakossági megkeresések kezelése.</p>
                 </div>
-                <button onClick={() => setIsSettingsModalOpen(true)} className="bg-white border border-gray-200 text-primary font-bold px-6 py-4 rounded-full flex items-center gap-2 hover:bg-gray-50 transition-all shadow-sm cursor-pointer">
+                <button onClick={openSettingsModal} className="bg-white border border-gray-200 text-primary font-bold px-6 py-4 rounded-full flex items-center gap-2 hover:bg-gray-50 transition-all shadow-sm cursor-pointer">
                     <Settings size={20} className="text-accent" /> Publikus adatok szerkesztése
                 </button>
             </div>
@@ -175,18 +189,21 @@ export const AdminMessagesPage = () => {
                             <h2 className="text-2xl font-serif font-bold text-primary">Kapcsolati Adatok</h2>
                             <button onClick={() => setIsSettingsModalOpen(false)} className="p-2 text-gray-400 hover:text-primary rounded-full transition-colors cursor-pointer"><X size={20} /></button>
                         </div>
-                        <form onSubmit={handleSettingsSubmit} className="space-y-5">
+                        <form onSubmit={handleSubmit(onValidSubmit)} className="space-y-5">
                             <div>
-                                <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-2"><MapPin size={12} /> Hivatal Címe</label>
-                                <input type="text" placeholder="Pl. 8145 Nádasdladány, Fő utca 1." className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-xl outline-none focus:border-accent text-sm font-bold text-primary" value={contactAddress} onChange={e => setContactAddress(e.target.value)} />
+                                <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-2"><MapPin size={12} /> Hivatal Címe *</label>
+                                <input type="text" placeholder="Pl. 8145 Nádasdladány, Fő utca 1." className={`w-full bg-secondary/50 border p-4 rounded-xl outline-none focus:border-accent text-sm font-bold text-primary ${errors.contactAddress ? 'border-red-400' : 'border-gray-100'}`} {...register('contactAddress')} />
+                                {errors.contactAddress && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.contactAddress.message}</p>}
                             </div>
                             <div>
-                                <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-2"><Mail size={12} /> Hivatalos E-mail cím</label>
-                                <input type="email" placeholder="Pl. hivatal@nadasdladany.hu" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-xl outline-none focus:border-accent text-sm" value={contactEmail} onChange={e => setContactEmail(e.target.value)} />
+                                <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-2"><Mail size={12} /> Hivatalos E-mail cím *</label>
+                                <input type="email" placeholder="Pl. hivatal@nadasdladany.hu" className={`w-full bg-secondary/50 border p-4 rounded-xl outline-none focus:border-accent text-sm ${errors.contactEmail ? 'border-red-400' : 'border-gray-100'}`} {...register('contactEmail')} />
+                                {errors.contactEmail && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.contactEmail.message}</p>}
                             </div>
                             <div>
-                                <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-2"><Phone size={12} /> Központi Telefonszám</label>
-                                <input type="text" placeholder="Pl. +36 22 123 456" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-xl outline-none focus:border-accent text-sm" value={contactPhone} onChange={e => setContactPhone(e.target.value)} />
+                                <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-2"><Phone size={12} /> Központi Telefonszám *</label>
+                                <input type="text" placeholder="Pl. +36 22 123 456" className={`w-full bg-secondary/50 border p-4 rounded-xl outline-none focus:border-accent text-sm ${errors.contactPhone ? 'border-red-400' : 'border-gray-100'}`} {...register('contactPhone')} />
+                                {errors.contactPhone && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.contactPhone.message}</p>}
                             </div>
                             <div className="pt-4 flex gap-3">
                                 <button type="button" onClick={() => setIsSettingsModalOpen(false)} className="flex-1 py-4 bg-gray-100 text-gray-500 font-bold rounded-xl hover:bg-gray-200 transition-colors cursor-pointer">Mégse</button>

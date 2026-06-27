@@ -7,27 +7,18 @@ namespace Nadasdladany.Application.Features.Documents.Commands;
 
 public record DeleteDocumentCommand(int Id) : IRequest;
 
-public class DeleteDocumentCommandHandler : IRequestHandler<DeleteDocumentCommand>
+public class DeleteDocumentCommandHandler(IApplicationDbContext context, IFileService fileService) : IRequestHandler<DeleteDocumentCommand>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IFileService _fileService;
-
-    public DeleteDocumentCommandHandler(IApplicationDbContext context, IFileService fileService)
-    {
-        _context = context;
-        _fileService = fileService;
-    }
-
     public async Task Handle(DeleteDocumentCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Documents.FindAsync(new object[] { request.Id }, cancellationToken);
+        var entity = await context.Documents.FindAsync(new object[] { request.Id }, cancellationToken);
 
         if (entity == null)
             throw new NotFoundException(nameof(Document), request.Id);
 
-        _fileService.DeleteFile(entity.FilePath);
+        fileService.DeleteFile(entity.FilePath);
 
-        _context.Documents.Remove(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.Documents.Remove(entity);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

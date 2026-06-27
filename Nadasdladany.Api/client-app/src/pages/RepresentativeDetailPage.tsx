@@ -1,31 +1,23 @@
-import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, Phone, User, Landmark, Briefcase } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, User, Landmark, Briefcase, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { MainLayout } from '../layouts/MainLayout';
 import { municipalityService } from '../api/municipalityService';
 import { type Representative } from '../types/Municipality';
-import { getImageUrl } from '../lib/imageUtils';
 import { Seo } from '../components/common/Seo';
+import { OptimizedImage } from '../components/ui/OptimizedImage';
 
 export const RepresentativeDetailPage = () => {
     const { id } = useParams<{ id: string }>();
-    const [rep, setRep] = useState<Representative | null>(null);
-    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (id) {
-            municipalityService.getRepresentatives()
-                .then(data => {
-                    const found = data?.find(r => r.id === Number(id));
-                    setRep(found || null);
-                })
-                .catch(err => console.error(err))
-                .finally(() => setLoading(false));
-        }
-    }, [id]);
+    const { data: rep, isLoading: loading } = useQuery<Representative | null>({
+        queryKey: ['representativeDetail', id],
+        queryFn: () => municipalityService.getRepresentativeById(Number(id)),
+        enabled: !!id
+    });
 
-    if (loading) return <div className="h-screen flex items-center justify-center font-serif italic text-accent text-2xl animate-pulse">Képviselői adatlap betöltése...</div>;
+    if (loading) return <div className="h-screen flex items-center justify-center font-serif italic text-accent text-2xl gap-3 animate-pulse"><Loader2 className="animate-spin" /> Képviselői adatlap betöltése...</div>;
     if (!rep) return <div className="h-screen flex items-center justify-center font-serif text-2xl">A tisztségviselő nem található.</div>;
 
     const getRoleTitle = (role: string | number) => {
@@ -39,7 +31,7 @@ export const RepresentativeDetailPage = () => {
 
     return (
         <MainLayout>
-            <Seo title={`${rep.name} - ${getRoleTitle(rep.role)}`} description={`${rep.name} önkormányzati tisztségviselő bemutatkozása és hivatali elérhetőségei.`} image={rep.imageUrl} />
+            <Seo title={`${rep.name} - ${getRoleTitle(rep.role)}`} description={`${rep.name} önkormányzati tisztségviselő bemutatkozása és hivatali elérhetőségei.`} image={rep.imageUrl} type="article" />
 
             <div className="max-w-4xl mx-auto px-6 py-12">
                 <button
@@ -54,7 +46,7 @@ export const RepresentativeDetailPage = () => {
                     <div className="md:col-span-1 bg-white rounded-[40px] border border-gray-100 p-8 shadow-sm text-center space-y-6">
                         <div className="w-36 h-36 mx-auto rounded-full overflow-hidden bg-secondary border-2 border-accent relative shadow-md">
                             {rep.imageUrl ? (
-                                <img src={getImageUrl(rep.imageUrl)} alt={rep.name} className="w-full h-full object-cover" />
+                                <OptimizedImage src={rep.imageUrl} alt={rep.name} isHero={true} className="w-full h-full" />
                             ) : <User size={56} className="text-primary/10 absolute inset-0 m-auto" />}
                         </div>
 

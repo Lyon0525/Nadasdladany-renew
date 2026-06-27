@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AdminLayout } from '../../layouts/AdminLayout';
-import { electionApiService, type ElectionResult } from '../../api/electionApiService';
+import { electionApiService, type ElectionResult, type ElectionSubmitData } from '../../api/electionApiService';
 import { Plus, Trash2, Loader2, Edit2, Vote, Users, Percent } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { ElectionForm } from '../../features/admin/elections/components/ElectionForm';
@@ -27,7 +27,7 @@ export const AdminElectionsPage = () => {
         }
     };
 
-    const handleSave = async (payload: any) => {
+    const handleSave = async (payload: ElectionSubmitData) => {
         setIsSubmitting(true);
         try {
             await electionApiService.saveElectionResults(payload);

@@ -10,49 +10,32 @@ namespace Nadasdladany.Application.Features.Institutions.Queries;
 
 public record GetInstitutionsQuery : IRequest<List<InstitutionDto>>;
 
-public class GetInstitutionsQueryHandler : IRequestHandler<GetInstitutionsQuery, List<InstitutionDto>>
+public class GetInstitutionsQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetInstitutionsQuery, List<InstitutionDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetInstitutionsQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
-
     public async Task<List<InstitutionDto>> Handle(GetInstitutionsQuery request, CancellationToken cancellationToken)
     {
-        var entities = await _context.Institutions
+        var entities = await context.Institutions
             .AsNoTracking()
             .OrderBy(x => x.DisplayOrder)
             .ToListAsync(cancellationToken);
 
-        return _mapper.Map<List<InstitutionDto>>(entities);
+        return mapper.Map<List<InstitutionDto>>(entities);
     }
 }
+
 public record GetInstitutionBySlugQuery(string Slug) : IRequest<InstitutionDto>;
 
-public class GetInstitutionBySlugQueryHandler : IRequestHandler<GetInstitutionBySlugQuery, InstitutionDto>
+public class GetInstitutionBySlugQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetInstitutionBySlugQuery, InstitutionDto>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetInstitutionBySlugQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
-
     public async Task<InstitutionDto> Handle(GetInstitutionBySlugQuery request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Institutions
+        var entity = await context.Institutions
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.IsPublished && x.Slug == request.Slug, cancellationToken);
 
         if (entity == null)
             throw new NotFoundException(nameof(Institution), request.Slug);
 
-        return _mapper.Map<InstitutionDto>(entity);
+        return mapper.Map<InstitutionDto>(entity);
     }
 }

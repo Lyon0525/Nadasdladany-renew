@@ -21,6 +21,10 @@ export const institutionService = {
         const response = await apiClient.get<Institution[]>('/institutions');
         return response.data;
     },
+    getInstitutionBySlug: async (slug: string) => {
+        const response = await apiClient.get<Institution>(`/institutions/${slug}`);
+        return response.data;
+    },
     createInstitution: async (formData: FormData) => {
         const response = await apiClient.post<number>('/institutions', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }

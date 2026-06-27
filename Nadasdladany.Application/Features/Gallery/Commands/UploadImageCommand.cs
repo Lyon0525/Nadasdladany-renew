@@ -23,20 +23,11 @@ public class UploadImageCommandValidator : AbstractValidator<UploadImageCommand>
     }
 }
 
-public class UploadImageCommandHandler : IRequestHandler<UploadImageCommand, int>
+public class UploadImageCommandHandler(IApplicationDbContext context, IFileService fileService) : IRequestHandler<UploadImageCommand, int>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IFileService _fileService;
-
-    public UploadImageCommandHandler(IApplicationDbContext context, IFileService fileService)
-    {
-        _context = context;
-        _fileService = fileService;
-    }
-
     public async Task<int> Handle(UploadImageCommand request, CancellationToken cancellationToken)
     {
-        string? imageUrl = await _fileService.UploadFileAsync(request.File, "gallery");
+        string? imageUrl = await fileService.UploadFileAsync(request.File, "gallery");
 
         if (string.IsNullOrEmpty(imageUrl))
             throw new Exception("Image upload failed.");
@@ -52,8 +43,8 @@ public class UploadImageCommandHandler : IRequestHandler<UploadImageCommand, int
             DisplayOrder = 0
         };
 
-        _context.GalleryImages.Add(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.GalleryImages.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }

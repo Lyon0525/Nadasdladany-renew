@@ -26,22 +26,11 @@ public class CreateProjectCommandValidator : AbstractValidator<CreateProjectComm
     }
 }
 
-public class CreateProjectCommandHandler : IRequestHandler<CreateProjectCommand, int>
+public class CreateProjectCommandHandler(IApplicationDbContext context, ISlugService slugService, IFileService fileService) : IRequestHandler<CreateProjectCommand, int>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly ISlugService _slugService;
-    private readonly IFileService _fileService;
-
-    public CreateProjectCommandHandler(IApplicationDbContext context, ISlugService slugService, IFileService fileService)
-    {
-        _context = context;
-        _slugService = slugService;
-        _fileService = fileService;
-    }
-
     public async Task<int> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
     {
-        string? imageUrl = await _fileService.UploadFileAsync(request.Image, "projects");
+        string? imageUrl = await fileService.UploadFileAsync(request.Image, "projects");
 
         var entity = new Project
         {
@@ -52,11 +41,11 @@ public class CreateProjectCommandHandler : IRequestHandler<CreateProjectCommand,
             TotalFunding = request.TotalFunding,
             SupportRate = request.SupportRate,
             FeaturedImageUrl = imageUrl,
-            Slug = _slugService.GenerateSlug(request.Title)
+            Slug = slugService.GenerateSlug(request.Title)
         };
 
-        _context.Projects.Add(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.Projects.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }

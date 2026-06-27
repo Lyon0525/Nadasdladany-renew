@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MapPin, Clock, ArrowRight, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { MainLayout } from '../layouts/MainLayout';
 import { Seo } from '../components/common/Seo';
 import apiClient from '../api/apiClient';
 import { cn } from '../lib/utils';
-import { getImageUrl } from '../lib/imageUtils';
+import { OptimizedImage } from '../components/ui/OptimizedImage';
+import { useEvents } from '../hooks/useEvents';
 
 interface Event {
     id: number;
@@ -23,32 +25,17 @@ interface Event {
 }
 
 export const EventsPage = () => {
-    const [events, setEvents] = useState<Event[]>([]);
-    const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'upcoming' | 'past'>('upcoming');
 
-    useEffect(() => {
-        apiClient.get('/events')
-            .then(response => {
-                if (Array.isArray(response.data)) {
-                    setEvents(response.data);
-                } else if (response.data && Array.isArray(response.data.items)) {
-                    setEvents(response.data.items);
-                }
-            })
-            .catch(err => {
-                console.error("Hiba történt az események lekérésekor:", err);
-            })
-            .finally(() => setLoading(false));
-    }, []);
+    const { data: events = [], isLoading: loading } = useEvents();
 
     const now = new Date();
 
-    const upcomingEvents = events.filter(e => new Date(e.startDate) >= now)
-        .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    const upcomingEvents = events.filter((e: any) => new Date(e.startDate) >= now)
+        .sort((a: any, b: any) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
-    const pastEvents = events.filter(e => new Date(e.startDate) < now)
-        .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+    const pastEvents = events.filter((e: any) => new Date(e.startDate) < now)
+        .sort((a: any, b: any) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
 
     const displayedEvents = filter === 'upcoming' ? upcomingEvents : pastEvents;
 
@@ -108,11 +95,7 @@ export const EventsPage = () => {
                                     className="bg-white rounded-[32px] overflow-hidden border border-gray-50 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group relative"
                                 >
                                     <div className="h-52 overflow-hidden relative bg-gray-100">
-                                        <img
-                                            src={event.imageUrl ? getImageUrl(event.imageUrl) : "/Nadasdladany-hero-banner.jpg"}
-                                            alt={event.title}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                        />
+                                        <OptimizedImage src={event.imageUrl} alt={event.title} className="w-full h-full group-hover:scale-105 transition-transform duration-500" />
                                         <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-md py-2 px-3 rounded-2xl text-center shadow-md flex items-center gap-2">
                                             <span className="text-xl font-bold font-serif text-primary">{eDate.getDate()}</span>
                                             <div className="flex flex-col text-left border-l border-gray-200 pl-2">

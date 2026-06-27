@@ -19,6 +19,15 @@ export interface ElectionResult {
     candidatesJson?: string;
 }
 
+export interface ElectionSubmitData {
+    year: number;
+    type: string;
+    registeredVoters: number;
+    votedCount: number;
+    turnoutPercentage: number;
+    results: CandidateResult[];
+}
+
 export const electionApiService = {
     getAllElections: async (): Promise<ElectionResult[]> => {
         const response = await apiClient.get<ElectionResult[]>('/elections');
@@ -34,7 +43,7 @@ export const electionApiService = {
         }
     },
 
-    saveElectionResults: async (data: any): Promise<number> => {
+    saveElectionResults: async (data: ElectionSubmitData): Promise<number> => {
         const response = await apiClient.post<number>('/elections', data);
         return response.data;
     },

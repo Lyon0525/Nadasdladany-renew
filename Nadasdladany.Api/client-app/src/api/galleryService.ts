@@ -23,22 +23,23 @@ export const galleryService = {
         const response = await apiClient.get<GalleryImage[]>(`/gallery/albums/${slug}`);
         return response.data;
     },
-    createAlbum: async (album: any): Promise<any> => {
-        const response = await apiClient.post('/gallery/albums', album);
+    createAlbum: async (formData: FormData): Promise<number> => {
+        const response = await apiClient.post<number>('/gallery/albums', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
         return response.data;
     },
     updateAlbum: async (id: number, data: { id: number, name: string, description?: string }): Promise<void> => {
         await apiClient.put(`/gallery/albums/${id}`, data);
     },
-    uploadImages: async (albumId: number, files: FileList): Promise<any> => {
+    uploadImages: async (albumId: number, files: FileList): Promise<void> => {
         const formData = new FormData();
         Array.from(files).forEach(file => {
             formData.append('images', file);
         });
-        const response = await apiClient.post(`/gallery/albums/${albumId}/images`, formData, {
+        await apiClient.post(`/gallery/albums/${albumId}/images`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
-        return response.data;
     },
     deleteAlbum: async (id: number): Promise<void> => {
         await apiClient.delete(`/gallery/albums/${id}`);

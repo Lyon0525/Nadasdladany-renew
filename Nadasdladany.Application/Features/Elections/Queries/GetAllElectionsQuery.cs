@@ -17,18 +17,11 @@ public class ElectionDto
 
 public record GetAllElectionsQuery : IRequest<List<ElectionDto>>;
 
-public class GetAllElectionsQueryHandler : IRequestHandler<GetAllElectionsQuery, List<ElectionDto>>
+public class GetAllElectionsQueryHandler(IApplicationDbContext context) : IRequestHandler<GetAllElectionsQuery, List<ElectionDto>>
 {
-    private readonly IApplicationDbContext _context;
-
-    public GetAllElectionsQueryHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<List<ElectionDto>> Handle(GetAllElectionsQuery request, CancellationToken cancellationToken)
     {
-        return await _context.Elections
+        return await context.Elections
             .AsNoTracking()
             .Select(x => new ElectionDto
             {
@@ -43,4 +36,4 @@ public class GetAllElectionsQueryHandler : IRequestHandler<GetAllElectionsQuery,
             .OrderByDescending(x => x.Year)
             .ToListAsync(cancellationToken);
     }
-} 
+}

@@ -24,21 +24,14 @@ public record CreateElectionResultCommand : IRequest<int>
     public required List<CandidateInput> Results { get; init; }
 }
 
-public class CreateElectionResultCommandHandler : IRequestHandler<CreateElectionResultCommand, int>
+public class CreateElectionResultCommandHandler(IApplicationDbContext context) : IRequestHandler<CreateElectionResultCommand, int>
 {
-    private readonly IApplicationDbContext _context;
-
-    public CreateElectionResultCommandHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<int> Handle(CreateElectionResultCommand request, CancellationToken cancellationToken)
     {
-        var oldEntity = _context.Elections.FirstOrDefault(x => x.Year == request.Year);
+        var oldEntity = context.Elections.FirstOrDefault(x => x.Year == request.Year);
         if (oldEntity != null)
         {
-            _context.Elections.Remove(oldEntity);
+            context.Elections.Remove(oldEntity);
         }
 
         var entity = new ElectionResultEntity
@@ -51,8 +44,8 @@ public class CreateElectionResultCommandHandler : IRequestHandler<CreateElection
             CandidatesJson = JsonSerializer.Serialize(request.Results, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
         };
 
-        _context.Elections.Add(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.Elections.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }

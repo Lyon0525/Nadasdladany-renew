@@ -1,17 +1,14 @@
-import { useEffect, useState } from 'react';
 import { MainLayout } from '../layouts/MainLayout';
-import { institutionService, type Institution } from '../api/institutionService';
+import { institutionService } from '../api/institutionService';
 import { InstitutionCard } from '../features/institutions/components/InstitutionCard';
-import { Building2 } from 'lucide-react';
+import { Building2, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 export const InstitutionsPage = () => {
-    const [institutions, setInstitutions] = useState<Institution[]>([]);
-
-    useEffect(() => {
-        institutionService.getInstitutions().then(data => {
-            setInstitutions(data);
-        });
-    }, []);
+    const { data: institutions = [], isLoading: loading } = useQuery({
+        queryKey: ['publicInstitutions'],
+        queryFn: () => institutionService.getInstitutions()
+    });
 
     return (
         <MainLayout>
@@ -24,17 +21,24 @@ export const InstitutionsPage = () => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                    {institutions.length > 0 ? (
-                        institutions.map((inst, index) => (
-                            <InstitutionCard key={inst.id} inst={inst} index={index} />
-                        ))
-                    ) : (
-                        <div className="col-span-full text-center py-20 text-gray-400 italic">
-                            Az intézmények listája hamarosan frissül.
-                        </div>
-                    )}
-                </div>
+                {loading ? (
+                    <div className="text-center py-20 font-serif italic text-accent text-xl animate-pulse flex flex-col items-center justify-center gap-3">
+                        <Loader2 className="animate-spin" size={32} />
+                        Intézmények betöltése...
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                        {institutions.length > 0 ? (
+                            institutions.map((inst, index) => (
+                                <InstitutionCard key={inst.id} inst={inst} index={index} />
+                            ))
+                        ) : (
+                            <div className="col-span-full text-center py-20 text-gray-400 italic">
+                                Az intézmények listája hamarosan frissül.
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         </MainLayout>
     );

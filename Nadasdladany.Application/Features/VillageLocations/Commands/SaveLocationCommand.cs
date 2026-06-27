@@ -16,15 +16,8 @@ public record SaveLocationCommand : IRequest<int>
     public string Description { get; init; } = string.Empty;
 }
 
-public class SaveLocationCommandHandler : IRequestHandler<SaveLocationCommand, int>
+public class SaveLocationCommandHandler(IApplicationDbContext context) : IRequestHandler<SaveLocationCommand, int>
 {
-    private readonly IApplicationDbContext _context;
-
-    public SaveLocationCommandHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<int> Handle(SaveLocationCommand request, CancellationToken cancellationToken)
     {
         VillageLocation? location;
@@ -32,11 +25,11 @@ public class SaveLocationCommandHandler : IRequestHandler<SaveLocationCommand, i
         if (request.Id == 0)
         {
             location = new VillageLocation();
-            _context.VillageLocations.Add(location);
+            context.VillageLocations.Add(location);
         }
         else
         {
-            location = await _context.VillageLocations.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            location = await context.VillageLocations.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (location == null) throw new KeyNotFoundException("Helyszín nem található.");
         }
 
@@ -47,7 +40,7 @@ public class SaveLocationCommandHandler : IRequestHandler<SaveLocationCommand, i
         location.Address = request.Address;
         location.Description = request.Description;
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
         return location.Id;
     }
 }

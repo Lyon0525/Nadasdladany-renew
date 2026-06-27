@@ -9,6 +9,9 @@ import {
     HeartPulse, Pill, Baby, GraduationCap, Trophy, Home, Edit3, X
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import toast from 'react-hot-toast';
 import 'leaflet/dist/leaflet.css';
 
@@ -41,12 +44,17 @@ const MapEvents = ({ onMapClick }: { onMapClick: (lat: number, lng: number) => v
     return null;
 };
 
+const mapFormSchema = z.object({
+    name: z.string().min(1, "A megnevezés kötelező!"),
+    address: z.string().min(1, "A pontos cím kötelező!"),
+    description: z.string().optional(),
+    iconType: z.string().default('default')
+});
+
+type MapFormData = z.infer<typeof mapFormSchema>;
+
 export const AdminMapPage = () => {
     const [editingId, setEditingId] = useState<number | null>(null);
-    const [name, setName] = useState('');
-    const [address, setAddress] = useState('');
-    const [description, setDescription] = useState('');
-    const [iconType, setIconType] = useState('default');
     const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
     const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
 
@@ -55,20 +63,30 @@ export const AdminMapPage = () => {
         queryFn: () => villageMapService.getLocations()
     });
 
+    const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<MapFormData>({
+        resolver: zodResolver(mapFormSchema) as any,
+        defaultValues: { name: '', address: '8145 Nádasdladány, ', description: '', iconType: 'default' }
+    });
+
+    const watchedName = watch('name');
+    const watchedIconType = watch('iconType');
+
     useEffect(() => { if (mapInstance) { setTimeout(() => mapInstance.invalidateSize(), 250); } }, [mapInstance]);
 
     const handleMapClick = (lat: number, lng: number) => {
         setCoords({ lat, lng });
-        if (!editingId) clearFormExceptCoords();
+        if (!editingId) reset({ name: '', address: '8145 Nádasdladány, ', description: '', iconType: 'default' });
         toast.success("Kattintási pont rögzítve!");
     };
 
     const startEdit = (loc: VillageLocation) => {
         setEditingId(loc.id);
-        setName(loc.name);
-        setAddress(loc.address || '8145 Nádasdladány, ');
-        setDescription(loc.description || '');
-        setIconType(loc.iconType);
+        reset({
+            name: loc.name,
+            address: loc.address || '8145 Nádasdladány, ',
+            description: loc.description || '',
+            iconType: loc.iconType
+        });
         setCoords({ lat: loc.latitude, lng: loc.longitude });
         if (mapInstance) mapInstance.flyTo([loc.latitude, loc.longitude], 16);
     };
@@ -76,24 +94,15 @@ export const AdminMapPage = () => {
     const cancelEditOrCreation = () => {
         setEditingId(null);
         setCoords(null);
-        clearFormExceptCoords();
+        reset({ name: '', address: '8145 Nádasdladány, ', description: '', iconType: 'default' });
     };
 
-    const clearFormExceptCoords = () => {
-        setName('');
-        setAddress('8145 Nádasdladány, ');
-        setDescription('');
-        setIconType('default');
-    };
-
-    const handleSaveLocation = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!coords || !name.trim()) return;
-
+    const onValidSubmit = async (data: MapFormData) => {
+        if (!coords) return;
         try {
             await villageMapService.saveLocation({
                 id: editingId || undefined,
-                name, address, description, iconType,
+                name: data.name, address: data.address, description: data.description || '', iconType: data.iconType,
                 latitude: coords.lat, longitude: coords.lng
             });
             toast.success(editingId ? "Helyszín sikeresen módosítva!" : "Új helyszín elmentve az adatbázisba!");
@@ -158,26 +167,27 @@ export const AdminMapPage = () => {
                         </h3>
 
                         {coords ? (
-                            <form onSubmit={handleSaveLocation} className="space-y-4 animate-in fade-in duration-200">
+                            <form onSubmit={handleSubmit(onValidSubmit)} className="space-y-4 animate-in fade-in duration-200">
                                 <div className="p-2.5 bg-gray-50 border rounded-xl text-[11px] text-gray-500 font-mono">
                                     Szélesség: {coords.lat.toFixed(5)} <br />
                                     Hosszúság: {coords.lng.toFixed(5)}
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Megnevezés</label>
-                                    <input type="text" required className="w-full bg-secondary/30 border border-gray-200/60 p-3 rounded-xl text-sm outline-none focus:border-accent text-primary font-medium" value={name} onChange={e => setName(e.target.value)} placeholder="pl. Faluház" />
+                                    <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Megnevezés *</label>
+                                    <input type="text" className={`w-full bg-secondary/30 border p-3 rounded-xl text-sm outline-none focus:border-accent text-primary font-medium ${errors.name ? 'border-red-400' : 'border-gray-200/60'}`} placeholder="pl. Faluház" {...register('name')} />
+                                    {errors.name && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.name.message}</p>}
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Pontos cím</label>
-                                    <input type="text" required className="w-full bg-secondary/30 border border-gray-200/60 p-3 rounded-xl text-sm outline-none focus:border-accent text-primary font-medium" value={address} onChange={e => setAddress(e.target.value)} placeholder="8145 Nádasdladány, Fő utca 1." />
+                                    <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Pontos cím *</label>
+                                    <input type="text" className={`w-full bg-secondary/30 border p-3 rounded-xl text-sm outline-none focus:border-accent text-primary font-medium ${errors.address ? 'border-red-400' : 'border-gray-200/60'}`} placeholder="8145 Nádasdladány, Fő utca 1." {...register('address')} />
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Rövid leírás / Nyitvatartás</label>
-                                    <textarea rows={3} className="w-full bg-secondary/30 border border-gray-200/60 p-3 rounded-xl text-sm outline-none focus:border-accent text-primary leading-tight" value={description} onChange={e => setDescription(e.target.value)} placeholder="Opcionális leírás..." />
+                                    <textarea rows={3} className="w-full bg-secondary/30 border border-gray-200/60 p-3 rounded-xl text-sm outline-none focus:border-accent text-primary leading-tight" placeholder="Opcionális leírás..." {...register('description')} />
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Ikon és kategória</label>
-                                    <select className="w-full bg-secondary/30 border border-gray-200/60 p-3 rounded-xl text-sm outline-none focus:border-accent text-primary font-medium" value={iconType} onChange={e => setIconType(e.target.value)}>
+                                    <select className="w-full bg-secondary/30 border border-gray-200/60 p-3 rounded-xl text-sm outline-none focus:border-accent text-primary font-medium" {...register('iconType')}>
                                         {Object.entries(MAP_ICONS).map(([key, obj]) => <option key={key} value={key}>{obj.label}</option>)}
                                     </select>
                                 </div>
@@ -220,8 +230,8 @@ export const AdminMapPage = () => {
                         <MapEvents onMapClick={handleMapClick} />
 
                         {coords && !locations.some(l => l.id === editingId) && (
-                            <Marker position={[coords.lat, coords.lng]} icon={createMapIcon(iconType)}>
-                                <Popup><span className="text-xs font-bold">Új pont helye: {name || 'Töltse ki a formot'}</span></Popup>
+                            <Marker position={[coords.lat, coords.lng]} icon={createMapIcon(watchedIconType || 'default')}>
+                                <Popup><span className="text-xs font-bold">Új pont helye: {watchedName || 'Töltse ki a formot'}</span></Popup>
                             </Marker>
                         )}
 
@@ -231,10 +241,10 @@ export const AdminMapPage = () => {
                             const currentLng = isCurrentEdit && coords ? coords.lng : loc.longitude;
 
                             return (
-                                <Marker key={loc.id} position={[currentLat, currentLng]} icon={createMapIcon(isCurrentEdit ? iconType : loc.iconType)} draggable={true} eventHandlers={{ dragend: (e) => { const marker = e.target; const position = marker.getLatLng(); handleMarkerDragEnd(loc, position.lat, position.lng); }, click: () => { startEdit(loc); } }}>
+                                <Marker key={loc.id} position={[currentLat, currentLng]} icon={createMapIcon(isCurrentEdit ? (watchedIconType || loc.iconType) : loc.iconType)} draggable={true} eventHandlers={{ dragend: (e) => { const marker = e.target; const position = marker.getLatLng(); handleMarkerDragEnd(loc, position.lat, position.lng); }, click: () => { startEdit(loc); } }}>
                                     <Popup>
                                         <div className="p-1 max-w-xs space-y-1">
-                                            <h4 className="font-serif font-bold text-primary text-sm leading-tight">{loc.name}</h4>
+                                            <h4 className="font-serif font-bold text-primary text-sm leading-tight">{isCurrentEdit ? watchedName : loc.name}</h4>
                                             {loc.address && <p className="text-gray-500 text-[11px] font-medium">{loc.address}</p>}
                                             {loc.description && <p className="text-gray-400 text-[10px] italic leading-snug pt-0.5 border-t border-gray-100">{loc.description}</p>}
                                         </div>

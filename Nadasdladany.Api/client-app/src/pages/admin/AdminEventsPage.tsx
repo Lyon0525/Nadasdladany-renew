@@ -1,31 +1,23 @@
 import { useState } from 'react';
 import { AdminLayout } from '../../layouts/AdminLayout';
-import { eventService, type VillageEvent } from '../../api/eventService';
+import { type VillageEvent } from '../../api/eventService';
 import { EventForm } from '../../features/admin/events/components/EventForm';
 import { Trash2, CalendarPlus, MapPin, Clock, Edit2, ExternalLink, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
+import { useEvents, useSaveEvent, useDeleteEvent } from '../../hooks/useEvents';
 import { getImageUrl } from '../../lib/imageUtils';
 
 export const AdminEventsPage = () => {
     const [isFormOpen, setIsFormOpen] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [editingEvent, setEditingEvent] = useState<VillageEvent | null>(null);
 
-    const { data: events = [], refetch, isLoading } = useQuery({
-        queryKey: ['adminEvents'],
-        queryFn: () => eventService.getEvents()
-    });
+    const { data: events = [], isLoading } = useEvents();
+    const saveEvent = useSaveEvent();
+    const deleteEvent = useDeleteEvent();
 
     const handleDelete = async (id: number) => {
-        if (!window.confirm('Biztosan törölni szeretné ezt az eseményt?')) return;
-        try {
-            await eventService.deleteEvent(id);
-            toast.success("Esemény sikeresen törölve");
-            refetch();
-        } catch (err) {
-            toast.error("Hiba a törlés során");
+        if (window.confirm('Biztosan törölni szeretné ezt az eseményt?')) {
+            await deleteEvent.mutateAsync(id);
         }
     };
 
@@ -33,23 +25,9 @@ export const AdminEventsPage = () => {
     const handleEdit = (event: VillageEvent) => { setEditingEvent(event); setIsFormOpen(true); };
 
     const handleSubmit = async (formData: FormData) => {
-        setIsSubmitting(true);
-        try {
-            if (editingEvent) {
-                await eventService.updateEvent(editingEvent.id, formData);
-                toast.success("Esemény frissítve!");
-            } else {
-                await eventService.createEvent(formData);
-                toast.success("Esemény közzétéve!");
-            }
-            setIsFormOpen(false);
-            setEditingEvent(null);
-            refetch();
-        } catch (err) {
-            toast.error("Mentési hiba!");
-        } finally {
-            setIsSubmitting(false);
-        }
+        await saveEvent.mutateAsync({ id: editingEvent?.id, formData });
+        setIsFormOpen(false);
+        setEditingEvent(null);
     };
 
     return (
@@ -78,11 +56,11 @@ export const AdminEventsPage = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50 text-sm">
-                            {events.map((event) => (
+                            {events.map((event: VillageEvent) => (
                                 <tr key={event.id} className="hover:bg-gray-50/50 transition-colors group">
                                     <td className="px-8 py-5 font-bold text-primary">
                                         <div className="flex items-center gap-4">
-                                            {event.imageUrl && <img src={getImageUrl(event.imageUrl)} className="w-10 h-10 rounded-lg object-cover border border-gray-100" alt="" />}
+                                            {event.imageUrl && <img src={getImageUrl(event.imageUrl)} loading="lazy" className="w-10 h-10 rounded-lg object-cover border border-gray-100" alt="" />}
                                             <span className="font-bold text-primary">{event.title}</span>
                                         </div>
                                     </td>
@@ -108,7 +86,7 @@ export const AdminEventsPage = () => {
                 )}
             </div>
 
-            {isFormOpen && <EventForm event={editingEvent} onClose={() => setIsFormOpen(false)} onSubmit={handleSubmit} loading={isSubmitting} />}
+            {isFormOpen && <EventForm event={editingEvent} onClose={() => setIsFormOpen(false)} onSubmit={handleSubmit} loading={saveEvent.isPending} />}
         </AdminLayout>
     );
 };

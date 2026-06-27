@@ -6,7 +6,7 @@ import { AlbumForm } from '../../features/admin/gallery/components/AlbumForm';
 import { AlbumManagerModal } from '../../features/admin/gallery/components/AlbumManagerModal';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { getImageUrl } from '../../lib/imageUtils';
+import { OptimizedImage } from '../../components/ui/OptimizedImage';
 
 export const AdminGalleryPage = () => {
     const [isAlbumFormOpen, setIsAlbumFormOpen] = useState(false);
@@ -49,7 +49,11 @@ export const AdminGalleryPage = () => {
                             <div className="flex items-center gap-6">
                                 <div className="w-20 h-20 rounded-2xl bg-secondary overflow-hidden border border-gray-100 flex-shrink-0">
                                     {album.thumbnailUrl ? (
-                                        <img src={getImageUrl(album.thumbnailUrl)} alt="" className="w-full h-full object-cover" />
+                                        <OptimizedImage
+                                            src={album.thumbnailUrl}
+                                            className="w-full h-full object-cover"
+                                            alt="Album borító"
+                                        />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-primary/10">
                                             <ImageIcon size={32} />

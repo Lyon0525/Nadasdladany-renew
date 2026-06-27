@@ -5,16 +5,24 @@ import { siteSettingsService } from '../../api/siteSettingsService';
 import { type Representative } from '../../types/Municipality';
 import { RepresentativeForm } from '../../features/admin/representatives/components/RepresentativeForm';
 import { Plus, Edit2, Trash2, Mail, Phone, X, Loader2, Users } from 'lucide-react';
-import { getImageUrl } from '../../lib/imageUtils';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { OptimizedImage } from '../../components/ui/OptimizedImage';
+
+export interface Committee {
+    id: string;
+    name: string;
+    description: string;
+    chairId: string;
+    memberIds: number[];
+}
 
 export const AdminRepresentativesPage = () => {
     const queryClient = useQueryClient();
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingRep, setEditingRep] = useState<Representative | null>(null);
     const [isCommitteesModalOpen, setIsCommitteesModalOpen] = useState(false);
-    const [committees, setCommittees] = useState<any[]>([]);
+    const [committees, setCommittees] = useState<Committee[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { data: reps = [], refetch: refetchReps, isLoading: isLoadingReps } = useQuery<Representative[]>({
@@ -71,8 +79,10 @@ export const AdminRepresentativesPage = () => {
     };
 
     const addCommittee = () => setCommittees([...committees, { id: Date.now().toString(), name: '', description: '', chairId: '', memberIds: [] }]);
+
     const removeCommittee = (index: number) => setCommittees(committees.filter((_, i) => i !== index));
-    const updateCommittee = (index: number, field: string, value: any) => {
+
+    const updateCommittee = <K extends keyof Committee>(index: number, field: K, value: Committee[K]) => {
         const newC = [...committees];
         newC[index][field] = value;
         setCommittees(newC);
@@ -151,7 +161,17 @@ export const AdminRepresentativesPage = () => {
                                 <tr key={rep.id} className="hover:bg-gray-50/50 transition-colors group">
                                     <td className="px-8 py-5">
                                         <div className="flex items-center gap-4">
-                                            {rep.imageUrl ? <img src={getImageUrl(rep.imageUrl)} className="w-12 h-12 rounded-full object-cover border border-gray-100" alt="" /> : <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 font-bold">{rep.name.charAt(0)}</div>}
+                                            {rep.imageUrl ? (
+                                                <OptimizedImage
+                                                    src={rep.imageUrl}
+                                                    className="w-12 h-12 rounded-full object-cover border border-gray-100"
+                                                    alt=""
+                                                />
+                                            ) : (
+                                                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 font-bold">
+                                                    {rep.name.charAt(0)}
+                                                </div>
+                                            )}
                                             <div className="flex flex-col items-start gap-1">
                                                 <span className="font-bold text-primary text-base">{rep.name}</span>
                                                 {getRoleBadge(rep)}
@@ -215,7 +235,7 @@ export const AdminRepresentativesPage = () => {
                                             <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Bizottság Elnöke</label>
                                             <select className="w-full bg-white border border-gray-100 p-3 rounded-xl outline-none focus:border-accent text-sm cursor-pointer" value={committee.chairId} onChange={(e) => updateCommittee(index, 'chairId', e.target.value)}>
                                                 <option value="">Válasszon elnököt...</option>
-                                                {reps.map((r: Representative) => <option key={r.id} value={r.id}>{r.name} ({r.customTitleOverride || 'Képviselő'})</option>)}
+                                                {reps.map((r: Representative) => <option key={r.id} value={r.id.toString()}>{r.name} ({r.customTitleOverride || 'Képviselő'})</option>)}
                                             </select>
                                         </div>
                                         <div>

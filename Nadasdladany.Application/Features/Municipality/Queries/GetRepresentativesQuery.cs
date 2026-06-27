@@ -9,24 +9,15 @@ namespace Nadasdladany.Application.Features.Municipality.Queries;
 
 public record GetRepresentativesQuery : IRequest<List<RepresentativeDto>>;
 
-public class GetRepresentativesQueryHandler : IRequestHandler<GetRepresentativesQuery, List<RepresentativeDto>>
+public class GetRepresentativesQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetRepresentativesQuery, List<RepresentativeDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetRepresentativesQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
-
     public async Task<List<RepresentativeDto>> Handle(GetRepresentativesQuery request, CancellationToken cancellationToken)
     {
-        return await _context.Representatives
+        return await context.Representatives
             .AsNoTracking()
             .Where(x => x.IsPublished)
             .OrderBy(x => x.DisplayOrder)
-            .ProjectTo<RepresentativeDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<RepresentativeDto>(mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
     }
 }

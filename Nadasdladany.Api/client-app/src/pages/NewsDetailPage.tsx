@@ -1,37 +1,32 @@
-import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar, ArrowLeft, User, Share2, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { MainLayout } from '../layouts/MainLayout';
 import apiClient from '../api/apiClient';
 import type { Article } from '../types/Article';
 import { Seo } from '../components/common/Seo';
+import { getImageUrl } from '../lib/imageUtils';
+import { OptimizedImage } from '../components/ui/OptimizedImage';
+import { useArticleBySlug } from '../hooks/useArticles';
 
 export const NewsDetailPage = () => {
     const { slug } = useParams<{ slug: string }>();
-    const [article, setArticle] = useState<Article | null>(null);
-    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (slug) {
-            apiClient.get('/articles?pageNumber=1&pageSize=100')
-                .then(res => {
-                    const items = res.data?.items || [];
-                    const foundArticle = items.find((a: Article) => a.slug === slug);
-                    setArticle(foundArticle || null);
-                })
-                .catch(err => console.error("Hiba a hír betöltésekor:", err))
-                .finally(() => setLoading(false));
-        }
-    }, [slug]);
+    const { data: article, isLoading: loading } = useArticleBySlug(slug);
 
     if (loading) return <div className="h-screen flex items-center justify-center font-serif italic text-accent text-2xl gap-3"><Loader2 className="animate-spin" /> Bejegyzés betöltése...</div>;
     if (!article) return <div className="h-screen flex items-center justify-center font-serif text-2xl">A hír nem található.</div>;
 
     return (
         <MainLayout>
-            <Seo title={article.title} description={article.excerpt} image={article.featuredImageUrl} />
+            <Seo
+                title={article.title}
+                description={article.excerpt}
+                image={getImageUrl(article.featuredImageUrl)}
+                type="article"
+            />
             <article className="max-w-4xl mx-auto px-6 py-12">
                 <button
                     onClick={() => navigate(-1)}
@@ -63,11 +58,14 @@ export const NewsDetailPage = () => {
                     </motion.div>
                 </header>
 
-                {article.featuredImageUrl && (
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative h-[500px] rounded-[40px] overflow-hidden mb-16 shadow-2xl">
-                        <img src={article.featuredImageUrl} alt={article.title} className="w-full h-full object-cover" />
-                    </motion.div>
-                )}
+                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative h-[500px] rounded-[40px] overflow-hidden mb-16 shadow-2xl bg-gray-100">
+                    <OptimizedImage
+                        src={article.featuredImageUrl}
+                        alt={article.title}
+                        isHero={true}
+                        className="w-full h-full"
+                    />
+                </motion.div>
 
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="prose prose-lg prose-slate max-w-none prose-headings:font-serif prose-headings:text-primary prose-p:leading-relaxed prose-img:rounded-3xl shadow-sm bg-white p-8 md:p-16 rounded-[40px] border border-gray-50">
                     <div dangerouslySetInnerHTML={{ __html: article.content }} className="content-area" />

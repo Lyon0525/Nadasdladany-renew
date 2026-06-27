@@ -21,38 +21,27 @@ public class CreateAlbumCommandValidator : AbstractValidator<CreateAlbumCommand>
     }
 }
 
-public class CreateAlbumCommandHandler : IRequestHandler<CreateAlbumCommand, int>
+public class CreateAlbumCommandHandler(IApplicationDbContext context, ISlugService slugService, IFileService fileService) : IRequestHandler<CreateAlbumCommand, int>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly ISlugService _slugService;
-    private readonly IFileService _fileService;
-
-    public CreateAlbumCommandHandler(IApplicationDbContext context, ISlugService slugService, IFileService fileService)
-    {
-        _context = context;
-        _slugService = slugService;
-        _fileService = fileService;
-    }
-
     public async Task<int> Handle(CreateAlbumCommand request, CancellationToken cancellationToken)
     {
         var entity = new GalleryAlbum
         {
             Title = request.Name,
             Description = request.Description,
-            Slug = _slugService.GenerateSlug(request.Name),
+            Slug = slugService.GenerateSlug(request.Name),
             IsPublished = true
         };
 
-        _context.GalleryAlbums.Add(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.GalleryAlbums.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
 
         if (request.CoverImage != null)
         {
-            string? imageUrl = await _fileService.UploadFileAsync(request.CoverImage, "gallery");
+            string? imageUrl = await fileService.UploadFileAsync(request.CoverImage, "gallery");
             if (!string.IsNullOrEmpty(imageUrl))
             {
-                _context.GalleryImages.Add(new GalleryImage
+                context.GalleryImages.Add(new GalleryImage
                 {
                     ImageUrl = imageUrl,
                     ThumbnailUrl = imageUrl,
@@ -61,7 +50,7 @@ public class CreateAlbumCommandHandler : IRequestHandler<CreateAlbumCommand, int
                     IsPublished = true,
                     DisplayOrder = 0
                 });
-                await _context.SaveChangesAsync(cancellationToken);
+                await context.SaveChangesAsync(cancellationToken);
             }
         }
 

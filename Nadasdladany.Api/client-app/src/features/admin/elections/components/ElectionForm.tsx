@@ -1,75 +1,77 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { X, Loader2, Award, Plus, Trash2 } from 'lucide-react';
-import { type ElectionResult, type CandidateResult } from '../../../../api/electionApiService';
+import { type ElectionResult, type ElectionSubmitData } from '../../../../api/electionApiService';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import toast from 'react-hot-toast';
+
+const candidateSchema = z.object({
+    candidateName: z.string().min(1, "Név kötelező"),
+    organization: z.string().min(1, "Szervezet kötelező"),
+    votesCount: z.coerce.number().min(0, "A szavazat nem lehet negatív"),
+    percentage: z.coerce.number().min(0).max(100, "Maximum 100%"),
+    isWinner: z.boolean().default(false)
+});
+
+const electionSchema = z.object({
+    year: z.coerce.number().min(1990, "Érvénytelen évszám"),
+    type: z.string().min(1, "Megnevezés kötelező"),
+    registeredVoters: z.coerce.number().min(0),
+    votedCount: z.coerce.number().min(0),
+    turnoutPercentage: z.coerce.number().min(0).max(100),
+    results: z.array(candidateSchema).min(1, "Legalább egy jelölt rögzítése kötelező!")
+});
+
+type ElectionFormData = z.infer<typeof electionSchema>;
 
 interface Props {
     election?: ElectionResult | null;
     onClose: () => void;
-    onSubmit: (data: any) => void;
+    onSubmit: (data: ElectionSubmitData) => void;
     loading: boolean;
 }
 
 export const ElectionForm = ({ election, onClose, onSubmit, loading }: Props) => {
-    const [year, setYear] = useState<number>(new Date().getFullYear());
-    const [type, setType] = useState('Országgyűlési Képviselő Választás');
-    const [registeredVoters, setRegisteredVoters] = useState<number>(0);
-    const [votedCount, setVotedCount] = useState<number>(0);
-    const [turnoutPercentage, setTurnoutPercentage] = useState<number>(0);
-    const [candidates, setCandidates] = useState<CandidateResult[]>([
-        { candidateName: '', organization: '', votesCount: 0, percentage: 0, isWinner: false }
-    ]);
+    const { register, control, handleSubmit, setValue, watch, formState: { errors } } = useForm<ElectionFormData>({
+        resolver: zodResolver(electionSchema) as any,
+        defaultValues: {
+            year: election?.year || new Date().getFullYear(),
+            type: election?.type || 'Országgyűlési Képviselő Választás',
+            registeredVoters: election?.registeredVoters || 0,
+            votedCount: election?.votedCount || 0,
+            turnoutPercentage: election?.turnoutPercentage || 0,
+            results: []
+        }
+    });
+
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: "results"
+    });
 
     useEffect(() => {
-        if (election) {
-            setYear(election.year);
-            setType(election.type);
-            setRegisteredVoters(election.registeredVoters);
-            setVotedCount(election.votedCount);
-            setTurnoutPercentage(election.turnoutPercentage);
-
-            if (election.candidatesJson) {
-                try {
-                    setCandidates(JSON.parse(election.candidatesJson));
-                } catch { }
-            }
+        if (election && election.candidatesJson) {
+            try {
+                const parsed = JSON.parse(election.candidatesJson);
+                setValue('results', parsed);
+            } catch { }
+        } else if (!election) {
+            append({ candidateName: '', organization: '', votesCount: 0, percentage: 0, isWinner: false });
         }
-    }, [election]);
+    }, [election, setValue, append]);
 
-    const handleAddCandidate = () => {
-        setCandidates([...candidates, { candidateName: '', organization: '', votesCount: 0, percentage: 0, isWinner: false }]);
+    const votedCount = watch('votedCount');
+
+    const calculatePercentage = (index: number, votes: number) => {
+        if (votedCount > 0 && votes >= 0) {
+            const perc = Number(((votes / votedCount) * 100).toFixed(2));
+            setValue(`results.${index}.percentage`, perc);
+        }
     };
 
-    const handleRemoveCandidate = (index: number) => {
-        setCandidates(candidates.filter((_, i) => i !== index));
-    };
-
-    const handleCandidateChange = (index: number, field: keyof CandidateResult, value: any) => {
-        const updated = [...candidates];
-        updated[index] = { ...updated[index], [field]: value };
-
-        if (field === 'votesCount' && votedCount > 0) {
-            updated[index].percentage = Number(((value / votedCount) * 100).toFixed(2));
-        }
-
-        setCandidates(updated);
-    };
-
-    const handleSave = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (candidates.some(c => !c.candidateName || !c.organization)) {
-            toast.error("Minden jelölt nevét és szervezetét kötelező kitölteni!");
-            return;
-        }
-
-        onSubmit({
-            year,
-            type,
-            registeredVoters,
-            votedCount,
-            turnoutPercentage,
-            results: candidates
-        });
+    const onValidSubmit = (data: ElectionFormData) => {
+        onSubmit(data);
     };
 
     return (
@@ -83,45 +85,32 @@ export const ElectionForm = ({ election, onClose, onSubmit, loading }: Props) =>
                     <button type="button" onClick={onClose} className="p-3 hover:bg-secondary rounded-full text-primary/50 cursor-pointer"><X size={24} /></button>
                 </div>
 
-                <form onSubmit={handleSave} className="space-y-8 pb-20">
+                <form onSubmit={handleSubmit(onValidSubmit, (err) => { toast.error("Kérjük ellenőrizze a pirossal jelölt mezőket!"); console.log(err); })} className="space-y-8 pb-20">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Választás Éve</label>
-                            <input
-                                type="number" required className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm font-bold text-primary"
-                                value={year} onChange={e => setYear(Number(e.target.value))}
-                            />
+                            <input type="number" className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm font-bold text-primary ${errors.year ? 'border-red-400' : 'border-gray-100'}`} {...register('year')} />
+                            {errors.year && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.year.message}</p>}
                         </div>
                         <div className="md:col-span-2">
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Választás Hivatalos Megnevezése</label>
-                            <input
-                                type="text" required className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm font-medium"
-                                value={type} onChange={e => setType(e.target.value)}
-                            />
+                            <input type="text" className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm font-medium ${errors.type ? 'border-red-400' : 'border-gray-100'}`} {...register('type')} />
+                            {errors.type && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.type.message}</p>}
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Választásra jogosultak (fő)</label>
-                            <input
-                                type="number" required className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm"
-                                value={registeredVoters || ''} onChange={e => setRegisteredVoters(Number(e.target.value))}
-                            />
+                            <input type="number" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" {...register('registeredVoters')} />
                         </div>
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Érvényes szavazatok (fő)</label>
-                            <input
-                                type="number" required className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm"
-                                value={votedCount || ''} onChange={e => setVotedCount(Number(e.target.value))}
-                            />
+                            <input type="number" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm" {...register('votedCount')} />
                         </div>
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Részvételi arány (%)</label>
-                            <input
-                                type="number" step="0.01" required className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm font-bold text-accent"
-                                value={turnoutPercentage || ''} onChange={e => setTurnoutPercentage(Number(e.target.value))}
-                            />
+                            <input type="number" step="0.01" className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm font-bold text-accent" {...register('turnoutPercentage')} />
                         </div>
                     </div>
 
@@ -129,57 +118,55 @@ export const ElectionForm = ({ election, onClose, onSubmit, loading }: Props) =>
                         <div className="flex justify-between items-center">
                             <h3 className="text-lg font-serif font-bold text-primary">Jelöltek és eredmények</h3>
                             <button
-                                type="button" onClick={handleAddCandidate}
+                                type="button" onClick={() => append({ candidateName: '', organization: '', votesCount: 0, percentage: 0, isWinner: false })}
                                 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-accent bg-accent/5 px-4 py-2 rounded-xl hover:bg-accent hover:text-white transition-all cursor-pointer"
                             >
                                 <Plus size={14} /> Új jelölt hozzáadása
                             </button>
                         </div>
 
+                        {errors.results?.root && <p className="text-red-500 text-sm font-bold">{errors.results.root.message}</p>}
+
                         <div className="space-y-3">
-                            {candidates.map((candidate, index) => (
-                                <div key={index} className="flex flex-col md:flex-row gap-3 items-center bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                            {fields.map((candidate, index) => (
+                                <div key={candidate.id} className="flex flex-col md:flex-row gap-3 items-center bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
                                     <div className="w-full md:flex-1">
                                         <input
-                                            type="text" required placeholder="Jelölt neve"
-                                            className="w-full bg-white border border-gray-200 p-3 rounded-xl text-xs outline-none focus:border-accent font-bold"
-                                            value={candidate.candidateName} onChange={e => handleCandidateChange(index, 'candidateName', e.target.value)}
+                                            type="text" placeholder="Jelölt neve"
+                                            className={`w-full bg-white border p-3 rounded-xl text-xs outline-none focus:border-accent font-bold ${errors.results?.[index]?.candidateName ? 'border-red-400' : 'border-gray-200'}`}
+                                            {...register(`results.${index}.candidateName` as const)}
                                         />
                                     </div>
                                     <div className="w-full md:flex-1">
                                         <input
-                                            type="text" required placeholder="Jelölő szervezet (vagy Független)"
-                                            className="w-full bg-white border border-gray-200 p-3 rounded-xl text-xs outline-none focus:border-accent"
-                                            value={candidate.organization} onChange={e => handleCandidateChange(index, 'organization', e.target.value)}
+                                            type="text" placeholder="Jelölő szervezet"
+                                            className={`w-full bg-white border p-3 rounded-xl text-xs outline-none focus:border-accent ${errors.results?.[index]?.organization ? 'border-red-400' : 'border-gray-200'}`}
+                                            {...register(`results.${index}.organization` as const)}
                                         />
                                     </div>
                                     <div className="w-32">
                                         <input
-                                            type="number" required placeholder="Szavazat" title="Szavazatok száma"
+                                            type="number" placeholder="Szavazat" title="Szavazatok száma"
                                             className="w-full bg-white border border-gray-200 p-3 rounded-xl text-xs outline-none focus:border-accent text-center font-semibold"
-                                            value={candidate.votesCount || ''} onChange={e => handleCandidateChange(index, 'votesCount', Number(e.target.value))}
+                                            {...register(`results.${index}.votesCount` as const, { onChange: (e) => calculatePercentage(index, Number(e.target.value)) })}
                                         />
                                     </div>
                                     <div className="w-24">
                                         <input
-                                            type="number" step="0.01" required placeholder="%" title="Százalékos arány"
+                                            type="number" step="0.01" placeholder="%" title="Százalékos arány"
                                             className="w-full bg-white border border-gray-200 p-3 rounded-xl text-xs outline-none focus:border-accent text-center font-bold text-accent"
-                                            value={candidate.percentage || ''} onChange={e => handleCandidateChange(index, 'percentage', Number(e.target.value))}
+                                            {...register(`results.${index}.percentage` as const)}
                                         />
                                     </div>
                                     <div className="flex items-center gap-1.5 px-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => handleCandidateChange(index, 'isWinner', !candidate.isWinner)}
-                                            className={`p-2.5 rounded-xl border transition-all cursor-pointer ${candidate.isWinner ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-200 text-gray-300 hover:text-green-500'}`}
-                                            title={candidate.isWinner ? "Nyertes jelölt" : "Megjelölés nyertesként"}
-                                        >
+                                        <label className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${watch(`results.${index}.isWinner`) ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-200 text-gray-300 hover:text-green-500'}`} title="Megjelölés nyertesként">
+                                            <input type="checkbox" className="hidden" {...register(`results.${index}.isWinner` as const)} />
                                             <Award size={16} />
-                                        </button>
+                                        </label>
                                     </div>
                                     <button
-                                        type="button" disabled={candidates.length === 1}
-                                        onClick={() => handleRemoveCandidate(index)}
+                                        type="button" disabled={fields.length === 1}
+                                        onClick={() => remove(index)}
                                         className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors cursor-pointer disabled:opacity-30"
                                     >
                                         <Trash2 size={16} />

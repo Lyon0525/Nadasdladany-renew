@@ -7,6 +7,7 @@ import { type Institution } from '../../../../api/institutionService';
 import { getImageUrl } from '../../../../lib/imageUtils';
 import { RichTextEditor } from '../../../../components/ui/RichTextEditor';
 import toast from 'react-hot-toast';
+import { OptimizedImage } from '../../../../components/ui/OptimizedImage';
 
 const institutionSchema = z.object({
     name: z.string().min(1, "Az intézmény neve kötelező!").max(150),
@@ -158,7 +159,11 @@ export const InstitutionForm = ({ institution, onClose, onSubmit, loading }: Pro
                             <div onDragOver={e => e.preventDefault()} onDragEnter={() => setIsDragging(true)} onDragLeave={() => setIsDragging(false)} onDrop={handleDrop} className={`relative h-24 border-2 border-dashed rounded-2xl flex items-center justify-center group transition-all overflow-hidden bg-white cursor-pointer ${isDragging ? 'border-accent bg-accent/5' : 'border-gray-200 hover:border-accent'}`}>
                                 {imagePreview ? (
                                     <div className="flex items-center gap-3 w-full px-4">
-                                        <img src={imagePreview} className="w-12 h-12 object-cover rounded-lg" alt="" />
+                                        <OptimizedImage 
+                                            src={imagePreview} 
+                                            className="w-12 h-12 object-cover rounded-lg" 
+                                            alt="" 
+                                        />
                                         <span className="text-xs font-bold text-accent truncate">{image ? image.name : 'Jelenlegi borítókép'}</span>
                                         <Check className="ml-auto text-green-500" size={16} />
                                     </div>

@@ -7,18 +7,11 @@ namespace Nadasdladany.Application.Features.SiteSettings.Queries;
 
 public record GetSiteSettingQuery : IRequest<SiteSettingDto>;
 
-public class GetSiteSettingQueryHandler : IRequestHandler<GetSiteSettingQuery, SiteSettingDto>
+public class GetSiteSettingQueryHandler(IApplicationDbContext context) : IRequestHandler<GetSiteSettingQuery, SiteSettingDto>
 {
-    private readonly IApplicationDbContext _context;
-
-    public GetSiteSettingQueryHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<SiteSettingDto> Handle(GetSiteSettingQuery request, CancellationToken cancellationToken)
     {
-        var settings = await _context.SiteSettings.FirstOrDefaultAsync(cancellationToken);
+        var settings = await context.SiteSettings.FirstOrDefaultAsync(cancellationToken);
 
         if (settings == null)
         {

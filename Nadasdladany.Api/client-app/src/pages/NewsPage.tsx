@@ -1,36 +1,29 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar, ArrowRight, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { MainLayout } from '../layouts/MainLayout';
 import { articleService } from '../api/articleService';
 import type { Article } from '../types/Article';
 import { Seo } from '../components/common/Seo';
 import { cn } from '../lib/utils';
+import { getImageUrl } from '../lib/imageUtils';
+import { useArticles } from '../hooks/useArticles';
+
+const CATEGORIES = [
+    { id: null, name: 'Mind' },
+    { id: 1, name: 'Közösségi hírek' },
+    { id: 2, name: 'Önkormányzati hirdetmények' },
+    { id: 3, name: 'Esemény beszámolók' },
+    { id: 4, name: 'Kastély hírek' }
+];
 
 export const NewsPage = () => {
-    const [articles, setArticles] = useState<Article[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [activeCategory, setActiveCategory] = useState<string>('Mind');
+    const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
 
-    useEffect(() => {
-        articleService.getArticles()
-            .then(data => {
-                if (data && data.items) {
-                    setArticles(data.items);
-                } else if (Array.isArray(data)) {
-                    setArticles(data);
-                }
-            })
-            .catch(err => console.error("Hiba a hírek betöltésekor:", err))
-            .finally(() => setLoading(false));
-    }, []);
-
-    const categories = ['Mind', ...Array.from(new Set(articles.map(a => a.categoryName)))];
-
-    const filteredArticles = activeCategory === 'Mind'
-        ? articles
-        : articles.filter(a => a.categoryName === activeCategory);
+    const { data: articlesData, isFetching } = useArticles(1, 50, activeCategoryId);
+    const articles: Article[] = articlesData?.items || [];
 
     return (
         <MainLayout>
@@ -46,34 +39,34 @@ export const NewsPage = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-2 mb-12 justify-center md:justify-start">
-                    {categories.map((category) => (
+                    {CATEGORIES.map((cat) => (
                         <button
-                            key={category}
-                            onClick={() => setActiveCategory(category)}
+                            key={cat.name}
+                            onClick={() => setActiveCategoryId(cat.id)}
                             className={cn(
                                 "px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all cursor-pointer border",
-                                activeCategory === category
+                                activeCategoryId === cat.id
                                     ? "bg-accent border-accent text-primary shadow-md"
                                     : "bg-white border-gray-100 text-gray-500 hover:border-gray-300 hover:text-primary"
                             )}
                         >
-                            {category}
+                            {cat.name}
                         </button>
                     ))}
                 </div>
 
-                {loading ? (
+                {isFetching ? (
                     <div className="h-64 flex flex-col items-center justify-center gap-3">
                         <Loader2 className="animate-spin text-accent" size={36} />
                         <span className="font-serif italic text-gray-400">Hírek betöltése folyamatban...</span>
                     </div>
-                ) : filteredArticles.length === 0 ? (
+                ) : articles.length === 0 ? (
                     <div className="text-center py-20 bg-gray-50 rounded-[40px] border border-dashed border-gray-200">
                         <p className="text-xl font-serif text-gray-400">Jelenleg nincs megjeleníthető hír ebben a kategóriában.</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {filteredArticles.map((article, index) => (
+                        {articles.map((article, index) => (
                             <motion.article
                                 key={article.id}
                                 initial={{ opacity: 0, y: 30 }}
@@ -83,8 +76,10 @@ export const NewsPage = () => {
                             >
                                 <div className="h-60 overflow-hidden relative bg-gray-100">
                                     <img
-                                        src={article.featuredImageUrl || '/Nadasdladany-hero-banner.jpg'}
+                                        src={getImageUrl(article.featuredImageUrl)}
                                         alt={article.title}
+                                        loading="lazy"
+                                        decoding="async"
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     />
                                     <span className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest text-primary shadow-sm">

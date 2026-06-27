@@ -1,45 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MainLayout } from '../layouts/MainLayout';
-import apiClient from '../api/apiClient';
-import { type DocumentFile } from '../types/Municipality';
-import { type PaginatedResult } from '../api/articleService';
+import { documentService } from '../api/documentService';
 import { DocumentItem } from '../features/documents/components/DocumentItem';
-import { electionApiService, type ElectionResult, type CandidateResult } from '../api/electionApiService';
-import { Vote, FileText, Search, BarChart3, Users, CheckCircle2, Percent } from 'lucide-react';
+import { electionApiService, type CandidateResult } from '../api/electionApiService';
+import { Vote, FileText, Search, BarChart3, Users, CheckCircle2, Percent, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 export const ElectionsPage = () => {
-    const [docs, setDocs] = useState<DocumentFile[]>([]);
-    const [loadingDocs, setLoadingDocs] = useState(true);
     const [selectedYear, setSelectedYear] = useState<number>(2024);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [apiResult, setApiResult] = useState<ElectionResult | null>(null);
-    const [loadingApi, setLoadingApi] = useState(false);
+    const [searchInput, setSearchInput] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [activeSubTab, setActiveSubTab] = useState<'results' | 'documents'>('results');
 
     useEffect(() => {
-        setLoadingDocs(true);
-        apiClient.get<PaginatedResult<DocumentFile>>('/documents', {
-            params: { categoryId: 5, pageNumber: 1, pageSize: 100 }
-        })
-            .then(response => {
-                setDocs(response.data && Array.isArray(response.data.items) ? response.data.items : []);
-            })
-            .catch(() => setDocs([]))
-            .finally(() => setLoadingDocs(false));
-    }, []);
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchInput);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchInput]);
 
-    useEffect(() => {
-        setLoadingApi(true);
-        electionApiService.getNadasdladanyResults(selectedYear)
-            .then((data) => setApiResult(data))
-            .finally(() => setLoadingApi(false));
-    }, [selectedYear]);
+    const { data: docsData, isFetching: loadingDocs } = useQuery({
+        queryKey: ['electionDocs', debouncedSearch],
+        queryFn: () => documentService.getDocuments(1, 50, 5, debouncedSearch || undefined)
+    });
+
+    const { data: apiResult, isLoading: loadingApi } = useQuery({
+        queryKey: ['electionResult', selectedYear],
+        queryFn: () => electionApiService.getNadasdladanyResults(selectedYear)
+    });
+
+    const docs = docsData && Array.isArray(docsData.items) ? docsData.items : [];
 
     const filteredDocs = docs.filter(doc => {
-        const matchesSearch = doc.title.toLowerCase().includes(searchTerm.toLowerCase());
         const docYear = new Date(doc.createdAt).getFullYear().toString();
-        const containsYear = doc.title.includes(selectedYear.toString()) || docYear === selectedYear.toString();
-        return matchesSearch && containsYear;
+        return doc.title.includes(selectedYear.toString()) || docYear === selectedYear.toString();
     });
 
     return (
@@ -88,7 +82,10 @@ export const ElectionsPage = () => {
                 {activeSubTab === 'results' && (
                     <div className="space-y-8 animate-in fade-in duration-300">
                         {loadingApi ? (
-                            <div className="text-center py-20 font-serif italic text-accent text-xl animate-pulse">API adatok lekérése...</div>
+                            <div className="text-center py-20 font-serif italic text-accent text-xl animate-pulse flex flex-col items-center justify-center gap-3">
+                                <Loader2 className="animate-spin" size={32} />
+                                API adatok lekérése...
+                            </div>
                         ) : apiResult ? (
                             <>
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -165,18 +162,21 @@ export const ElectionsPage = () => {
                                 type="text"
                                 placeholder="Keresés a választási határozatok között..."
                                 className="w-full pl-11 pr-6 py-3 rounded-full border border-gray-100 focus:border-accent outline-none text-sm transition-all"
-                                value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                                value={searchInput} onChange={(e) => setSearchInput(e.target.value)}
                             />
                         </div>
 
                         <div className="space-y-4">
                             {loadingDocs ? (
-                                <div className="text-center py-20 font-serif italic text-accent text-xl animate-pulse">Dokumentumok betöltése...</div>
+                                <div className="text-center py-20 font-serif italic text-accent text-xl animate-pulse flex flex-col items-center justify-center gap-3">
+                                    <Loader2 className="animate-spin" size={32} />
+                                    Dokumentumok keresése...
+                                </div>
                             ) : filteredDocs.length > 0 ? (
                                 filteredDocs.map((doc) => <DocumentItem key={doc.id} doc={doc} />)
                             ) : (
                                 <div className="text-center py-20 bg-white rounded-[40px] border border-dashed border-gray-200 text-gray-400 text-sm italic">
-                                    Nincsenek feltöltött választási dokumentumok ehhez az évszámhoz.
+                                    Nincsenek feltöltött választási dokumentumok ehhez az évszámhoz, vagy nincs találat.
                                 </div>
                             )}
                         </div>

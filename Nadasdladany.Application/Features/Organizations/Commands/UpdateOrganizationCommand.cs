@@ -31,22 +31,11 @@ public class UpdateOrganizationCommandValidator : AbstractValidator<UpdateOrgani
     }
 }
 
-public class UpdateOrganizationCommandHandler : IRequestHandler<UpdateOrganizationCommand>
+public class UpdateOrganizationCommandHandler(IApplicationDbContext context, IFileService fileService, ISlugService slugService) : IRequestHandler<UpdateOrganizationCommand>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IFileService _fileService;
-    private readonly ISlugService _slugService;
-
-    public UpdateOrganizationCommandHandler(IApplicationDbContext context, IFileService fileService, ISlugService slugService)
-    {
-        _context = context;
-        _fileService = fileService;
-        _slugService = slugService;
-    }
-
     public async Task Handle(UpdateOrganizationCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Organizations.FindAsync(new object[] { request.Id }, cancellationToken);
+        var entity = await context.Organizations.FindAsync(new object[] { request.Id }, cancellationToken);
         if (entity == null) throw new NotFoundException(nameof(Organization), request.Id);
 
         entity.Name = request.Name;
@@ -58,17 +47,17 @@ public class UpdateOrganizationCommandHandler : IRequestHandler<UpdateOrganizati
         entity.WebsiteUrl = request.WebsiteUrl;
         entity.Type = request.Type;
         entity.DisplayOrder = request.DisplayOrder;
-        entity.Slug = _slugService.GenerateSlug(request.Name);
+        entity.Slug = slugService.GenerateSlug(request.Name);
 
         if (request.Image != null)
         {
             if (!string.IsNullOrEmpty(entity.ImageUrl))
             {
-                _fileService.DeleteFile(entity.ImageUrl);
+                fileService.DeleteFile(entity.ImageUrl);
             }
-            entity.ImageUrl = await _fileService.UploadFileAsync(request.Image, "organizations");
+            entity.ImageUrl = await fileService.UploadFileAsync(request.Image, "organizations");
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

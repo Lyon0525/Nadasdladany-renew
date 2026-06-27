@@ -7,6 +7,10 @@ export const municipalityService = {
         const response = await apiClient.get<Representative[]>('/municipality/representatives');
         return response.data;
     },
+    getRepresentativeById: async (id: number) => {
+        const response = await apiClient.get<Representative>(`/municipality/representatives/${id}`);
+        return response.data;
+    },
     createRepresentative: async (formData: FormData) => {
         const response = await apiClient.post<number>('/municipality/representatives', formData);
         return response.data;

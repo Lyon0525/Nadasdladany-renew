@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Clock, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import apiClient from '../../api/apiClient';
+import { useEvents } from '../../hooks/useEvents';
 
 interface VillageEvent {
     id: number;
@@ -13,22 +15,14 @@ interface VillageEvent {
 }
 
 export const MiniCalendar = () => {
-    const [events, setEvents] = useState<VillageEvent[]>([]);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const navigate = useNavigate();
 
+    const { data: eventsData } = useEvents();
+    const events: VillageEvent[] = eventsData || [];
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-
-    useEffect(() => {
-        apiClient.get('/events')
-            .then(res => {
-                const items = Array.isArray(res.data) ? res.data : (res.data?.items || []);
-                setEvents(items);
-            })
-            .catch(err => console.error("Hiba a naptár események betöltésekor:", err));
-    }, []);
 
     const MONTHS = [
         "Január", "Február", "Március", "Április", "Május", "Június",

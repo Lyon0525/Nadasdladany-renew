@@ -28,20 +28,11 @@ public class CreateRepresentativeCommandValidator : AbstractValidator<CreateRepr
     }
 }
 
-public class CreateRepresentativeCommandHandler : IRequestHandler<CreateRepresentativeCommand, int>
+public class CreateRepresentativeCommandHandler(IApplicationDbContext context, IFileService fileService) : IRequestHandler<CreateRepresentativeCommand, int>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IFileService _fileService;
-
-    public CreateRepresentativeCommandHandler(IApplicationDbContext context, IFileService fileService)
-    {
-        _context = context;
-        _fileService = fileService;
-    }
-
     public async Task<int> Handle(CreateRepresentativeCommand request, CancellationToken cancellationToken)
     {
-        string? imageUrl = await _fileService.UploadFileAsync(request.Image, "reps");
+        string? imageUrl = await fileService.UploadFileAsync(request.Image, "reps");
 
         var entity = new Representative
         {
@@ -56,8 +47,8 @@ public class CreateRepresentativeCommandHandler : IRequestHandler<CreateRepresen
             IsPublished = true
         };
 
-        _context.Representatives.Add(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.Representatives.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }

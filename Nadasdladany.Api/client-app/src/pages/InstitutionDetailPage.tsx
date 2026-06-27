@@ -1,49 +1,26 @@
-import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, MapPin, Phone, Mail, Clock, Loader2, Landmark } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { MainLayout } from '../layouts/MainLayout';
 import { Seo } from '../components/common/Seo';
-import apiClient from '../api/apiClient';
-
-interface Institution {
-    id: number;
-    name: string;
-    slug: string;
-    description: string;
-    content?: string;
-    leaderName?: string;
-    address?: string;
-    phoneNumber?: string;
-    email?: string;
-    openingHours?: string;
-    websiteUrl?: string;
-}
+import { institutionService, type Institution } from '../api/institutionService';
 
 export const InstitutionDetailPage = () => {
     const { slug } = useParams<{ slug: string }>();
-    const [inst, setInst] = useState<Institution | null>(null);
-    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (slug) {
-            apiClient.get('/institutions')
-                .then(response => {
-                    const items = Array.isArray(response.data) ? response.data : (response.data?.items || []);
-                    const found = items.find((i: Institution) => i.slug === slug);
-                    setInst(found || null);
-                })
-                .catch(err => console.error("Hiba az intézmény betöltésekor:", err))
-                .finally(() => setLoading(false));
-        }
-    }, [slug]);
+    const { data: inst, isLoading: loading } = useQuery<Institution | null>({
+        queryKey: ['institutionDetail', slug],
+        queryFn: () => institutionService.getInstitutionBySlug(slug!),
+        enabled: !!slug
+    });
 
     if (loading) return <div className="h-screen flex items-center justify-center font-serif italic text-accent text-2xl gap-3"><Loader2 className="animate-spin" /> Intézmény adatainak betöltése...</div>;
     if (!inst) return <div className="h-screen flex items-center justify-center font-serif text-2xl">Az intézmény nem található.</div>;
 
     return (
         <MainLayout>
-            <Seo title={inst.name} description={inst.description} />
+            <Seo title={inst.name} description={inst.description} type="article" />
 
             <div className="max-w-5xl mx-auto px-6 py-12">
                 <button

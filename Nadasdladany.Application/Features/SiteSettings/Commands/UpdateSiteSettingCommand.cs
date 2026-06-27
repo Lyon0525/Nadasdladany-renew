@@ -27,20 +27,11 @@ public record UpdateSiteSettingCommand : IRequest
     public string? AccessibilityText { get; init; }
 }
 
-public class UpdateSiteSettingCommandHandler : IRequestHandler<UpdateSiteSettingCommand>
+public class UpdateSiteSettingCommandHandler(IApplicationDbContext context, IFileService fileService) : IRequestHandler<UpdateSiteSettingCommand>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IFileService _fileService;
-
-    public UpdateSiteSettingCommandHandler(IApplicationDbContext context, IFileService fileService)
-    {
-        _context = context;
-        _fileService = fileService;
-    }
-
     public async Task Handle(UpdateSiteSettingCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.SiteSettings.FirstOrDefaultAsync(cancellationToken);
+        var entity = await context.SiteSettings.FirstOrDefaultAsync(cancellationToken);
 
         if (entity == null)
         {
@@ -61,7 +52,7 @@ public class UpdateSiteSettingCommandHandler : IRequestHandler<UpdateSiteSetting
                 AccessibilityText = request.AccessibilityText ?? string.Empty,
                 HostingProviderText = request.HostingProviderText ?? string.Empty
             };
-            _context.SiteSettings.Add(entity);
+            context.SiteSettings.Add(entity);
         }
         else
         {
@@ -83,19 +74,19 @@ public class UpdateSiteSettingCommandHandler : IRequestHandler<UpdateSiteSetting
         if (request.MayorImage != null)
         {
             if (!string.IsNullOrEmpty(entity.MayorImageUrl))
-                _fileService.DeleteFile(entity.MayorImageUrl);
+                fileService.DeleteFile(entity.MayorImageUrl);
 
-            entity.MayorImageUrl = await _fileService.UploadFileAsync(request.MayorImage, "settings");
+            entity.MayorImageUrl = await fileService.UploadFileAsync(request.MayorImage, "settings");
         }
 
         if (request.CoatOfArmsImage != null)
         {
             if (!string.IsNullOrEmpty(entity.CoatOfArmsImageUrl))
-                _fileService.DeleteFile(entity.CoatOfArmsImageUrl);
+                fileService.DeleteFile(entity.CoatOfArmsImageUrl);
 
-            entity.CoatOfArmsImageUrl = await _fileService.UploadFileAsync(request.CoatOfArmsImage, "settings");
+            entity.CoatOfArmsImageUrl = await fileService.UploadFileAsync(request.CoatOfArmsImage, "settings");
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

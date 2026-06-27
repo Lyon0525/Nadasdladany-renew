@@ -15,20 +15,11 @@ public record GetDocumentsWithPaginationQuery : IRequest<PaginatedList<DocumentD
     public int PageSize { get; init; } = 20;
 }
 
-public class GetDocumentsWithPaginationQueryHandler : IRequestHandler<GetDocumentsWithPaginationQuery, PaginatedList<DocumentDto>>
+public class GetDocumentsWithPaginationQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetDocumentsWithPaginationQuery, PaginatedList<DocumentDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetDocumentsWithPaginationQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
-
     public async Task<PaginatedList<DocumentDto>> Handle(GetDocumentsWithPaginationQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Documents
+        var query = context.Documents
             .Where(x => x.IsPublished)
             .OrderByDescending(x => x.CreatedAt)
             .AsQueryable();
@@ -40,7 +31,7 @@ public class GetDocumentsWithPaginationQueryHandler : IRequestHandler<GetDocumen
             query = query.Where(x => x.Title.Contains(request.SearchTerm));
 
         return await PaginatedList<DocumentDto>.CreateAsync(
-            query.ProjectTo<DocumentDto>(_mapper.ConfigurationProvider),
+            query.ProjectTo<DocumentDto>(mapper.ConfigurationProvider),
             request.PageNumber,
             request.PageSize);
     }

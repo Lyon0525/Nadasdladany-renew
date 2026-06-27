@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { AdminLayout } from '../../layouts/AdminLayout';
 import { DocumentUploadForm } from '../../features/admin/documents/components/DocumentUploadForm';
-import apiClient from '../../api/apiClient';
+import { documentService } from '../../api/documentService';
 import { type DocumentFile } from '../../types/Municipality';
-import { type PaginatedResult } from '../../api/articleService';
 import { FileText, Plus, Trash2, Download, Folder, Loader2, Edit2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -15,17 +14,15 @@ export const AdminDocumentsPage = () => {
     const { data: documents = [], refetch, isLoading } = useQuery({
         queryKey: ['adminDocuments'],
         queryFn: async () => {
-            const res = await apiClient.get<PaginatedResult<DocumentFile>>('/documents', {
-                params: { pageNumber: 1, pageSize: 100 }
-            });
-            return res.data && Array.isArray(res.data.items) ? res.data.items : [];
+            const data = await documentService.getDocuments(1, 100);
+            return data && Array.isArray(data.items) ? data.items : [];
         }
     });
 
     const handleDelete = async (id: number) => {
         if (!window.confirm("Biztosan törölni szeretné ezt a dokumentumot?")) return;
         try {
-            await apiClient.delete(`/documents/${id}`);
+            await documentService.deleteDocument(id);
             toast.success("Dokumentum sikeresen törölve!");
             refetch();
         } catch {
@@ -102,11 +99,11 @@ export const AdminDocumentsPage = () => {
                                         </td>
                                         <td className="p-5 text-right">
                                             <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                {(doc as any).fileUrl || doc.filePath ? (
-                                                    <a href={(doc as any).fileUrl || doc.filePath} target="_blank" rel="noreferrer" className="p-2.5 text-gray-400 hover:text-accent hover:bg-gray-100 rounded-xl transition-colors cursor-pointer" title="Letöltés / Megtekintés">
+                                                {doc.filePath && (
+                                                    <a href={doc.filePath} target="_blank" rel="noreferrer" className="p-2.5 text-gray-400 hover:text-accent hover:bg-gray-100 rounded-xl transition-colors cursor-pointer" title="Letöltés / Megtekintés">
                                                         <Download size={16} />
                                                     </a>
-                                                ) : null}
+                                                )}
                                                 <button onClick={() => handleEdit(doc)} className="p-2.5 text-gray-400 hover:text-primary hover:bg-gray-100 rounded-xl transition-colors cursor-pointer" title="Szerkesztés">
                                                     <Edit2 size={16} />
                                                 </button>

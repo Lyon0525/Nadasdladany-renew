@@ -10,26 +10,17 @@ public record SendNewsletterCommand : IRequest
     public required string Body { get; init; }
 }
 
-public class SendNewsletterCommandHandler : IRequestHandler<SendNewsletterCommand>
+public class SendNewsletterCommandHandler(IApplicationDbContext context, IEmailService emailService) : IRequestHandler<SendNewsletterCommand>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IEmailService _emailService;
-
-    public SendNewsletterCommandHandler(IApplicationDbContext context, IEmailService emailService)
-    {
-        _context = context;
-        _emailService = emailService;
-    }
-
     public async Task Handle(SendNewsletterCommand request, CancellationToken cancellationToken)
     {
-        var subscribers = await _context.NewsletterSubscribers
+        var subscribers = await context.NewsletterSubscribers
             .Where(x => x.IsActive)
             .ToListAsync(cancellationToken);
 
         foreach (var sub in subscribers)
         {
-            await _emailService.SendEmailAsync(sub.Email, request.Subject, request.Body);
+            await emailService.SendEmailAsync(sub.Email, request.Subject, request.Body);
         }
     }
 }

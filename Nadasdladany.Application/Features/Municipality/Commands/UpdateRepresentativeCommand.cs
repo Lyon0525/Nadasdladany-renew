@@ -31,20 +31,11 @@ public class UpdateRepresentativeCommandValidator : AbstractValidator<UpdateRepr
     }
 }
 
-public class UpdateRepresentativeCommandHandler : IRequestHandler<UpdateRepresentativeCommand>
+public class UpdateRepresentativeCommandHandler(IApplicationDbContext context, IFileService fileService) : IRequestHandler<UpdateRepresentativeCommand>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IFileService _fileService;
-
-    public UpdateRepresentativeCommandHandler(IApplicationDbContext context, IFileService fileService)
-    {
-        _context = context;
-        _fileService = fileService;
-    }
-
     public async Task Handle(UpdateRepresentativeCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Representatives.FindAsync(new object[] { request.Id }, cancellationToken);
+        var entity = await context.Representatives.FindAsync(new object[] { request.Id }, cancellationToken);
         if (entity == null) throw new NotFoundException(nameof(Representative), request.Id);
 
         entity.Name = request.Name;
@@ -60,11 +51,11 @@ public class UpdateRepresentativeCommandHandler : IRequestHandler<UpdateRepresen
         {
             if (!string.IsNullOrEmpty(entity.ImageUrl))
             {
-                _fileService.DeleteFile(entity.ImageUrl);
+                fileService.DeleteFile(entity.ImageUrl);
             }
-            entity.ImageUrl = await _fileService.UploadFileAsync(request.Image, "reps");
+            entity.ImageUrl = await fileService.UploadFileAsync(request.Image, "reps");
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

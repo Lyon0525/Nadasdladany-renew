@@ -26,20 +26,13 @@ public class StaffDto
 
 public record GetOfficeDetailsQuery : IRequest<OfficeDetailsDto>;
 
-public class GetOfficeDetailsQueryHandler : IRequestHandler<GetOfficeDetailsQuery, OfficeDetailsDto>
+public class GetOfficeDetailsQueryHandler(IApplicationDbContext context) : IRequestHandler<GetOfficeDetailsQuery, OfficeDetailsDto>
 {
-    private readonly IApplicationDbContext _context;
-
-    public GetOfficeDetailsQueryHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<OfficeDetailsDto> Handle(GetOfficeDetailsQuery request, CancellationToken cancellationToken)
     {
-        var setting = await _context.OfficeSettings.FirstOrDefaultAsync(cancellationToken);
+        var setting = await context.OfficeSettings.FirstOrDefaultAsync(cancellationToken);
 
-        var staff = await _context.OfficeStaff
+        var staff = await context.OfficeStaff
             .OrderBy(x => x.Order)
             .Select(x => new StaffDto
             {

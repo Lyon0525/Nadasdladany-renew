@@ -7,28 +7,19 @@ namespace Nadasdladany.Application.Features.Municipality.Commands;
 
 public record DeleteRepresentativeCommand(int Id) : IRequest;
 
-public class DeleteRepresentativeCommandHandler : IRequestHandler<DeleteRepresentativeCommand>
+public class DeleteRepresentativeCommandHandler(IApplicationDbContext context, IFileService fileService) : IRequestHandler<DeleteRepresentativeCommand>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IFileService _fileService;
-
-    public DeleteRepresentativeCommandHandler(IApplicationDbContext context, IFileService fileService)
-    {
-        _context = context;
-        _fileService = fileService;
-    }
-
     public async Task Handle(DeleteRepresentativeCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Representatives.FindAsync(new object[] { request.Id }, cancellationToken);
+        var entity = await context.Representatives.FindAsync(new object[] { request.Id }, cancellationToken);
         if (entity == null) throw new NotFoundException(nameof(Representative), request.Id);
 
         if (!string.IsNullOrEmpty(entity.ImageUrl))
         {
-            _fileService.DeleteFile(entity.ImageUrl);
+            fileService.DeleteFile(entity.ImageUrl);
         }
 
-        _context.Representatives.Remove(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.Representatives.Remove(entity);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

@@ -25,18 +25,11 @@ public record UpdateOfficeDetailsCommand : IRequest
     public List<StaffInputDto> Staff { get; init; } = new();
 }
 
-public class UpdateOfficeDetailsCommandHandler : IRequestHandler<UpdateOfficeDetailsCommand>
+public class UpdateOfficeDetailsCommandHandler(IApplicationDbContext context) : IRequestHandler<UpdateOfficeDetailsCommand>
 {
-    private readonly IApplicationDbContext _context;
-
-    public UpdateOfficeDetailsCommandHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task Handle(UpdateOfficeDetailsCommand request, CancellationToken cancellationToken)
     {
-        var setting = await _context.OfficeSettings.FirstOrDefaultAsync(cancellationToken);
+        var setting = await context.OfficeSettings.FirstOrDefaultAsync(cancellationToken);
         if (setting == null)
         {
             setting = new OfficeSetting
@@ -47,7 +40,7 @@ public class UpdateOfficeDetailsCommandHandler : IRequestHandler<UpdateOfficeDet
                 Email = request.Email,
                 OpeningHoursJson = request.OpeningHoursJson
             };
-            _context.OfficeSettings.Add(setting);
+            context.OfficeSettings.Add(setting);
         }
         else
         {
@@ -58,12 +51,12 @@ public class UpdateOfficeDetailsCommandHandler : IRequestHandler<UpdateOfficeDet
             setting.OpeningHoursJson = request.OpeningHoursJson;
         }
 
-        var existingStaff = await _context.OfficeStaff.ToListAsync(cancellationToken);
+        var existingStaff = await context.OfficeStaff.ToListAsync(cancellationToken);
 
         var incomingIds = request.Staff.Where(x => x.Id.HasValue && x.Id > 0).Select(x => x.Id.Value).ToList();
         var toRemove = existingStaff.Where(x => !incomingIds.Contains(x.Id)).ToList();
 
-        _context.OfficeStaff.RemoveRange(toRemove);
+        context.OfficeStaff.RemoveRange(toRemove);
 
         foreach (var s in request.Staff)
         {
@@ -81,7 +74,7 @@ public class UpdateOfficeDetailsCommandHandler : IRequestHandler<UpdateOfficeDet
             }
             else
             {
-                _context.OfficeStaff.Add(new OfficeStaff
+                context.OfficeStaff.Add(new OfficeStaff
                 {
                     Name = s.Name,
                     Position = s.Position,
@@ -92,6 +85,6 @@ public class UpdateOfficeDetailsCommandHandler : IRequestHandler<UpdateOfficeDet
             }
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

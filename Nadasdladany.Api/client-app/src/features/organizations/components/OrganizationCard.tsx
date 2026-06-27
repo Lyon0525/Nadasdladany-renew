@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Globe, Shield, Heart, Church, User, ExternalLink } from 'lucide-react';
 import { type Organization, OrganizationType } from '../../../api/organizationService';
-import { getImageUrl } from '../../../lib/imageUtils';
+import { OptimizedImage } from '../../../components/ui/OptimizedImage';
 
 interface Props {
     org: Organization;
@@ -16,20 +16,10 @@ export const OrganizationCard = ({ org, index }: Props) => {
     };
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: index * 0.05 }}
-            className="bg-white rounded-[40px] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col md:flex-row gap-8 items-start"
-        >
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.05 }} className="bg-white rounded-[40px] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col md:flex-row gap-8 items-start">
             {org.imageUrl && (
                 <div className="w-full md:w-40 h-40 flex-shrink-0 rounded-[24px] overflow-hidden shadow-inner bg-secondary/30 border border-gray-50">
-                    <img 
-                        src={getImageUrl(org.imageUrl)} 
-                        alt={org.name} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                    />
+                    <OptimizedImage src={org.imageUrl} alt={org.name} className="w-full h-full group-hover:scale-105 transition-transform duration-500" />
                 </div>
             )}
 

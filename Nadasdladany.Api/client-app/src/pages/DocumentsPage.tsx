@@ -1,33 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { MainLayout } from '../layouts/MainLayout';
-import apiClient from '../api/apiClient';
-import { type DocumentFile } from '../types/Municipality';
-import { type PaginatedResult } from '../api/articleService';
+import { documentService } from '../api/documentService';
 import { DocumentItem } from '../features/documents/components/DocumentItem';
-import { FileText, Search, Scale, Coins, ShieldCheck, Folder, HelpCircle } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { FileText, Search, Scale, Coins, ShieldCheck, Folder, HelpCircle, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 export const DocumentsPage = () => {
-    const [allDocuments, setAllDocuments] = useState<DocumentFile[]>([]);
-    const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-
     const [activeTab, setActiveTab] = useState<'all' | 'rendelet' | 'budget' | 'contracts' | 'eselyegyenloseg' | 'kozerdeku'>('all');
 
-    useEffect(() => {
-        setLoading(true);
-        apiClient.get<PaginatedResult<DocumentFile>>('/documents', {
-            params: { pageNumber: 1, pageSize: 200 }
-        })
-            .then(response => {
-                setAllDocuments(response.data && Array.isArray(response.data.items) ? response.data.items : []);
-            })
-            .catch(() => {
-                toast.error("Hiba a dokumentumok betöltésekor");
-                setAllDocuments([]);
-            })
-            .finally(() => setLoading(false));
-    }, []);
+    const { data: docsData, isLoading: loading } = useQuery({
+        queryKey: ['publicDocuments'],
+        queryFn: () => documentService.getDocuments(1, 200)
+    });
+
+    const allDocuments = docsData && Array.isArray(docsData.items) ? docsData.items : [];
 
     const filteredDocuments = allDocuments.filter(doc => {
         const matchesSearch = doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -126,8 +113,9 @@ export const DocumentsPage = () => {
 
                         <div className="space-y-4">
                             {loading ? (
-                                <div className="text-center py-20 font-serif italic text-accent text-xl animate-pulse">
-                                    Dokumentumok strukturálása...
+                                <div className="text-center py-20 font-serif italic text-accent text-xl animate-pulse flex flex-col items-center justify-center gap-3">
+                                    <Loader2 className="animate-spin" size={32} />
+                                    Dokumentumok betöltése...
                                 </div>
                             ) : filteredDocuments.length > 0 ? (
                                 filteredDocuments.map((doc) => (

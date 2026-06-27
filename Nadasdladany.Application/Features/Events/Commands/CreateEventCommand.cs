@@ -33,25 +33,14 @@ public class CreateEventCommandValidator : AbstractValidator<CreateEventCommand>
     }
 }
 
-public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, int>
+public class CreateEventCommandHandler(IApplicationDbContext context, ISlugService slugService, IFileService fileService) : IRequestHandler<CreateEventCommand, int>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly ISlugService _slugService;
-    private readonly IFileService _fileService;
-
-    public CreateEventCommandHandler(IApplicationDbContext context, ISlugService slugService, IFileService fileService)
-    {
-        _context = context;
-        _slugService = slugService;
-        _fileService = fileService;
-    }
-
     public async Task<int> Handle(CreateEventCommand request, CancellationToken cancellationToken)
     {
         var entity = new Event
         {
             Title = request.Title,
-            Slug = _slugService.GenerateSlug(request.Title),
+            Slug = slugService.GenerateSlug(request.Title),
             Description = request.Description,
             StartDate = request.StartDate,
             EndDate = request.EndDate,
@@ -64,11 +53,11 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, int
 
         if (request.Image != null)
         {
-            entity.ImageUrl = await _fileService.UploadFileAsync(request.Image, "events");
+            entity.ImageUrl = await fileService.UploadFileAsync(request.Image, "events");
         }
 
-        _context.Events.Add(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.Events.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }

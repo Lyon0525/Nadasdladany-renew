@@ -7,16 +7,44 @@ using Nadasdladany.Application;
 using Nadasdladany.Infrastructure;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.HttpOverrides;
+using Nadasdladany.Api.Middlewares;
+using Nadasdladany.Api.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
 
-builder.Services.AddControllers();
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
+    ?? new[] { "http://localhost:5173" };
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DefaultCorsPolicy", policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 builder.Services.AddOpenApi();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
+
+builder.Services.AddOutputCache();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -52,7 +80,8 @@ builder.Services.AddRateLimiter(options =>
 });
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings.GetValue<string>("Key") ?? "ValamiNagyonHosszuEsTitkosKulcsMinimum32Karakter!";
+var secretKey = jwtSettings.GetValue<string>("Key")
+    ?? throw new InvalidOperationException("JWT Secret Key is missing from configuration. The application cannot start securely.");
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -67,9 +96,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = jwtSettings.GetValue<string>("Audience") ?? "NadasdladanyReact",
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
         };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                if (context.Request.Cookies.ContainsKey("X-Access-Token"))
+                {
+                    context.Token = context.Request.Cookies["X-Access-Token"];
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
+app.UseExceptionHandler();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -99,11 +143,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("DefaultCorsPolicy");
 app.UseRateLimiter();
+app.UseOutputCache();
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
+
+app.MapAllEndpoints();
 
 app.MapFallbackToFile("index.html");
 app.UseSerilogRequestLogging();

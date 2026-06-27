@@ -10,20 +10,11 @@ namespace Nadasdladany.Application.Features.Organizations.Queries;
 
 public record GetOrganizationsQuery(OrganizationType? Type) : IRequest<List<OrganizationDto>>;
 
-public class GetOrganizationsQueryHandler : IRequestHandler<GetOrganizationsQuery, List<OrganizationDto>>
+public class GetOrganizationsQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetOrganizationsQuery, List<OrganizationDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetOrganizationsQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
-
     public async Task<List<OrganizationDto>> Handle(GetOrganizationsQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Organizations
+        var query = context.Organizations
             .AsNoTracking()
             .Where(x => x.IsPublished)
             .AsQueryable();
@@ -36,7 +27,7 @@ public class GetOrganizationsQueryHandler : IRequestHandler<GetOrganizationsQuer
         return await query
             .OrderBy(x => x.DisplayOrder)
             .ThenBy(x => x.Name)
-            .ProjectTo<OrganizationDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<OrganizationDto>(mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
     }
 }

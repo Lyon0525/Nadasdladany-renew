@@ -13,26 +13,17 @@ public record GetProjectsWithPaginationQuery : IRequest<PaginatedList<ProjectDto
     public int PageSize { get; init; } = 10;
 }
 
-public class GetProjectsWithPaginationQueryHandler : IRequestHandler<GetProjectsWithPaginationQuery, PaginatedList<ProjectDto>>
+public class GetProjectsWithPaginationQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetProjectsWithPaginationQuery, PaginatedList<ProjectDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetProjectsWithPaginationQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
-
     public async Task<PaginatedList<ProjectDto>> Handle(GetProjectsWithPaginationQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Projects
+        var query = context.Projects
             .Where(x => x.IsPublished)
             .OrderByDescending(x => x.CreatedAt)
             .AsQueryable();
 
         return await PaginatedList<ProjectDto>.CreateAsync(
-            query.ProjectTo<ProjectDto>(_mapper.ConfigurationProvider),
+            query.ProjectTo<ProjectDto>(mapper.ConfigurationProvider),
             request.PageNumber,
             request.PageSize);
     }

@@ -1,18 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MainLayout } from '../layouts/MainLayout';
 import { galleryService, type GalleryImage } from '../api/galleryService';
 import { X, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { OptimizedImage } from '../components/ui/OptimizedImage';
 
 export const AlbumDetailPage = () => {
     const { slug } = useParams<{ slug: string }>();
-    const [images, setImages] = useState<GalleryImage[]>([]);
     const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
-    useEffect(() => {
-        if (slug) galleryService.getImagesByAlbum(slug).then(setImages);
-    }, [slug]);
+    const { data: images = [] } = useQuery<GalleryImage[]>({
+        queryKey: ['albumImages', slug],
+        queryFn: () => galleryService.getImagesByAlbum(slug!),
+        enabled: !!slug
+    });
 
     const openLightbox = (index: number) => setSelectedImageIndex(index);
     const closeLightbox = () => setSelectedImageIndex(null);
@@ -32,10 +35,10 @@ export const AlbumDetailPage = () => {
                             key={img.id}
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
-                            className="relative group cursor-pointer overflow-hidden rounded-3xl"
+                            className="relative group cursor-pointer overflow-hidden rounded-3xl bg-gray-100"
                             onClick={() => openLightbox(index)}
                         >
-                            <img src={img.imageUrl} alt="" className="w-full h-auto group-hover:scale-105 transition-transform duration-500" />
+                            <OptimizedImage src={img.imageUrl} alt={`Galéria kép ${index + 1}`} className="w-full h-auto group-hover:scale-105 transition-transform duration-500" />
                             <div className="absolute inset-0 bg-accent/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                 <Maximize2 className="text-white" />
                             </div>
@@ -53,10 +56,11 @@ export const AlbumDetailPage = () => {
                         <button onClick={closeLightbox} className="absolute top-10 right-10 text-white/50 hover:text-white transition-colors"><X size={32} /></button>
                         <button onClick={prevImage} className="absolute left-4 md:left-10 text-white/50 hover:text-white transition-colors"><ChevronLeft size={48} /></button>
 
-                        <motion.img
+                        <OptimizedImage
                             key={selectedImageIndex}
-                            initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
                             src={images[selectedImageIndex].imageUrl}
+                            alt="Nagyított kép"
+                            isHero={true}
                             className="max-w-full max-h-full rounded-xl shadow-2xl"
                         />
 

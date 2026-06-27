@@ -2,6 +2,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { MainLayout } from '../layouts/MainLayout';
 import { CastleParticles } from '../features/castle/components/CastleParticles';
 import { Landmark, Sparkles, MapPin, Ticket, Info } from 'lucide-react';
+import { OptimizedImage } from '../components/ui/OptimizedImage';
 
 export const CastlePage = () => {
     const { scrollYProgress } = useScroll();
@@ -38,11 +39,7 @@ export const CastlePage = () => {
                 <section className="relative h-[90vh] flex items-center justify-center overflow-hidden">
                     <CastleParticles />
                     <motion.div style={{ scale }} className="absolute inset-0 z-0">
-                        <img
-                            src="/castle/castle_hero_banner.jpg"
-                            className="w-full h-full object-cover opacity-40"
-                            alt="Nádasdy-kastély"
-                        />
+                        <OptimizedImage src="/castle/castle_hero_banner.jpg" alt="Nádasdy-kastély" isHero={true} fallbackSrc="/castle/castle_hero_banner.jpg" className="w-full h-full opacity-40" />
                         <div className="absolute inset-0 bg-gradient-to-b from-[#080a0f]/20 via-transparent to-[#080a0f]" />
                     </motion.div>
 
@@ -94,11 +91,7 @@ export const CastlePage = () => {
                         className="relative"
                     >
                         <div className="absolute -inset-4 border border-accent/20 rounded-[40px] rotate-3" />
-                        <img
-                            src="/castle/castle_inside.jpeg"
-                            className="relative rounded-[40px] shadow-2xl z-10"
-                            alt="Kastély belső"
-                        />
+                        <OptimizedImage src="/castle/castle_inside.jpeg" alt="Kastély belső" fallbackSrc="/castle/castle_inside.jpeg" className="relative rounded-[40px] shadow-2xl z-10" />
                     </motion.div>
                 </section>
 
@@ -146,11 +139,9 @@ export const CastlePage = () => {
                                 transition={{ duration: 0.6, delay: index * 0.1 }}
                                 className="relative h-80 rounded-[24px] overflow-hidden group border border-white/10 hover:border-accent/40 transition-colors shadow-lg bg-gray-900"
                             >
-                                <img
-                                    src={img.src}
-                                    alt={img.alt}
-                                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                                />
+                                {/* FIXED: Added the missing closing tag `/>` here */}
+                                <OptimizedImage src={img.src} alt={img.alt} fallbackSrc={img.src} className="w-full h-full transition-transform duration-700 ease-out group-hover:scale-110" />
+
                                 <div className="absolute inset-0 bg-[#080a0f]/40 group-hover:bg-transparent transition-colors duration-500" />
 
                                 <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-[#080a0f] via-[#080a0f]/80 to-transparent translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">

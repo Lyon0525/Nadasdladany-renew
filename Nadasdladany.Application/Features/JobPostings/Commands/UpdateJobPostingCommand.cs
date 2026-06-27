@@ -27,20 +27,11 @@ public class UpdateJobPostingCommandValidator : AbstractValidator<UpdateJobPosti
     }
 }
 
-public class UpdateJobPostingCommandHandler : IRequestHandler<UpdateJobPostingCommand>
+public class UpdateJobPostingCommandHandler(IApplicationDbContext context, ISlugService slugService) : IRequestHandler<UpdateJobPostingCommand>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly ISlugService _slugService;
-
-    public UpdateJobPostingCommandHandler(IApplicationDbContext context, ISlugService slugService)
-    {
-        _context = context;
-        _slugService = slugService;
-    }
-
     public async Task Handle(UpdateJobPostingCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.JobPostings.FindAsync(new object[] { request.Id }, cancellationToken);
+        var entity = await context.JobPostings.FindAsync(new object[] { request.Id }, cancellationToken);
         if (entity == null) throw new NotFoundException(nameof(JobPosting), request.Id);
 
         entity.Title = request.Title;
@@ -50,8 +41,8 @@ public class UpdateJobPostingCommandHandler : IRequestHandler<UpdateJobPostingCo
         entity.Location = request.Location;
         entity.EmploymentType = request.EmploymentType;
         entity.ApplicationDeadline = request.ApplicationDeadline;
-        entity.Slug = _slugService.GenerateSlug(request.Title);
+        entity.Slug = slugService.GenerateSlug(request.Title);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

@@ -1,47 +1,29 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Landmark, Mail, Phone, MapPin, ChevronRight } from 'lucide-react';
-import { siteSettingsService, type SiteSetting } from '../../api/siteSettingsService';
+import { useQuery } from '@tanstack/react-query';
+import { siteSettingsService } from '../../api/siteSettingsService';
+import { OptimizedImage } from '../ui/OptimizedImage';
 
 export const Footer = () => {
-    const [settings, setSettings] = useState<SiteSetting | null>(null);
-
-    useEffect(() => {
-        siteSettingsService.getSettings()
-            .then(setSettings)
-            .catch(err => console.error("Hiba a lábléc adatainak betöltésekor:", err));
-    }, []);
+    const { data: settings } = useQuery({
+        queryKey: ['publicSiteSettings'],
+        queryFn: () => siteSettingsService.getSettings()
+    });
 
     return (
         <div className="w-full flex flex-col mt-auto">
             <div className="bg-white border-y border-gray-100 py-10 relative z-10 shadow-[0_-5px_15px_rgba(0,0,0,0.02)]">
                 <div className="max-w-7xl mx-auto px-6 flex flex-wrap justify-center items-center gap-6 lg:gap-12">
-                    <a
-                        href="https://ohp-20.asp.lgov.hu"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:border-accent/30 transition-all px-8 py-5 flex items-center justify-center h-[90px] w-full sm:w-auto min-w-[280px] grayscale hover:grayscale-0 rounded-xl group"
-                        title="Intézze ügyeit elektronikusan!"
-                    >
-                        <img
-                            src="/partners/e-ugyintezes.png"
-                            alt="E-ügyintézés"
-                            className="h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                        />
+                    <a href="https://ohp-20.asp.lgov.hu" target="_blank" rel="noopener noreferrer" className="bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:border-accent/30 transition-all px-8 py-5 flex items-center justify-center h-[90px] w-full sm:w-auto min-w-[280px] grayscale hover:grayscale-0 rounded-xl group" title="Intézze ügyeit elektronikusan!">
+                        <OptimizedImage src="/partners/e-ugyintezes.png" alt="E-ügyintézés" fallbackSrc="/partners/e-ugyintezes.png" className="h-full object-contain group-hover:scale-105 transition-transform duration-300" />
                     </a>
 
-                    <a
-                        href="https://magyarfaluprogram.hu"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:border-accent/30 transition-all px-8 py-5 flex items-center justify-center h-[90px] w-full sm:w-auto min-w-[280px] grayscale hover:grayscale-0 rounded-xl group"
-                        title="Magyar Falu Program"
-                    >
-                        <img
-                            src="/partners/magyar-falu.png"
-                            alt="Magyar Falu Program"
-                            className="h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                        />
+                    <a href="https://magyarfaluprogram.hu" target="_blank" rel="noopener noreferrer" className="bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:border-accent/30 transition-all px-8 py-5 flex items-center justify-center h-[90px] w-full sm:w-auto min-w-[280px] grayscale hover:grayscale-0 rounded-xl group" title="Magyar Falu Program">
+                        <OptimizedImage src="/partners/magyar-falu.png" alt="Magyar Falu Program" fallbackSrc="/partners/magyar-falu.png" className="h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                    </a>
+
+                    <a href="https://magyarkozlony.hu" target="_blank" rel="noopener noreferrer" className="bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:border-accent/30 transition-all px-8 py-5 flex items-center justify-center h-[90px] w-full sm:w-auto min-w-[280px] grayscale hover:grayscale-0 rounded-xl group" title="Magyar Közlöny">
+                        <OptimizedImage src="/partners/magyar-kozlony.png" alt="Magyar Közlöny" fallbackSrc="/partners/magyar-kozlony.png" className="h-full object-contain group-hover:scale-105 transition-transform duration-300" />
                     </a>
 
                     <a
@@ -54,6 +36,8 @@ export const Footer = () => {
                         <img
                             src="/partners/magyar-kozlony.png"
                             alt="Magyar Közlöny"
+                            loading="lazy"
+                            decoding="async"
                             className="h-full object-contain group-hover:scale-105 transition-transform duration-300"
                         />
                     </a>

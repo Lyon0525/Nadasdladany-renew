@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Calendar, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { type Article } from '../../../types/Article';
+import { OptimizedImage } from '../../../components/ui/OptimizedImage';
 
 interface Props {
     article: Article;
@@ -18,12 +19,13 @@ export const NewsCard = ({ article, index }: Props) => {
             className="group"
         >
             <Link to={`/hirek/${article.slug}`} className="block relative overflow-hidden rounded-3xl bg-white shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100">
-                <div className="relative h-72 overflow-hidden">
-                    <img
-                        src={article.featuredImageUrl || 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80'}
+                <div className="relative h-72 overflow-hidden bg-gray-100">
+                    <OptimizedImage
+                        src={article.featuredImageUrl}
                         alt={article.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        className="w-full h-full transition-transform duration-700 group-hover:scale-110"
                     />
+
                     <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-8">
                         <span className="text-white font-bold flex items-center gap-2">
                             Elolvasom <ArrowRight size={18} />
@@ -31,14 +33,14 @@ export const NewsCard = ({ article, index }: Props) => {
                     </div>
 
                     <div className="absolute top-4 left-4">
-                        <span className="px-4 py-1 bg-accent/90 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-full">
+                        <span className="px-4 py-1 bg-accent/90 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-full shadow-sm">
                             {article.categoryName}
                         </span>
                     </div>
                 </div>
 
                 <div className="p-8">
-                    <div className="flex items-center gap-2 text-gray-400 text-xs mb-4 uppercase tracking-widest">
+                    <div className="flex items-center gap-2 text-gray-400 text-xs mb-4 uppercase tracking-widest font-medium">
                         <Calendar size={14} className="text-accent" />
                         {new Date(article.publishedDate).toLocaleDateString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric' })}
                     </div>

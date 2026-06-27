@@ -11,18 +11,11 @@ public record SubscribeNewsletterCommand : IRequest<bool>
     public string? Name { get; init; }
 }
 
-public class SubscribeNewsletterCommandHandler : IRequestHandler<SubscribeNewsletterCommand, bool>
+public class SubscribeNewsletterCommandHandler(IApplicationDbContext context) : IRequestHandler<SubscribeNewsletterCommand, bool>
 {
-    private readonly IApplicationDbContext _context;
-
-    public SubscribeNewsletterCommandHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<bool> Handle(SubscribeNewsletterCommand request, CancellationToken cancellationToken)
     {
-        var existing = await _context.NewsletterSubscribers
+        var existing = await context.NewsletterSubscribers
             .FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
 
         if (existing != null)
@@ -30,7 +23,7 @@ public class SubscribeNewsletterCommandHandler : IRequestHandler<SubscribeNewsle
             if (!existing.IsActive)
             {
                 existing.IsActive = true;
-                await _context.SaveChangesAsync(cancellationToken);
+                await context.SaveChangesAsync(cancellationToken);
             }
             return true;
         }
@@ -42,8 +35,8 @@ public class SubscribeNewsletterCommandHandler : IRequestHandler<SubscribeNewsle
             IsActive = true
         };
 
-        _context.NewsletterSubscribers.Add(subscriber);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.NewsletterSubscribers.Add(subscriber);
+        await context.SaveChangesAsync(cancellationToken);
         return true;
     }
 }

@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { galleryService } from '../../../../api/galleryService';
 import toast from 'react-hot-toast';
+import { OptimizedImage } from '../../../../components/ui/OptimizedImage';
 
 const albumSchema = z.object({
     name: z.string().min(1, "Az album neve kötelező!").max(100),
@@ -110,7 +111,11 @@ export const AlbumForm = ({ onClose, onSuccess }: Props) => {
                         >
                             {imagePreview ? (
                                 <div className="flex items-center gap-3 w-full px-4 relative z-20 pointer-events-none">
-                                    <img src={imagePreview} className="w-14 h-14 object-cover rounded-lg" alt="" />
+                                    <OptimizedImage 
+                                        src={imagePreview} 
+                                        className="w-14 h-14 object-cover rounded-lg" 
+                                        alt="" 
+                                    />
                                     <span className="text-xs font-bold text-accent truncate flex-1">{coverImage?.name}</span>
                                     <Check className="text-green-500" size={16} />
                                 </div>

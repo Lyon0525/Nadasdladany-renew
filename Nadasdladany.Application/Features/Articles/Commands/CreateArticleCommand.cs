@@ -25,22 +25,11 @@ public class CreateArticleCommandValidator : AbstractValidator<CreateArticleComm
     }
 }
 
-public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand, int>
+public class CreateArticleCommandHandler(IApplicationDbContext context, ISlugService slugService, IFileService fileService) : IRequestHandler<CreateArticleCommand, int>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly ISlugService _slugService;
-    private readonly IFileService _fileService;
-
-    public CreateArticleCommandHandler(IApplicationDbContext context, ISlugService slugService, IFileService fileService)
-    {
-        _context = context;
-        _slugService = slugService;
-        _fileService = fileService;
-    }
-
     public async Task<int> Handle(CreateArticleCommand request, CancellationToken cancellationToken)
     {
-        string? imageUrl = await _fileService.UploadFileAsync(request.Image, "articles");
+        string? imageUrl = await fileService.UploadFileAsync(request.Image, "articles");
 
         var entity = new Article
         {
@@ -49,12 +38,13 @@ public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand,
             Excerpt = request.Excerpt,
             CategoryId = request.CategoryId,
             FeaturedImageUrl = imageUrl,
-            Slug = _slugService.GenerateSlug(request.Title),
-            PublishedDate = DateTime.UtcNow
+            Slug = slugService.GenerateSlug(request.Title),
+            PublishedDate = DateTime.UtcNow,
+            IsPublished = true
         };
 
-        _context.Articles.Add(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.Articles.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }

@@ -1,24 +1,35 @@
 import { useEffect, useState } from 'react';
 import { AdminLayout } from '../../layouts/AdminLayout';
 import { newsletterService } from '../../api/newsletterService';
-import { Send, AlertTriangle, Users } from 'lucide-react';
+import { Send, AlertTriangle, Users, Loader2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import toast from 'react-hot-toast';
+
+const newsletterSchema = z.object({
+    subject: z.string().min(1, "A tárgy megadása kötelező!"),
+    body: z.string().min(10, "A hírlevél szövege túl rövid!")
+});
+
+type NewsletterFormData = z.infer<typeof newsletterSchema>;
 
 export const AdminNewsletterPage = () => {
     const [count, setCount] = useState(0);
-    const [subject, setSubject] = useState('');
-    const [body, setBody] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const { register, handleSubmit, reset, formState: { errors } } = useForm<NewsletterFormData>({
+        resolver: zodResolver(newsletterSchema)
+    });
 
     useEffect(() => {
         newsletterService.getSubscriberCount().then(setCount);
     }, []);
 
-    const handleSend = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const onValidSubmit = async (data: NewsletterFormData) => {
         setLoading(true);
         try {
-            const result = await newsletterService.sendNewsletter(subject, body);
+            const result = await newsletterService.sendNewsletter(data.subject, data.body);
 
             if (result.isDummy) {
                 toast(() => (
@@ -31,8 +42,7 @@ export const AdminNewsletterPage = () => {
                 toast.success("Hírlevél kiküldve!");
             }
 
-            setSubject('');
-            setBody('');
+            reset();
         } catch {
             toast.error("Hiba történt a küldés során.");
         } finally {
@@ -57,28 +67,31 @@ export const AdminNewsletterPage = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <form onSubmit={handleSend} className="lg:col-span-2 bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm space-y-6">
+                <form onSubmit={handleSubmit(onValidSubmit)} className="lg:col-span-2 bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm space-y-6">
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Hírlevél tárgya</label>
                         <input
-                            type="text" required placeholder="Pl. Lakossági tájékoztató áramszünetről"
-                            className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm font-medium"
-                            value={subject} onChange={(e) => setSubject(e.target.value)}
+                            type="text" placeholder="Pl. Lakossági tájékoztató áramszünetről"
+                            className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm font-medium ${errors.subject ? 'border-red-400' : 'border-gray-100'}`}
+                            {...register('subject')}
                         />
+                        {errors.subject && <p className="text-red-500 text-[10px] font-bold mt-1.5">{errors.subject.message}</p>}
                     </div>
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Üzenet tartalma (Sima szöveg)</label>
                         <textarea
-                            rows={8} required placeholder="Tisztelt Lakosok! Tájékoztatjuk Önöket, hogy..."
-                            className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm leading-relaxed"
-                            value={body} onChange={(e) => setBody(e.target.value)}
+                            rows={8} placeholder="Tisztelt Lakosok! Tájékoztatjuk Önöket, hogy..."
+                            className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm leading-relaxed ${errors.body ? 'border-red-400' : 'border-gray-100'}`}
+                            {...register('body')}
                         />
+                        {errors.body && <p className="text-red-500 text-[10px] font-bold mt-1.5">{errors.body.message}</p>}
                     </div>
                     <button
                         type="submit" disabled={loading}
-                        className="bg-primary text-white font-bold px-8 py-4 rounded-2xl text-sm hover:bg-accent transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                        className="bg-primary text-white font-bold px-8 py-4 rounded-2xl text-sm hover:bg-accent transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer shadow-md"
                     >
-                        <Send size={16} /> {loading ? "Küldés folyamatban..." : "Hírlevél körözése"}
+                        {loading ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
+                        {loading ? "Küldés folyamatban..." : "Hírlevél körözése"}
                     </button>
                 </form>
 

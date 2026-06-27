@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { type Project } from '../../../../api/projectService';
 import { getImageUrl } from '../../../../lib/imageUtils';
 import toast from 'react-hot-toast';
+import { OptimizedImage } from '../../../../components/ui/OptimizedImage';
 
 const projectSchema = z.object({
     title: z.string().min(1, "A projekt neve kötelező!").max(250),
@@ -127,7 +128,11 @@ export const ProjectForm = ({ project, onClose, onSubmit, loading }: Props) => {
                             >
                                 {imagePreview ? (
                                     <div className="flex items-center gap-3 px-4 w-full">
-                                        <img src={imagePreview} className="w-8 h-8 object-cover rounded-lg" alt="" />
+                                        <OptimizedImage 
+                                            src={imagePreview} 
+                                            className="w-8 h-8 object-cover rounded-lg" 
+                                            alt="" 
+                                        />
                                         <span className="text-xs font-bold text-accent truncate">{image ? image.name : 'Jelenlegi kép'}</span>
                                         <Check className="ml-auto text-green-500" size={16} />
                                     </div>

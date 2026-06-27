@@ -9,24 +9,15 @@ namespace Nadasdladany.Application.Features.JobPostings.Queries;
 
 public record GetActiveJobPostingsQuery : IRequest<List<JobPostingDto>>;
 
-public class GetActiveJobPostingsQueryHandler : IRequestHandler<GetActiveJobPostingsQuery, List<JobPostingDto>>
+public class GetActiveJobPostingsQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetActiveJobPostingsQuery, List<JobPostingDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetActiveJobPostingsQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
-
     public async Task<List<JobPostingDto>> Handle(GetActiveJobPostingsQuery request, CancellationToken cancellationToken)
     {
-        return await _context.JobPostings
+        return await context.JobPostings
             .AsNoTracking()
             .Where(x => x.IsActive)
             .OrderByDescending(x => x.CreatedAt)
-            .ProjectTo<JobPostingDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<JobPostingDto>(mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
     }
 }

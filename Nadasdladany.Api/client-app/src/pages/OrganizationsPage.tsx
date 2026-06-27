@@ -1,21 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { MainLayout } from '../layouts/MainLayout';
-import { organizationService, type Organization, OrganizationType } from '../api/organizationService';
+import { organizationService, OrganizationType } from '../api/organizationService';
 import { OrganizationCard } from '../features/organizations/components/OrganizationCard';
-import { Users } from 'lucide-react';
+import { Users, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 export const OrganizationsPage = () => {
-    const [orgs, setOrgs] = useState<Organization[]>([]);
-    const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<OrganizationType | 'all'>('all');
 
-    useEffect(() => {
-        setLoading(true);
-        const typeParam = activeTab === 'all' ? undefined : activeTab;
-        organizationService.getOrganizations(typeParam)
-            .then(setOrgs)
-            .finally(() => setLoading(false));
-    }, [activeTab]);
+    const { data: orgs = [], isLoading: loading } = useQuery({
+        queryKey: ['publicOrganizations', activeTab],
+        queryFn: () => {
+            const typeParam = activeTab === 'all' ? undefined : activeTab;
+            return organizationService.getOrganizations(typeParam);
+        }
+    });
 
     return (
         <MainLayout>
@@ -28,16 +27,19 @@ export const OrganizationsPage = () => {
 
                 <div className="flex justify-center mb-12">
                     <div className="inline-flex bg-secondary p-1.5 rounded-full border border-gray-100 flex-wrap justify-center gap-1 sm:gap-0">
-                        <button onClick={() => setActiveTab('all')} className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all ${activeTab === 'all' ? 'bg-white text-primary shadow-sm' : 'text-gray-400'}`}>Összes</button>
-                        <button onClick={() => setActiveTab(OrganizationType.CivilSzervezet)} className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all ${activeTab === OrganizationType.CivilSzervezet ? 'bg-white text-primary shadow-sm' : 'text-gray-400'}`}>Civil szervezetek</button>
-                        <button onClick={() => setActiveTab(OrganizationType.Egyhaz)} className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all ${activeTab === OrganizationType.Egyhaz ? 'bg-white text-primary shadow-sm' : 'text-gray-400'}`}>Egyházak</button>
-                        <button onClick={() => setActiveTab(OrganizationType.Alapitvany)} className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all ${activeTab === OrganizationType.Alapitvany ? 'bg-white text-primary shadow-sm' : 'text-gray-400'}`}>Alapítványok</button>
+                        <button onClick={() => setActiveTab('all')} className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer ${activeTab === 'all' ? 'bg-white text-primary shadow-sm' : 'text-gray-400 hover:text-primary'}`}>Összes</button>
+                        <button onClick={() => setActiveTab(OrganizationType.CivilSzervezet)} className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer ${activeTab === OrganizationType.CivilSzervezet ? 'bg-white text-primary shadow-sm' : 'text-gray-400 hover:text-primary'}`}>Civil szervezetek</button>
+                        <button onClick={() => setActiveTab(OrganizationType.Egyhaz)} className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer ${activeTab === OrganizationType.Egyhaz ? 'bg-white text-primary shadow-sm' : 'text-gray-400 hover:text-primary'}`}>Egyházak</button>
+                        <button onClick={() => setActiveTab(OrganizationType.Alapitvany)} className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer ${activeTab === OrganizationType.Alapitvany ? 'bg-white text-primary shadow-sm' : 'text-gray-400 hover:text-primary'}`}>Alapítványok</button>
                     </div>
                 </div>
 
                 <div className="space-y-6">
                     {loading ? (
-                        <div className="text-center py-20 font-serif italic text-accent text-xl animate-pulse">Közösségek betöltése...</div>
+                        <div className="text-center py-20 font-serif italic text-accent text-xl animate-pulse flex flex-col items-center justify-center gap-3">
+                            <Loader2 className="animate-spin" size={32} />
+                            Közösségek betöltése...
+                        </div>
                     ) : orgs.length > 0 ? (
                         orgs.map((org, index) => <OrganizationCard key={org.id} org={org} index={index} />)
                     ) : (

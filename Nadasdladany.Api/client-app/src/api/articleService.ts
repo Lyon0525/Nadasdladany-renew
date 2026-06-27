@@ -1,5 +1,4 @@
 import apiClient from './apiClient';
-import type { Article } from "../types/Article";
 
 export interface PaginatedResult<T> {
     items: T[];
@@ -10,11 +9,29 @@ export interface PaginatedResult<T> {
     hasNextPage: boolean;
 }
 
+export interface Article {
+    id: number;
+    title: string;
+    slug: string;
+    excerpt?: string;
+    content: string;
+    featuredImageUrl?: string;
+    publishedDate: string;
+    author?: string;
+    categoryId: number;
+    categoryName: string;
+}
+
 export const articleService = {
     getArticles: async (pageNumber = 1, pageSize = 10, categoryId?: number) => {
         const response = await apiClient.get<PaginatedResult<Article>>('/articles', {
             params: { pageNumber, pageSize, categoryId }
         });
+        return response.data;
+    },
+
+    getArticleBySlug: async (slug: string) => {
+        const response = await apiClient.get<Article>(`/articles/${slug}`);
         return response.data;
     },
 

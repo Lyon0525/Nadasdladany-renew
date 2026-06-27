@@ -44,20 +44,11 @@ public class UpdateDocumentCommandValidator : AbstractValidator<UpdateDocumentCo
     }
 }
 
-public class UpdateDocumentCommandHandler : IRequestHandler<UpdateDocumentCommand>
+public class UpdateDocumentCommandHandler(IApplicationDbContext context, IFileService fileService) : IRequestHandler<UpdateDocumentCommand>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IFileService _fileService;
-
-    public UpdateDocumentCommandHandler(IApplicationDbContext context, IFileService fileService)
-    {
-        _context = context;
-        _fileService = fileService;
-    }
-
     public async Task Handle(UpdateDocumentCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Documents.FindAsync(new object[] { request.Id }, cancellationToken);
+        var entity = await context.Documents.FindAsync(new object[] { request.Id }, cancellationToken);
         if (entity == null) throw new NotFoundException(nameof(Document), request.Id);
 
         entity.Title = request.Title;
@@ -66,9 +57,9 @@ public class UpdateDocumentCommandHandler : IRequestHandler<UpdateDocumentComman
 
         if (request.File != null)
         {
-            _fileService.DeleteFile(entity.FilePath);
+            fileService.DeleteFile(entity.FilePath);
 
-            string? newFilePath = await _fileService.UploadFileAsync(request.File, "documents");
+            string? newFilePath = await fileService.UploadFileAsync(request.File, "documents");
             if (string.IsNullOrEmpty(newFilePath)) throw new InvalidOperationException("A fájl mentése sikertelen volt.");
 
             entity.FilePath = newFilePath;
@@ -76,6 +67,6 @@ public class UpdateDocumentCommandHandler : IRequestHandler<UpdateDocumentComman
             entity.FileSizeInBytes = request.File.Length;
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

@@ -1,19 +1,14 @@
-import { useEffect, useState } from 'react';
 import { MainLayout } from '../layouts/MainLayout';
-import { siteSettingsService, type SiteSetting } from '../api/siteSettingsService';
-import { getImageUrl } from '../lib/imageUtils';
+import { siteSettingsService } from '../api/siteSettingsService';
 import { Landmark, History, Shield, Building2, MapPin } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { OptimizedImage } from '../components/ui/OptimizedImage';
 
 export const AboutTownPage = () => {
-    const [settings, setSettings] = useState<SiteSetting | null>(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        siteSettingsService.getSettings()
-            .then(setSettings)
-            .catch(err => console.error("Hiba a bemutató betöltésekor:", err))
-            .finally(() => setLoading(false));
-    }, []);
+    const { data: settings, isLoading: loading } = useQuery({
+        queryKey: ['publicSiteSettings'],
+        queryFn: () => siteSettingsService.getSettings()
+    });
 
     if (loading) {
         return (
@@ -47,8 +42,8 @@ export const AboutTownPage = () => {
                             {settings?.historyText || "A település történelmi leírása hamarosan feltöltésre kerül."}
                         </p>
                     </div>
-                    <div className="w-full lg:w-1/2 h-[400px] rounded-[40px] overflow-hidden shadow-xl border border-gray-100">
-                        <img src="\aboutpage\nadasdladany_tajkep.jpg" alt="Nádasdladányi tájkép" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                    <div className="w-full lg:w-1/2 h-[400px] rounded-[40px] overflow-hidden shadow-xl border border-gray-100 bg-gray-100">
+                        <OptimizedImage src="/aboutpage/nadasdladany_tajkep.jpg" alt="Nádasdladányi tájkép" fallbackSrc="/aboutpage/nadasdladany_tajkep.jpg" className="w-full h-full hover:scale-105 transition-transform duration-700" />
                     </div>
                 </div>
 
@@ -63,11 +58,7 @@ export const AboutTownPage = () => {
                         </p>
                     </div>
                     <div className="w-full lg:w-1/2 flex justify-center bg-white p-12 rounded-[40px] shadow-md border border-gray-100/50">
-                        <img
-                            src={getImageUrl(settings?.coatOfArmsImageUrl || undefined) || "/aboutpage/nadasdladany_cimer.jpg"}
-                            alt="Nádasdladány címere"
-                            className="h-72 object-contain drop-shadow-xl animate-in fade-in duration-1000"
-                        />
+                        <OptimizedImage src={settings?.coatOfArmsImageUrl} alt="Nádasdladány címere" fallbackSrc="/aboutpage/nadasdladany_cimer.jpg" className="h-72 object-contain drop-shadow-xl animate-in fade-in duration-1000" />
                     </div>
                 </div>
 
@@ -79,8 +70,8 @@ export const AboutTownPage = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         <div className="bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col">
-                            <div className="h-64 overflow-hidden relative">
-                                <img src="\aboutpage\nadasdladany_kastely.jpg" alt="Nádasdy-kastély" className="w-full h-full object-cover" />
+                            <div className="h-64 overflow-hidden relative bg-gray-100">
+                                <OptimizedImage src="/aboutpage/nadasdladany_kastely.jpg" alt="Nádasdy-kastély" fallbackSrc="/aboutpage/nadasdladany_kastely.jpg" className="w-full h-full" />
                                 <span className="absolute bottom-4 left-4 bg-primary/90 text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 backdrop-blur-sm"><MapPin size={12} /> Kastélypark</span>
                             </div>
                             <div className="p-8 space-y-3 flex-grow">
@@ -91,11 +82,7 @@ export const AboutTownPage = () => {
 
                         <div className="bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col group">
                             <div className="h-64 overflow-hidden relative bg-gray-100">
-                                <img
-                                    src="\aboutpage\nadasdladany_templom.jpg"
-                                    alt="Szent Ilona Római Katolikus Templom"
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                                />
+                                <OptimizedImage src="/aboutpage/nadasdladany_templom.jpg" alt="Szent Ilona Római Katolikus Templom" fallbackSrc="/aboutpage/nadasdladany_templom.jpg" className="w-full h-full group-hover:scale-105 transition-transform duration-700 ease-out" />
                                 <span className="absolute bottom-4 left-4 bg-primary/90 text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 backdrop-blur-sm">
                                     <MapPin size={12} /> Templom tér
                                 </span>

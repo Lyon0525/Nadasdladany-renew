@@ -17,23 +17,16 @@ public record UpdateOfficeInfoCommand : IRequest
     public string? GoogleMapsEmbedUrl { get; init; }
 }
 
-public class UpdateOfficeInfoCommandHandler : IRequestHandler<UpdateOfficeInfoCommand>
+public class UpdateOfficeInfoCommandHandler(IApplicationDbContext context) : IRequestHandler<UpdateOfficeInfoCommand>
 {
-    private readonly IApplicationDbContext _context;
-
-    public UpdateOfficeInfoCommandHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task Handle(UpdateOfficeInfoCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.OfficeInfos.FirstOrDefaultAsync(cancellationToken);
+        var entity = await context.OfficeInfos.FirstOrDefaultAsync(cancellationToken);
 
         if (entity == null)
         {
             entity = new OfficeInfo { Address = request.Address, OfficeName = request.OfficeName };
-            _context.OfficeInfos.Add(entity);
+            context.OfficeInfos.Add(entity);
         }
 
         entity.OfficeName = request.OfficeName;
@@ -44,6 +37,6 @@ public class UpdateOfficeInfoCommandHandler : IRequestHandler<UpdateOfficeInfoCo
         entity.WebsiteUrl = request.WebsiteUrl;
         entity.GoogleMapsEmbedUrl = request.GoogleMapsEmbedUrl;
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

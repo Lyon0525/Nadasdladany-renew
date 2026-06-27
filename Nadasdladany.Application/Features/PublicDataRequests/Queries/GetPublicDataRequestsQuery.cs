@@ -9,23 +9,14 @@ namespace Nadasdladany.Application.Features.PublicDataRequests.Queries;
 
 public record GetPublicDataRequestsQuery : IRequest<List<PublicDataRequestDto>>;
 
-public class GetPublicDataRequestsQueryHandler : IRequestHandler<GetPublicDataRequestsQuery, List<PublicDataRequestDto>>
+public class GetPublicDataRequestsQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetPublicDataRequestsQuery, List<PublicDataRequestDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetPublicDataRequestsQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
-
     public async Task<List<PublicDataRequestDto>> Handle(GetPublicDataRequestsQuery request, CancellationToken cancellationToken)
     {
-        return await _context.PublicDataRequests
+        return await context.PublicDataRequests
             .AsNoTracking()
             .OrderByDescending(x => x.CreatedAt)
-            .ProjectTo<PublicDataRequestDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<PublicDataRequestDto>(mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
     }
 }

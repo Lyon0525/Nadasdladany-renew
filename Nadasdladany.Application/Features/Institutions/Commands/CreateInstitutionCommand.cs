@@ -28,22 +28,11 @@ public class CreateInstitutionCommandValidator : AbstractValidator<CreateInstitu
     }
 }
 
-public class CreateInstitutionCommandHandler : IRequestHandler<CreateInstitutionCommand, int>
+public class CreateInstitutionCommandHandler(IApplicationDbContext context, IFileService fileService, ISlugService slugService) : IRequestHandler<CreateInstitutionCommand, int>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IFileService _fileService;
-    private readonly ISlugService _slugService;
-
-    public CreateInstitutionCommandHandler(IApplicationDbContext context, IFileService fileService, ISlugService slugService)
-    {
-        _context = context;
-        _fileService = fileService;
-        _slugService = slugService;
-    }
-
     public async Task<int> Handle(CreateInstitutionCommand request, CancellationToken cancellationToken)
     {
-        string? imageUrl = await _fileService.UploadFileAsync(request.Image, "institutions");
+        string? imageUrl = await fileService.UploadFileAsync(request.Image, "institutions");
 
         var entity = new Institution
         {
@@ -56,12 +45,12 @@ public class CreateInstitutionCommandHandler : IRequestHandler<CreateInstitution
             ImageUrl = imageUrl,
             IconCssClass = request.IconCssClass,
             DisplayOrder = request.DisplayOrder,
-            Slug = _slugService.GenerateSlug(request.Name),
+            Slug = slugService.GenerateSlug(request.Name),
             IsPublished = true
         };
 
-        _context.Institutions.Add(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.Institutions.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }

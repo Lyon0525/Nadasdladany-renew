@@ -1,19 +1,16 @@
-import { useEffect, useState } from 'react';
 import { MainLayout } from '../layouts/MainLayout';
-import { projectService, type Project } from '../api/projectService';
-import { getImageUrl } from '../lib/imageUtils';
-import { FileCode, Award, Coins, Calendar } from 'lucide-react';
+import { projectService } from '../api/projectService';
+import { FileCode, Award, Coins, Calendar, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { OptimizedImage } from '../components/ui/OptimizedImage';
 
 export const ProjectsPage = () => {
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { data: projectsData, isLoading: loading } = useQuery({
+        queryKey: ['publicProjects'],
+        queryFn: () => projectService.getProjects(1, 50)
+    });
 
-    useEffect(() => {
-        projectService.getProjects(1, 50)
-            .then(data => setProjects(data && Array.isArray(data.items) ? data.items : []))
-            .catch(() => setProjects([]))
-            .finally(() => setLoading(false));
-    }, []);
+    const projects = projectsData && Array.isArray(projectsData.items) ? projectsData.items : [];
 
     return (
         <MainLayout>
@@ -27,7 +24,8 @@ export const ProjectsPage = () => {
                 </div>
 
                 {loading ? (
-                    <div className="text-center py-20 font-serif italic text-accent text-xl animate-pulse">
+                    <div className="text-center py-20 font-serif italic text-accent text-xl animate-pulse flex flex-col items-center gap-3">
+                        <Loader2 className="animate-spin" size={32} />
                         Pályázatok betöltése...
                     </div>
                 ) : projects.length > 0 ? (
@@ -35,12 +33,8 @@ export const ProjectsPage = () => {
                         {projects.map((proj) => (
                             <div key={proj.id} className="bg-white rounded-[40px] overflow-hidden shadow-sm border border-gray-100 hover:shadow-2xl transition-all duration-500 flex flex-col">
                                 {proj.featuredImageUrl && (
-                                    <div className="h-64 overflow-hidden relative">
-                                        <img
-                                            src={getImageUrl(proj.featuredImageUrl)}
-                                            alt={proj.title}
-                                            className="w-full h-full object-cover"
-                                        />
+                                    <div className="h-64 overflow-hidden relative bg-gray-100">
+                                        <OptimizedImage src={proj.featuredImageUrl} alt={proj.title} className="w-full h-full" />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                                     </div>
                                 )}

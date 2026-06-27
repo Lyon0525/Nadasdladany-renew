@@ -2,25 +2,36 @@ import { useState } from 'react';
 import { MainLayout } from '../layouts/MainLayout';
 import { dataRequestService } from '../api/dataRequestService';
 import { ShieldAlert, Info, Send, Loader2, CheckCircle } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import toast from 'react-hot-toast';
 
+const requestSchema = z.object({
+    applicantName: z.string().min(1, "A név kötelező!"),
+    applicantEmail: z.string().email("Érvénytelen e-mail cím!"),
+    applicantPhone: z.string().optional(),
+    requestedDataDescription: z.string().min(10, "Kérjük, fejtse ki részletesebben (min. 10 karakter)!")
+});
+
+type RequestFormData = z.infer<typeof requestSchema>;
+
 export const PublicDataRequestPage = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [phone, setPhone] = useState('');
-    const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const { register, handleSubmit, formState: { errors } } = useForm<RequestFormData>({
+        resolver: zodResolver(requestSchema)
+    });
+
+    const onValidSubmit = async (data: RequestFormData) => {
         setLoading(true);
         try {
             await dataRequestService.submitRequest({
-                applicantName: name,
-                applicantEmail: email,
-                applicantPhone: phone || undefined,
-                requestedDataDescription: description
+                applicantName: data.applicantName,
+                applicantEmail: data.applicantEmail,
+                applicantPhone: data.applicantPhone || undefined,
+                requestedDataDescription: data.requestedDataDescription
             });
             setSuccess(true);
             toast.success("Adatigénylés sikeresen beküldve!");
@@ -66,50 +77,56 @@ export const PublicDataRequestPage = () => {
                                 </p>
                             </div>
                         ) : (
-                            <form onSubmit={handleSubmit} className="space-y-6">
+                            <form onSubmit={handleSubmit(onValidSubmit)} className="space-y-6">
                                 <h3 className="text-xl font-serif font-bold text-primary mb-2">Igénylő űrlap</h3>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Az Ön neve *</label>
                                         <input
-                                            type="text" required placeholder="Kovács János"
-                                            className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm"
-                                            value={name} onChange={(e) => setName(e.target.value)}
+                                            type="text"
+                                            className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm ${errors.applicantName ? 'border-red-400' : 'border-gray-100'}`}
+                                            placeholder="Kovács János"
+                                            {...register('applicantName')}
                                         />
+                                        {errors.applicantName && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.applicantName.message}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">E-mail címe *</label>
                                         <input
-                                            type="email" required placeholder="kovacs@example.hu"
-                                            className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm"
-                                            value={email} onChange={(e) => setEmail(e.target.value)}
+                                            type="email"
+                                            className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm ${errors.applicantEmail ? 'border-red-400' : 'border-gray-100'}`}
+                                            placeholder="kovacs@example.hu"
+                                            {...register('applicantEmail')}
                                         />
+                                        {errors.applicantEmail && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.applicantEmail.message}</p>}
                                     </div>
                                 </div>
 
                                 <div>
                                     <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Telefonszáma (Opcionális)</label>
                                     <input
-                                        type="tel" placeholder="+36 (30) 123-4567"
+                                        type="tel"
                                         className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm"
-                                        value={phone} onChange={(e) => setPhone(e.target.value)}
+                                        placeholder="+36 (30) 123-4567"
+                                        {...register('applicantPhone')}
                                     />
                                 </div>
 
                                 <div>
                                     <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">A kért adatok köre, leírása *</label>
                                     <textarea
-                                        rows={6} required
+                                        rows={6}
+                                        className={`w-full bg-secondary/50 border p-4 rounded-2xl outline-none focus:border-accent text-sm leading-relaxed ${errors.requestedDataDescription ? 'border-red-400' : 'border-gray-100'}`}
                                         placeholder="Kérjük, fogalmazza meg pontosan, milyen közérdekű adatok vagy hivatali dokumentumok megismerését igényli..."
-                                        className="w-full bg-secondary/50 border border-gray-100 p-4 rounded-2xl outline-none focus:border-accent text-sm leading-relaxed"
-                                        value={description} onChange={(e) => setDescription(e.target.value)}
+                                        {...register('requestedDataDescription')}
                                     />
+                                    {errors.requestedDataDescription && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.requestedDataDescription.message}</p>}
                                 </div>
 
                                 <button
                                     type="submit" disabled={loading}
-                                    className="bg-primary text-white font-bold px-8 py-4 rounded-2xl text-sm hover:bg-accent transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer shadow-md"
+                                    className="bg-primary text-white font-bold px-8 py-4 rounded-2xl text-sm hover:bg-accent transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-md"
                                 >
                                     {loading ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
                                     {loading ? "Küldés folyamatban..." : "Adatigénylés benyújtása"}

@@ -3,7 +3,7 @@ import { RichTextEditor } from '../../../../components/ui/RichTextEditor';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { type JobPosting } from '../../../../api/jobService';
+import { type JobPosting, type JobPostingSubmitData } from '../../../../api/jobService';
 
 const jobSchema = z.object({
     title: z.string().min(1, "A munkakör neve kötelező!").max(200),
@@ -20,7 +20,7 @@ type JobFormData = z.infer<typeof jobSchema>;
 interface Props {
     job?: JobPosting | null;
     onClose: () => void;
-    onSubmit: (jobData: any) => void;
+    onSubmit: (jobData: JobPostingSubmitData) => void;
     loading: boolean;
 }
 

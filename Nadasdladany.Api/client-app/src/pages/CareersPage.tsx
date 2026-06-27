@@ -1,19 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { MainLayout } from '../layouts/MainLayout';
-import { jobService, type JobPosting } from '../api/jobService';
-import { Briefcase, Calendar, Building, ChevronDown, ChevronUp } from 'lucide-react';
+import { jobService } from '../api/jobService';
+import { Briefcase, Calendar, Building, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 export const CareersPage = () => {
-    const [jobs, setJobs] = useState<JobPosting[]>([]);
-    const [loading, setLoading] = useState(true);
     const [expandedJobId, setExpandedJobId] = useState<number | null>(null);
 
-    useEffect(() => {
-        jobService.getActiveJobs()
-            .then(setJobs)
-            .catch(() => setJobs([]))
-            .finally(() => setLoading(false));
-    }, []);
+    const { data: jobs = [], isLoading: loading } = useQuery({
+        queryKey: ['publicJobs'],
+        queryFn: () => jobService.getActiveJobs()
+    });
 
     const toggleExpand = (id: number) => {
         setExpandedJobId(expandedJobId === id ? null : id);
@@ -29,7 +26,10 @@ export const CareersPage = () => {
                 </div>
 
                 {loading ? (
-                    <div className="text-center py-20 font-serif italic text-accent text-xl animate-pulse">Álláspályázatok betöltése...</div>
+                    <div className="text-center py-20 font-serif italic text-accent text-xl animate-pulse flex flex-col items-center justify-center gap-3">
+                        <Loader2 className="animate-spin" size={32} />
+                        Álláspályázatok betöltése...
+                    </div>
                 ) : jobs.length > 0 ? (
                     <div className="space-y-6">
                         {jobs.map((job) => {

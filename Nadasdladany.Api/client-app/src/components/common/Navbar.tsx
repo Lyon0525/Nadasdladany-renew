@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ChevronRight, ChevronDown, Search } from 'lucide-react';
 import { SpotlightSearch } from './SpotlightSearch';
 import { cn } from '../../lib/utils';
+import { OptimizedImage } from '../ui/OptimizedImage';
 
 const primaryLinks = [
     { name: 'Főoldal', path: '/' },
@@ -75,9 +76,11 @@ export const Navbar = () => {
             )}>
                 <div className="max-w-7xl mx-auto w-full flex items-center gap-x-4">
                     <Link to="/" className="flex items-center gap-3 group flex-shrink-0">
-                        <img
+                        <OptimizedImage
                             src="/nadasdladany-cimer.png"
                             alt="Címer"
+                            isHero={true}
+                            fallbackSrc="/nadasdladany-cimer.png"
                             className="w-10 h-10 md:w-12 md:h-12 object-contain group-hover:rotate-12 transition-transform duration-300"
                         />
                         <span className={cn(

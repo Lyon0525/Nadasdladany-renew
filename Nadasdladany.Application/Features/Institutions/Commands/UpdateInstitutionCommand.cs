@@ -32,22 +32,11 @@ public class UpdateInstitutionCommandValidator : AbstractValidator<UpdateInstitu
     }
 }
 
-public class UpdateInstitutionCommandHandler : IRequestHandler<UpdateInstitutionCommand>
+public class UpdateInstitutionCommandHandler(IApplicationDbContext context, IFileService fileService, ISlugService slugService) : IRequestHandler<UpdateInstitutionCommand>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IFileService _fileService;
-    private readonly ISlugService _slugService;
-
-    public UpdateInstitutionCommandHandler(IApplicationDbContext context, IFileService fileService, ISlugService slugService)
-    {
-        _context = context;
-        _fileService = fileService;
-        _slugService = slugService;
-    }
-
     public async Task Handle(UpdateInstitutionCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Institutions.FindAsync(new object[] { request.Id }, cancellationToken);
+        var entity = await context.Institutions.FindAsync(new object[] { request.Id }, cancellationToken);
 
         if (entity == null) throw new NotFoundException(nameof(Institution), request.Id);
 
@@ -61,17 +50,17 @@ public class UpdateInstitutionCommandHandler : IRequestHandler<UpdateInstitution
         entity.OpeningHours = request.OpeningHours;
         entity.Content = request.Content;
         entity.DisplayOrder = request.DisplayOrder;
-        entity.Slug = _slugService.GenerateSlug(request.Name);
+        entity.Slug = slugService.GenerateSlug(request.Name);
 
         if (request.Image != null)
         {
             if (!string.IsNullOrEmpty(entity.ImageUrl))
             {
-                _fileService.DeleteFile(entity.ImageUrl);
+                fileService.DeleteFile(entity.ImageUrl);
             }
-            entity.ImageUrl = await _fileService.UploadFileAsync(request.Image, "institutions");
+            entity.ImageUrl = await fileService.UploadFileAsync(request.Image, "institutions");
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

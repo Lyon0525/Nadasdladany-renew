@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { galleryService, type GalleryAlbum } from '../../../../api/galleryService';
 import toast from 'react-hot-toast';
 import { getImageUrl } from '../../../../lib/imageUtils';
+import { OptimizedImage } from '../../../../components/ui/OptimizedImage';
 
 interface Props {
     album: GalleryAlbum;
@@ -159,7 +160,11 @@ export const AlbumManagerModal = ({ album, onClose }: Props) => {
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                                 {images.map((img) => (
                                     <div key={img.id} className="relative group rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-white aspect-square">
-                                        <img src={getImageUrl(img.imageUrl)} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        <OptimizedImage 
+                                            src={getImageUrl(img.imageUrl)} 
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                            alt="" 
+                                        />
 
                                         <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-end p-4">
                                             <button

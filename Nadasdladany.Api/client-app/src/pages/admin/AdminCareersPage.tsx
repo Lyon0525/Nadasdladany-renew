@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AdminLayout } from '../../layouts/AdminLayout';
-import { jobService, type JobPosting } from '../../api/jobService';
+import { jobService, type JobPosting, type JobPostingSubmitData } from '../../api/jobService';
 import { JobForm } from '../../features/admin/jobs/components/JobForm';
 import { Plus, Calendar, Building, ExternalLink, Loader2, Edit2, Trash2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -16,7 +16,7 @@ export const AdminCareersPage = () => {
         queryFn: () => jobService.getActiveJobs()
     });
 
-    const handleSubmit = async (jobData: any) => {
+    const handleSubmit = async (jobData: JobPostingSubmitData) => {
         setIsSubmitting(true);
         try {
             if (editingJob) {

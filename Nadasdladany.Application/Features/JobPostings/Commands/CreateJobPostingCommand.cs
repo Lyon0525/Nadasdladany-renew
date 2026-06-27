@@ -25,17 +25,8 @@ public class CreateJobPostingCommandValidator : AbstractValidator<CreateJobPosti
     }
 }
 
-public class CreateJobPostingCommandHandler : IRequestHandler<CreateJobPostingCommand, int>
+public class CreateJobPostingCommandHandler(IApplicationDbContext context, ISlugService slugService) : IRequestHandler<CreateJobPostingCommand, int>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly ISlugService _slugService;
-
-    public CreateJobPostingCommandHandler(IApplicationDbContext context, ISlugService slugService)
-    {
-        _context = context;
-        _slugService = slugService;
-    }
-
     public async Task<int> Handle(CreateJobPostingCommand request, CancellationToken cancellationToken)
     {
         var entity = new JobPosting
@@ -47,12 +38,12 @@ public class CreateJobPostingCommandHandler : IRequestHandler<CreateJobPostingCo
             Location = request.Location,
             EmploymentType = request.EmploymentType,
             ApplicationDeadline = request.ApplicationDeadline,
-            Slug = _slugService.GenerateSlug(request.Title),
+            Slug = slugService.GenerateSlug(request.Title),
             IsActive = true
         };
 
-        _context.JobPostings.Add(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.JobPostings.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }

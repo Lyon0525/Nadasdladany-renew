@@ -2,42 +2,33 @@
 
 namespace Nadasdladany.Api.Middlewares;
 
-public class RequestLoggingMiddleware
+public class RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggingMiddleware> logger)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<RequestLoggingMiddleware> _logger;
-
-    public RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggingMiddleware> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         var sw = Stopwatch.StartNew();
 
         try
         {
-            await _next(context);
+            await next(context);
             sw.Stop();
 
             var statusCode = context.Response.StatusCode;
             if (statusCode >= 400)
             {
-                _logger.LogWarning("HTTP {Method} {Path} responded {StatusCode} in {Elapsed}ms",
+                logger.LogWarning("HTTP {Method} {Path} responded {StatusCode} in {Elapsed}ms",
                     context.Request.Method, context.Request.Path, statusCode, sw.ElapsedMilliseconds);
             }
             else
             {
-                _logger.LogInformation("HTTP {Method} {Path} responded {StatusCode} in {Elapsed}ms",
+                logger.LogInformation("HTTP {Method} {Path} responded {StatusCode} in {Elapsed}ms",
                     context.Request.Method, context.Request.Path, statusCode, sw.ElapsedMilliseconds);
             }
         }
         catch (Exception)
         {
             sw.Stop();
-            _logger.LogError("HTTP {Method} {Path} failed in {Elapsed}ms",
+            logger.LogError("HTTP {Method} {Path} failed in {Elapsed}ms",
                 context.Request.Method, context.Request.Path, sw.ElapsedMilliseconds);
             throw;
         }

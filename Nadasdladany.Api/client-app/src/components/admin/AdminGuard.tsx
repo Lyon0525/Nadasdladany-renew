@@ -13,13 +13,15 @@ export const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
     const INACTIVITY_LIMIT = 30 * 60 * 1000;
 
     const logoutAdmin = () => {
-        sessionStorage.clear();
+        localStorage.removeItem('admin_token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('last_activity');
         toast.error("A munkamenet lejárt! Kérjük, jelentkezzen be újra.");
         navigate('/admin/login');
     };
 
     useEffect(() => {
-        const token = sessionStorage.getItem('admin_token');
+        const token = localStorage.getItem('admin_token');
 
         if (!token) {
             navigate('/admin/login');
@@ -33,10 +35,10 @@ export const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
         const resetTimer = () => {
             clearTimeout(timeoutId);
             timeoutId = setTimeout(logoutAdmin, INACTIVITY_LIMIT);
-            sessionStorage.setItem('last_activity', Date.now().toString());
+            localStorage.setItem('last_activity', Date.now().toString());
         };
 
-        const lastActivity = sessionStorage.getItem('last_activity');
+        const lastActivity = localStorage.getItem('last_activity');
         if (lastActivity) {
             const timeElapsed = Date.now() - parseInt(lastActivity, 10);
             if (timeElapsed > INACTIVITY_LIMIT) {

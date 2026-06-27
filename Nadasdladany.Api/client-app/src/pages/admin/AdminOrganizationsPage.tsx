@@ -3,9 +3,9 @@ import { AdminLayout } from '../../layouts/AdminLayout';
 import { organizationService, type Organization, OrganizationType } from '../../api/organizationService';
 import { OrganizationForm } from '../../features/admin/organizations/components/OrganizationForm';
 import { Plus, Shield, Church, Heart, Mail, Phone, Edit2, Trash2, Loader2 } from 'lucide-react';
-import { getImageUrl } from '../../lib/imageUtils';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { OptimizedImage } from '../../components/ui/OptimizedImage';
 
 export const AdminOrganizationsPage = () => {
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -85,7 +85,17 @@ export const AdminOrganizationsPage = () => {
                                 <tr key={org.id} className="hover:bg-gray-50/50 transition-colors group">
                                     <td className="px-8 py-5">
                                         <div className="flex items-center gap-4">
-                                            {org.imageUrl ? <img src={getImageUrl(org.imageUrl)} className="w-10 h-10 rounded-lg object-cover border border-gray-100" alt="" /> : <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 font-bold">{org.name.charAt(0)}</div>}
+                                            {org.imageUrl ? (
+                                                <OptimizedImage
+                                                    src={org.imageUrl}
+                                                    className="w-10 h-10 rounded-lg object-cover border border-gray-100"
+                                                    alt=""
+                                                />
+                                            ) : (
+                                                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 font-bold">
+                                                    {org.name.charAt(0)}
+                                                </div>
+                                            )}
                                             <span className="font-bold text-primary">{org.name}</span>
                                         </div>
                                     </td>

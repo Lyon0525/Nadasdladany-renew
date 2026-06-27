@@ -1,30 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MainLayout } from '../../layouts/MainLayout';
-import apiClient from '../../api/apiClient';
-import { type DocumentFile } from '../../types/Municipality';
-import { type PaginatedResult } from '../../api/articleService';
+import { documentService } from '../../api/documentService';
 import { DocumentItem } from '../../features/documents/components/DocumentItem';
-import { Laptop, HelpCircle, Search } from 'lucide-react';
+import { Laptop, HelpCircle, Search, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 export const EAdministrationPage = () => {
-    const [docs, setDocs] = useState<DocumentFile[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchInput, setSearchInput] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
 
     useEffect(() => {
-        apiClient.get<PaginatedResult<DocumentFile>>('/documents', {
-            params: { categoryId: 2, pageNumber: 1, pageSize: 100 }
-        })
-            .then((response: any) => {
-                setDocs(response.data && Array.isArray(response.data.items) ? response.data.items : []);
-            })
-            .catch(() => setDocs([]))
-            .finally(() => setLoading(false));
-    }, []);
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchInput);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchInput]);
 
-    const filteredDocs = docs.filter(doc =>
-        doc.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const { data: docsData, isFetching: loading } = useQuery({
+        queryKey: ['eAdminDocuments', debouncedSearch],
+        queryFn: () => documentService.getDocuments(1, 50, 2, debouncedSearch || undefined)
+    });
+
+    const docs = docsData && Array.isArray(docsData.items) ? docsData.items : [];
 
     return (
         <MainLayout>
@@ -65,20 +62,23 @@ export const EAdministrationPage = () => {
                         type="text"
                         placeholder="Keressen az űrlapok, kérelmek megnevezése között..."
                         className="w-full pl-14 pr-6 py-4 rounded-full border border-gray-100 focus:border-accent outline-none shadow-sm transition-all text-sm"
-                        value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                        value={searchInput} onChange={(e) => setSearchInput(e.target.value)}
                     />
                 </div>
 
                 <div className="space-y-4">
                     {loading ? (
-                        <div className="text-center py-20 font-serif italic text-accent text-xl animate-pulse">Űrlapok betöltése...</div>
-                    ) : filteredDocs.length > 0 ? (
-                        filteredDocs.map((doc) => (
+                        <div className="text-center py-20 font-serif italic text-accent text-xl animate-pulse flex flex-col items-center justify-center gap-3">
+                            <Loader2 className="animate-spin" size={32} />
+                            Űrlapok keresése...
+                        </div>
+                    ) : docs.length > 0 ? (
+                        docs.map((doc) => (
                             <DocumentItem key={doc.id} doc={doc} />
                         ))
                     ) : (
                         <div className="text-center py-20 bg-white rounded-[40px] border border-dashed border-gray-200 text-gray-400 text-sm italic">
-                            Jelenleg nincs feltöltött egyedi hivatali nyomtatvány.
+                            Jelenleg nincs feltöltött egyedi hivatali nyomtatvány, vagy nincs találat.
                         </div>
                     )}
                 </div>

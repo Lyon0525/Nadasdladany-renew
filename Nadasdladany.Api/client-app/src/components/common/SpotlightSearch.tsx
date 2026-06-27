@@ -2,12 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Command, ArrowRight, Newspaper, Calendar, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { searchService, type SearchResult } from '../../api/searchService';
+import { useQuery } from '@tanstack/react-query';
+import { searchService } from '../../api/searchService';
 
 export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
     const [query, setQuery] = useState('');
-    const [results, setResults] = useState<SearchResult[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [debouncedQuery, setDebouncedQuery] = useState('');
     const navigate = useNavigate();
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -15,21 +15,22 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean, onClose:
         if (isOpen) {
             setTimeout(() => inputRef.current?.focus(), 100);
             setQuery('');
-            setResults([]);
+            setDebouncedQuery('');
         }
     }, [isOpen]);
 
     useEffect(() => {
-        const timer = setTimeout(async () => {
-            if (query.length > 1) {
-                setLoading(true);
-                const data = await searchService.search(query);
-                setResults(data);
-                setLoading(false);
-            }
+        const timer = setTimeout(() => {
+            setDebouncedQuery(query);
         }, 300);
         return () => clearTimeout(timer);
     }, [query]);
+
+    const { data: results = [], isFetching } = useQuery({
+        queryKey: ['spotlightSearch', debouncedQuery],
+        queryFn: () => searchService.search(debouncedQuery),
+        enabled: debouncedQuery.length > 1,
+    });
 
     const handleSelect = (url: string) => {
         onClose();
@@ -68,7 +69,7 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean, onClose:
                         </div>
 
                         <div className="max-h-[400px] overflow-y-auto p-4">
-                            {loading ? (
+                            {isFetching ? (
                                 <div className="p-10 text-center text-gray-400 italic">Keresés...</div>
                             ) : results.length > 0 ? (
                                 <div className="space-y-2">
@@ -76,7 +77,7 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean, onClose:
                                         <button
                                             key={i}
                                             onClick={() => handleSelect(res.url)}
-                                            className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-secondary transition-all text-left group"
+                                            className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-secondary transition-all text-left group cursor-pointer"
                                         >
                                             <div className="p-2 bg-white rounded-xl shadow-sm text-accent">
                                                 {res.resultType === 'Hír' && <Newspaper size={18} />}
@@ -91,8 +92,8 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean, onClose:
                                         </button>
                                     ))}
                                 </div>
-                            ) : query.length > 1 ? (
-                                <div className="p-10 text-center text-gray-400">Nincs találat a következőre: "{query}"</div>
+                            ) : debouncedQuery.length > 1 ? (
+                                <div className="p-10 text-center text-gray-400">Nincs találat a következőre: "{debouncedQuery}"</div>
                             ) : (
                                 <div className="p-10 text-center text-gray-300 text-sm italic">Gépeljen legalább 2 karaktert a kereséshez...</div>
                             )}

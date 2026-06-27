@@ -4,26 +4,16 @@ using Nadasdladany.Application.Interfaces.Common;
 using Nadasdladany.Domain.Common;
 using Nadasdladany.Domain.Entities;
 using Nadasdladany.Infrastructure.Identity;
-using Nadasdladany.Infrastructure.Services;
 using System.Reflection;
 
 namespace Nadasdladany.Infrastructure.Persistence;
 
-public class NadasdladanyDbContext : IdentityDbContext<ApplicationUser>, IApplicationDbContext
+public class NadasdladanyDbContext(
+    DbContextOptions<NadasdladanyDbContext> options,
+    ICurrentUserService currentUserService,
+    IDateTime dateTime)
+    : IdentityDbContext<ApplicationUser>(options), IApplicationDbContext
 {
-    private readonly ICurrentUserService _currentUserService;
-    private readonly IDateTime _dateTime;
-
-    public NadasdladanyDbContext(
-        DbContextOptions<NadasdladanyDbContext> options,
-        ICurrentUserService currentUserService,
-        IDateTime dateTime)
-        : base(options)
-    {
-        _currentUserService = currentUserService;
-        _dateTime = dateTime;
-    }
-
     public DbSet<Article> Articles => Set<Article>();
     public DbSet<JobPosting> JobPostings => Set<JobPosting>();
     public DbSet<NewsletterSubscriber> NewsletterSubscribers => Set<NewsletterSubscriber>();
@@ -55,24 +45,34 @@ public class NadasdladanyDbContext : IdentityDbContext<ApplicationUser>, IApplic
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    private void UpdateAuditableEntities()
     {
         foreach (var entry in ChangeTracker.Entries<BaseAuditableEntity>())
         {
             switch (entry.State)
             {
                 case EntityState.Added:
-                    entry.Entity.CreatedAt = _dateTime.Now;
-                    entry.Entity.CreatedBy = _currentUserService.UserId;
+                    entry.Entity.CreatedAt = dateTime.Now;
+                    entry.Entity.CreatedBy = currentUserService.UserId;
                     break;
 
                 case EntityState.Modified:
-                    entry.Entity.LastModifiedAt = _dateTime.Now;
-                    entry.Entity.LastModifiedBy = _currentUserService.UserId;
+                    entry.Entity.LastModifiedAt = dateTime.Now;
+                    entry.Entity.LastModifiedBy = currentUserService.UserId;
                     break;
             }
         }
+    }
 
+    public override int SaveChanges()
+    {
+        UpdateAuditableEntities();
+        return base.SaveChanges();
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        UpdateAuditableEntities();
         return await base.SaveChangesAsync(cancellationToken);
     }
 }

@@ -1,42 +1,43 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { MainLayout } from '../layouts/MainLayout';
 import { articleService } from '../api/articleService';
-import type { Article } from '../types/Article';
 import { NewsCard } from '../features/news/components/NewsCard';
 import { NewsCardSkeleton } from '../features/news/components/NewsCardSkeleton';
 import { VillageMap } from '../features/map/components/VillageMap';
 import { getImageUrl } from '../lib/imageUtils';
 import { ChevronDown, User, Bell, CalendarDays, Newspaper, Camera, FolderOpen } from 'lucide-react';
 import { newsletterService } from '../api/newsletterService';
-import { siteSettingsService, type SiteSetting } from '../api/siteSettingsService';
-import { galleryService, type GalleryAlbum } from '../api/galleryService';
+import { siteSettingsService } from '../api/siteSettingsService';
+import { galleryService } from '../api/galleryService';
 import toast from 'react-hot-toast';
 import { MiniCalendar } from '../components/common/MiniCalendar';
+import { OptimizedImage } from '../components/ui/OptimizedImage';
 
 export const HomePage = () => {
-    const [articles, setArticles] = useState<Article[]>([]);
-    const [albums, setAlbums] = useState<GalleryAlbum[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [settings, setSettings] = useState<SiteSetting | null>(null);
     const [email, setEmail] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
-    useEffect(() => {
-        articleService.getArticles(1, 2)
-            .then(data => setArticles(data && Array.isArray(data.items) ? data.items : []))
-            .catch(() => setArticles([]))
-            .finally(() => setLoading(false));
+    const { data: articlesData, isLoading: isLoadingArticles } = useQuery({
+        queryKey: ['publicArticles', 1, 2],
+        queryFn: () => articleService.getArticles(1, 2)
+    });
+    const articles = articlesData && Array.isArray(articlesData.items) ? articlesData.items : [];
 
-        siteSettingsService.getSettings()
-            .then(data => setSettings(data || null))
-            .catch(err => console.error("Hiba a köszöntő betöltésekor:", err));
+    const { data: settings, isLoading: isLoadingSettings } = useQuery({
+        queryKey: ['publicSiteSettings'],
+        queryFn: () => siteSettingsService.getSettings()
+    });
 
-        galleryService.getAlbums()
-            .then(data => setAlbums(data ? data.slice(0, 3) : []))
-            .catch(err => console.error("Hiba a galéria betöltésekor:", err));
-    }, []);
+    const { data: albumsData, isLoading: isLoadingAlbums } = useQuery({
+        queryKey: ['publicAlbums'],
+        queryFn: () => galleryService.getAlbums()
+    });
+    const albums = albumsData ? albumsData.slice(0, 3) : [];
+
+    const loading = isLoadingArticles || isLoadingSettings || isLoadingAlbums;
 
     const handleSubscribe = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -56,13 +57,10 @@ export const HomePage = () => {
         <MainLayout>
             <section className="relative h-screen flex items-center justify-center overflow-hidden w-full">
                 <div className="absolute inset-0 z-0">
-                    <img
-                        src="/Nadasdladany-hero-banner.jpg"
-                        alt="Nádasdladány"
-                        className="w-full h-full object-cover"
-                    />
+                    <OptimizedImage src="/Nadasdladany-hero-banner.jpg" alt="Nádasdladány" isHero={true} className="w-full h-full" />
                     <div className="absolute inset-0 bg-black/40" />
                 </div>
+
 
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -113,11 +111,7 @@ export const HomePage = () => {
                             <div className="absolute inset-0 border-2 border-accent rounded-[40px] rotate-6 translate-x-4 translate-y-4" />
                             <div className="relative w-full h-full bg-secondary rounded-[40px] shadow-2xl z-10 overflow-hidden flex items-center justify-center border border-gray-100">
                                 {settings?.mayorImageUrl ? (
-                                    <img
-                                        src={getImageUrl(settings.mayorImageUrl) || '/aboutpage/polgarmester_placeholder.png'}
-                                        className="w-full h-full object-cover"
-                                        alt="Polgármester"
-                                    />
+                                    <OptimizedImage src={settings.mayorImageUrl} alt="Polgármester" fallbackSrc="/aboutpage/polgarmester_placeholder.png" className="w-full h-full" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-primary/10 bg-secondary/80">
                                         <User size={100} strokeWidth={1} />
@@ -129,15 +123,15 @@ export const HomePage = () => {
                         <div className="flex-grow text-center md:text-left">
                             <h2 className="text-accent font-bold uppercase tracking-[0.3em] text-sm mb-4">Köszöntő</h2>
                             <h3 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-8 leading-tight">
-                                {settings?.welcomeTitle || "Tisztelt Nádasdladányiak, Kedves Látogatók! (köszöntő cím nem elérhető)"}
+                                {settings?.welcomeTitle || "Tisztelt Nádasdladányiak, Kedves Látogatók!"}
                             </h3>
                             <div className="text-gray-600 space-y-6 leading-relaxed italic text-lg max-w-2xl whitespace-pre-line">
                                 <p>
-                                    {settings?.welcomeText || "Szeretettel köszöntöm Önöket Nádasdladány község megújult hivatalos weboldalán... (köszöntő szöveg nem elérhető)"}
+                                    {settings?.welcomeText || "Szeretettel köszöntöm Önöket Nádasdladány község megújult hivatalos weboldalán."}
                                 </p>
                             </div>
                             <div className="mt-10">
-                                <p className="font-bold text-primary text-xl">{settings?.mayorName || "Polgármester névenek betöltése sikertelen volt..."}</p>
+                                <p className="font-bold text-primary text-xl">{settings?.mayorName || "Polgármester"}</p>
                                 <p className="text-accent font-medium uppercase tracking-widest text-xs">Polgármester</p>
                             </div>
                         </div>
@@ -231,8 +225,10 @@ export const HomePage = () => {
                                     <Link to={`/galeria/${album.slug}`} className="group block h-full">
                                         <div className="relative h-72 rounded-[32px] overflow-hidden shadow-sm group-hover:shadow-xl transition-all duration-500 border border-gray-100">
                                             <img
-                                                src={album.thumbnailUrl ? getImageUrl(album.thumbnailUrl) : 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&q=80'}
+                                                src={album.thumbnailUrl ? getImageUrl(album.thumbnailUrl) : '/Nadasdladany-hero-banner.jpg'}
                                                 alt={album.title}
+                                                loading="lazy"
+                                                decoding="async"
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                             />
                                             <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/20 to-transparent flex flex-col justify-end p-6">

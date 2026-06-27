@@ -3,18 +3,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Nadasdladany.Infrastructure.Services;
 
-public class DummyEmailService : IEmailService
+public class DummyEmailService(ILogger<DummyEmailService> logger) : IEmailService
 {
-    private readonly ILogger<DummyEmailService> _logger;
-
-    public DummyEmailService(ILogger<DummyEmailService> logger)
-    {
-        _logger = logger;
-    }
-
     public Task SendEmailAsync(string to, string subject, string body)
     {
-        _logger.LogInformation("Hírlevél küldése szimulálva ide: {To}. Tárgy: {Subject}", to, subject);
+        logger.LogInformation("Hírlevél küldése szimulálva ide: {To}. Tárgy: {Subject}", to, subject);
         return Task.CompletedTask;
     }
 }

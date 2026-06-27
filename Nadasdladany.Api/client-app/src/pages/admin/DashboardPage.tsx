@@ -3,36 +3,19 @@ import { motion } from 'framer-motion';
 import { Newspaper, Calendar, Image as ImageIcon, FileText, ChevronRight, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { articleService } from '../../api/articleService';
-import { eventService } from '../../api/eventService';
-import { galleryService } from '../../api/galleryService';
-import apiClient from '../../api/apiClient';
+import { dashboardService } from '../../api/dashboardService';
 
 export const DashboardPage = () => {
     const { data: counts, isLoading } = useQuery({
         queryKey: ['dashboardStats'],
-        queryFn: async () => {
-            const [articles, events, albums, docs] = await Promise.all([
-                articleService.getArticles(1, 1).catch(() => ({ totalCount: 0 })),
-                eventService.getEvents().catch(() => []),
-                galleryService.getAlbums().catch(() => []),
-                apiClient.get('/documents', { params: { pageNumber: 1, pageSize: 1 } }).catch(() => ({ data: { totalCount: 0 } }))
-            ]);
-
-            return {
-                news: (articles as any).totalCount || 0,
-                events: Array.isArray(events) ? events.length : ((events as any)?.items?.length || 0),
-                gallery: Array.isArray(albums) ? albums.length : 0,
-                documents: (docs as any).data?.totalCount || 0
-            };
-        }
+        queryFn: () => dashboardService.getStats()
     });
 
     const stats = [
-        { name: 'Hírek', count: counts?.news || 0, icon: <Newspaper />, path: '/admin/news', color: 'bg-blue-500' },
-        { name: 'Események', count: counts?.events || 0, icon: <Calendar />, path: '/admin/events', color: 'bg-purple-500' },
-        { name: 'Galéria (Albumok)', count: counts?.gallery || 0, icon: <ImageIcon />, path: '/admin/gallery', color: 'bg-amber-500' },
-        { name: 'Dokumentumok', count: counts?.documents || 0, icon: <FileText />, path: '/admin/documents', color: 'bg-emerald-500' },
+        { name: 'Hírek', count: counts?.newsCount || 0, icon: <Newspaper />, path: '/admin/news', color: 'bg-blue-500' },
+        { name: 'Események', count: counts?.eventsCount || 0, icon: <Calendar />, path: '/admin/events', color: 'bg-purple-500' },
+        { name: 'Galéria (Albumok)', count: counts?.albumsCount || 0, icon: <ImageIcon />, path: '/admin/gallery', color: 'bg-amber-500' },
+        { name: 'Dokumentumok', count: counts?.documentsCount || 0, icon: <FileText />, path: '/admin/documents', color: 'bg-emerald-500' },
     ];
 
     return (

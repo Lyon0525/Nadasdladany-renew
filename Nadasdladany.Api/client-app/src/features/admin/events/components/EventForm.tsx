@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
+import { OptimizedImage } from '../../../../components/ui/OptimizedImage';
 
 const eventSchema = z.object({
     title: z.string().min(1, "A rendezvény neve kötelező!").max(150),
@@ -126,7 +127,11 @@ export const EventForm = ({ event, onClose, onSubmit, loading }: Props) => {
                         >
                             {imagePreview ? (
                                 <div className="flex items-center gap-3 w-full">
-                                    <img src={imagePreview} className="w-12 h-12 object-cover rounded-lg shadow-sm" alt="" />
+                                    <OptimizedImage 
+                                        src={imagePreview} 
+                                        className="w-12 h-12 object-cover rounded-lg shadow-sm" 
+                                        alt="" 
+                                    />
                                     <span className="text-xs font-bold text-accent truncate max-w-full">{image ? image.name : 'Jelenlegi borítókép'}</span>
                                     <Check className="text-green-500 ml-auto" size={16} />
                                 </div>

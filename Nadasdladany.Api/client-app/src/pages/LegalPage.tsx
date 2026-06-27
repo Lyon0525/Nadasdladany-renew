@@ -1,19 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { MainLayout } from '../layouts/MainLayout';
 import { Scale, ShieldAlert, FileText, Info, Loader2 } from 'lucide-react';
-import { siteSettingsService, type SiteSetting } from '../api/siteSettingsService';
+import { siteSettingsService } from '../api/siteSettingsService';
+import { useQuery } from '@tanstack/react-query';
 
 export const LegalPage = () => {
     const [activeTab, setActiveTab] = useState<'impresszum' | 'gdpr' | 'accessibility'>('impresszum');
-    const [settings, setSettings] = useState<SiteSetting | null>(null);
-    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        siteSettingsService.getSettings()
-            .then(data => setSettings(data))
-            .catch(console.error)
-            .finally(() => setLoading(false));
-    }, []);
+    const { data: settings, isLoading: loading } = useQuery({
+        queryKey: ['publicSiteSettings'],
+        queryFn: () => siteSettingsService.getSettings()
+    });
 
     const defaultImpressum = `
         <p><strong>A honlap fenntartója:</strong><br>Nádasdladány Község Önkormányzata<br>Székhely: 8145 Nádasdladány, Fő utca 1.<br>Adószám: 15337225-1-07</p>
